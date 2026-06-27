@@ -37,8 +37,6 @@ format:
 | University | FELU — Faculty of Economics Ljubljana |
 :::
 
----
-
 ## The Problem
 
 > *Every year, millions of songs are uploaded to Spotify. Most are never heard. A handful become global hits.*
@@ -55,8 +53,6 @@ format:
 **Our approach:** Analyse only the **audio characteristics** of a song — no artist name, no label, no marketing budget.
 
 *If the sound itself contains the secret to success, our tool will find it.*
-
----
 
 ## The Data
 
@@ -90,8 +86,6 @@ format:
 :::
 
 *Target: **popularity score** (0–100) — Spotify calculates this from how often a song is actually played*
-
----
 
 ## Our Approach
 
@@ -134,8 +128,6 @@ The closer to 100, the bigger the hit
 | 3 | If-then decision rules |
 | 4 | **Our most powerful prediction tool** — fine-tuned for best results |
 
----
-
 ## What We Found in the Data
 
 ::: {.columns}
@@ -172,8 +164,6 @@ Pop, dance, and hip-hop score higher than classical, ambient, or sleep music.
 
 *Predicting popularity requires combining many small signals — no single factor decides it.*
 
----
-
 ## How Well Does It Work?
 
 **Yes/No prediction — can we identify a hit?**
@@ -197,8 +187,6 @@ Pop, dance, and hip-hop score higher than classical, ambient, or sleep music.
 | **Our best model** | **±17 points** | **38% better** |
 
 *All results tested on songs the model had never seen before.*
-
----
 
 ## What Matters Most?
 
@@ -233,8 +221,6 @@ Pop, dance, and hip-hop score higher than classical, ambient, or sleep music.
 <br>
 
 We also created **new signals** by combining existing ones — for example, a "club music score" (danceability × energy) — which improved predictions beyond what any single measurement could achieve.
-
----
 
 ## Try It Live
 
@@ -278,8 +264,6 @@ Predicted score: 20.8 / 100
 
 *Adjust any audio slider and get an instant prediction*
 
----
-
 ## Honest Limitations
 
 ### What the model does well ✅
@@ -300,8 +284,6 @@ Predicted score: 20.8 / 100
 
 > Audio features explain only **38%** of why a song becomes popular.
 > The remaining **62%** is artist fame, marketing, timing, and everything outside the sound.
-
----
 
 ## Recommendations
 
