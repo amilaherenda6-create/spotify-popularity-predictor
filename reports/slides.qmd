@@ -18,7 +18,7 @@ format:
 
 <br>
 
-## 🎵 Spotify Popularity Predictor {style="color:#1DB954; font-size:1.8em; font-weight:900;"}
+### 🎵 Spotify Popularity Predictor {style="color:#1DB954; font-size:1.8em; font-weight:900;"}
 
 **Can audio features predict a song's success?**
 
@@ -96,7 +96,7 @@ format:
 
 ::: {.column width="48%"}
 ::: {.green-card}
-## 🎯 Yes/No Prediction
+### 🎯 Yes/No Prediction
 *Will this song be popular?*
 
 A score of **70 or above** = Popular ✅
@@ -107,7 +107,7 @@ Below 70 = Not yet popular
 
 ::: {.column width="48%"}
 ::: {.blue-card}
-## 📊 Score Prediction
+### 📊 Score Prediction
 *How popular will it actually be?*
 
 Predicts the **exact number** (0 to 100)
@@ -225,7 +225,7 @@ We also created **new signals** by combining existing ones — for example, a "c
 
 ## Try It Live
 
-## 🌐 Open the app now:
+### 🌐 Open the app now:
 
 **[spotify-popularity-predictor-dkb249nsp7axa3hkxdpkht.streamlit.app](https://spotify-popularity-predictor-dkb249nsp7axa3hkxdpkht.streamlit.app)**
 
@@ -267,21 +267,21 @@ Predicted score: 20.8 / 100
 
 ## Honest Limitations
 
-## What the model does well ✅
+### What the model does well ✅
 
 - Identifies popular vs unpopular songs reliably
 - **Finds 76 out of every 100 genuine hits**
 - Useful as a first filter when reviewing large numbers of songs
 - Confirms that genre, energy, and danceability are real, measurable signals
 
-## What the model cannot do ❌
+### What the model cannot do ❌
 
 - **Predict viral hits** — timing, social media moments, and cultural trends are invisible to audio data
 - **Evaluate artistic quality** — it rewards commercial conventions, not creativity or originality
 - **Work for niche genres** — rare genres have too few examples to learn from
 - **Replace human judgment** — past patterns cannot predict future trends
 
-## The honest number
+### The honest number
 
 > Audio features explain only **38%** of why a song becomes popular.
 > The remaining **62%** is artist fame, marketing, timing, and everything outside the sound.
@@ -292,7 +292,7 @@ Predicted score: 20.8 / 100
 
 ::: {.column width="50%"}
 ::: {.green-card}
-## For artists & producers
+### For artists & producers
 
 - Choose your **genre intentionally** — commercial genres attract more streams
 - Aim for **high energy and danceability** if mainstream success is the goal
@@ -305,7 +305,7 @@ Predicted score: 20.8 / 100
 
 ::: {.column width="50%"}
 ::: {.blue-card}
-## For labels & A&R teams
+### For labels & A&R teams
 
 - Use this tool as a **first-pass filter** on demo submissions
 - Apply it to **surface newly uploaded tracks** before any listening data exists
