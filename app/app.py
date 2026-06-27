@@ -78,13 +78,605 @@ st.set_page_config(
 )
 
 # =============================================================================
+# CUSTOM CSS — dark premium theme
+# =============================================================================
+st.markdown("""
+<style>
+/* ── Base & background ─────────────────────────────────────────────────── */
+.stApp {
+    background-color: #0A0A0F;
+    color: #E0E0E0;
+}
+.stApp > header {
+    background-color: transparent;
+}
+[data-testid="stAppViewContainer"] {
+    background-color: #0A0A0F;
+}
+[data-testid="stHeader"] {
+    background: transparent;
+}
+[data-testid="stToolbar"] {
+    right: 1rem;
+}
+
+/* ── Sidebar ───────────────────────────────────────────────────────────── */
+section[data-testid="stSidebar"] {
+    background-color: #0d0d18;
+    border-right: 1px solid #1a1a2e;
+}
+
+/* ── Remove default white blocks ───────────────────────────────────────── */
+.stTabs [data-baseweb="tab-panel"] {
+    background: transparent;
+    padding: 0;
+}
+[data-testid="stVerticalBlock"] > div:has(> [data-testid="stHorizontalBlock"]) {
+    background: transparent;
+}
+
+/* ── Typography ────────────────────────────────────────────────────────── */
+h1, h2, h3, h4 {
+    color: #F0F0F0 !important;
+}
+p, li, label {
+    color: #C0C0C0;
+}
+.stMarkdown p {
+    color: #C0C0C0;
+}
+
+/* ── Tabs — pill style ─────────────────────────────────────────────────── */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 6px;
+    background: #111118;
+    border-radius: 14px;
+    padding: 5px 6px;
+    border: 1px solid #1e1e2e;
+}
+.stTabs [data-baseweb="tab"] {
+    border-radius: 10px;
+    color: #888;
+    padding: 8px 22px;
+    font-weight: 500;
+    font-size: 0.9em;
+    background: transparent;
+    border: none;
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+}
+.stTabs [data-baseweb="tab"]:hover {
+    color: #fff;
+    background: #1a1a28;
+}
+.stTabs [aria-selected="true"] {
+    background: linear-gradient(135deg, #1DB954, #17a349) !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 12px rgba(29, 185, 84, 0.35);
+}
+
+/* ── Primary button — large green ─────────────────────────────────────── */
+.stButton > button[kind="primary"] {
+    background: linear-gradient(135deg, #1DB954 0%, #17a349 100%);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.05em;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    padding: 0.7em 2em;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 20px rgba(29, 185, 84, 0.35);
+    text-transform: uppercase;
+}
+.stButton > button[kind="primary"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px rgba(29, 185, 84, 0.55);
+}
+.stButton > button[kind="primary"]:active {
+    transform: translateY(0px);
+}
+.stButton > button[kind="primary"]:disabled {
+    background: #2a2a3a;
+    box-shadow: none;
+    color: #555;
+}
+
+/* ── Secondary buttons ─────────────────────────────────────────────────── */
+.stButton > button[kind="secondary"] {
+    background: #1a1a2e;
+    color: #ccc;
+    border: 1px solid #2a2a3e;
+    border-radius: 8px;
+}
+
+/* ── Sliders ───────────────────────────────────────────────────────────── */
+.stSlider [data-baseweb="slider"] {
+    margin-top: 4px;
+}
+.stSlider [data-testid="stTickBar"] {
+    display: none;
+}
+[data-testid="stSliderThumb"] {
+    background: #1DB954 !important;
+    box-shadow: 0 0 0 3px rgba(29,185,84,0.25);
+}
+[data-baseweb="slider"] [role="slider"] {
+    background: #1DB954;
+}
+[data-baseweb="slider"] > div > div:nth-child(2) {
+    background: #1DB954;
+}
+
+/* ── Selectbox / dropdowns ─────────────────────────────────────────────── */
+.stSelectbox > div > div {
+    background: #13131f;
+    border: 1px solid #252535;
+    border-radius: 8px;
+    color: #E0E0E0;
+}
+.stSelectbox > div > div:hover {
+    border-color: #1DB954;
+}
+.stSelectbox [data-baseweb="select"] > div {
+    background: #13131f;
+    color: #E0E0E0;
+}
+
+/* ── Radio buttons ─────────────────────────────────────────────────────── */
+.stRadio > div {
+    gap: 6px;
+}
+.stRadio > div > label {
+    background: #13131f;
+    border: 1px solid #252535;
+    border-radius: 8px;
+    padding: 6px 14px;
+    color: #ccc;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.stRadio > div > label:has(input:checked) {
+    border-color: #1DB954;
+    color: #1DB954;
+    background: rgba(29,185,84,0.08);
+}
+
+/* ── Checkboxes ────────────────────────────────────────────────────────── */
+.stCheckbox > label {
+    color: #C0C0C0;
+}
+
+/* ── Select-slider ─────────────────────────────────────────────────────── */
+.stSelectSlider [data-baseweb="slider"] > div > div:nth-child(2) {
+    background: #1DB954;
+}
+
+/* ── Divider ───────────────────────────────────────────────────────────── */
+hr {
+    border: none;
+    border-top: 1px solid #1e1e2e;
+    margin: 1em 0;
+}
+
+/* ── Metrics ───────────────────────────────────────────────────────────── */
+[data-testid="stMetricValue"] {
+    font-size: 1.9em !important;
+    font-weight: 800 !important;
+    color: #1DB954 !important;
+}
+[data-testid="stMetricLabel"] {
+    font-size: 0.78em !important;
+    color: #888 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+[data-testid="metric-container"] {
+    background: #111118;
+    border: 1px solid #1e1e2e;
+    border-radius: 12px;
+    padding: 1em 1.2em;
+}
+
+/* ── Progress bar ──────────────────────────────────────────────────────── */
+.stProgress > div > div > div {
+    background: linear-gradient(90deg, #1DB954, #17a349);
+    border-radius: 8px;
+    height: 10px !important;
+}
+.stProgress > div > div {
+    background: #1a1a2e;
+    border-radius: 8px;
+    height: 10px !important;
+}
+
+/* ── Expander ──────────────────────────────────────────────────────────── */
+.stExpander {
+    border: 1px solid #1e1e2e;
+    border-radius: 10px;
+    background: #0f0f1a;
+}
+.stExpander > details > summary {
+    color: #888;
+    font-size: 0.85em;
+}
+
+/* ── Dataframe / tables ────────────────────────────────────────────────── */
+[data-testid="stDataFrame"] {
+    border: 1px solid #1e1e2e;
+    border-radius: 8px;
+    background: #0f0f1a;
+}
+
+/* ── Info / warning / error / success boxes ────────────────────────────── */
+.stAlert {
+    border-radius: 10px;
+}
+[data-baseweb="notification"] {
+    background: #0f0f1a !important;
+}
+
+/* ── Spinner ───────────────────────────────────────────────────────────── */
+.stSpinner > div {
+    border-top-color: #1DB954 !important;
+}
+
+/* ── Caption ───────────────────────────────────────────────────────────── */
+.stCaptionContainer p {
+    color: #666 !important;
+    font-size: 0.8em;
+}
+
+/* ── Custom card containers ────────────────────────────────────────────── */
+.card {
+    background: #111118;
+    border: 1px solid #1e1e2e;
+    border-radius: 14px;
+    padding: 1.4em 1.6em 1em;
+    margin-bottom: 1em;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+.section-label {
+    font-size: 0.72em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #1DB954;
+    border-left: 3px solid #1DB954;
+    padding-left: 0.6em;
+    margin-bottom: 0.8em;
+    margin-top: 0.2em;
+}
+.section-label-blue {
+    font-size: 0.72em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #0F62FE;
+    border-left: 3px solid #0F62FE;
+    padding-left: 0.6em;
+    margin-bottom: 0.8em;
+    margin-top: 0.2em;
+}
+
+/* ── Result banners ────────────────────────────────────────────────────── */
+.result-popular {
+    background: linear-gradient(135deg, rgba(29,185,84,0.12), rgba(23,163,73,0.06));
+    border: 1px solid rgba(29,185,84,0.4);
+    border-radius: 14px;
+    padding: 1.4em 1.6em;
+    margin-bottom: 1.2em;
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    box-shadow: 0 0 30px rgba(29,185,84,0.12);
+}
+.result-not-popular {
+    background: linear-gradient(135deg, rgba(255,152,0,0.1), rgba(255,120,0,0.05));
+    border: 1px solid rgba(255,152,0,0.35);
+    border-radius: 14px;
+    padding: 1.4em 1.6em;
+    margin-bottom: 1.2em;
+    display: flex;
+    align-items: center;
+    gap: 1em;
+}
+.result-icon { font-size: 2.4em; }
+.result-verdict {
+    font-size: 1.4em;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #F0F0F0;
+}
+.result-sub {
+    font-size: 0.85em;
+    color: #888;
+    margin-top: 2px;
+}
+.popular-verdict { color: #1DB954; }
+.notpopular-verdict { color: #FF9800; }
+
+/* ── KPI grid ──────────────────────────────────────────────────────────── */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin: 1em 0;
+}
+.kpi-card {
+    background: #111118;
+    border: 1px solid #1e1e2e;
+    border-radius: 12px;
+    padding: 1em 0.8em;
+    text-align: center;
+}
+.kpi-value {
+    font-size: 1.8em;
+    font-weight: 800;
+    color: #1DB954;
+    line-height: 1;
+}
+.kpi-value-blue { color: #0F62FE; }
+.kpi-value-gray { color: #888; }
+.kpi-label {
+    font-size: 0.68em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #666;
+    margin-top: 4px;
+}
+.kpi-unit {
+    font-size: 0.72em;
+    color: #444;
+    margin-top: 1px;
+}
+
+/* ── Score bar ─────────────────────────────────────────────────────────── */
+.score-bar-label {
+    font-size: 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #666;
+    margin-bottom: 4px;
+}
+.score-bar-wrap {
+    background: #1a1a2e;
+    border-radius: 8px;
+    height: 12px;
+    overflow: hidden;
+}
+.score-bar-fill {
+    height: 100%;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #1DB954, #17a349);
+    transition: width 0.6s ease;
+}
+
+/* ── Confidence note ───────────────────────────────────────────────────── */
+.conf-note {
+    font-size: 0.8em;
+    color: #666;
+    background: #0d0d18;
+    border: 1px solid #1a1a28;
+    border-radius: 8px;
+    padding: 0.7em 1em;
+    margin-top: 0.8em;
+    line-height: 1.5;
+}
+.conf-note strong { color: #aaa; }
+
+/* ── Placeholder card (before predict) ─────────────────────────────────── */
+.placeholder-card {
+    background: #0d0d18;
+    border: 1px dashed #252535;
+    border-radius: 14px;
+    padding: 2em 1.5em;
+    text-align: center;
+    color: #555;
+    margin-top: 0.5em;
+}
+.placeholder-icon { font-size: 2.5em; margin-bottom: 0.3em; }
+.placeholder-text { font-size: 0.9em; color: #555; }
+.guide-table-wrap {
+    margin-top: 1.2em;
+    border: 1px solid #1a1a2e;
+    border-radius: 10px;
+    overflow: hidden;
+    font-size: 0.82em;
+}
+.guide-table-wrap table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #aaa;
+}
+.guide-table-wrap th {
+    background: #111118;
+    color: #666;
+    text-transform: uppercase;
+    font-size: 0.75em;
+    letter-spacing: 0.8px;
+    padding: 8px 12px;
+    border-bottom: 1px solid #1e1e2e;
+    text-align: left;
+}
+.guide-table-wrap td {
+    padding: 7px 12px;
+    border-bottom: 1px solid #131320;
+}
+.guide-table-wrap tr:nth-child(even) td { background: #0d0d18; }
+.guide-table-wrap tr:last-child td { border-bottom: none; }
+.guide-table-wrap td:first-child { color: #1DB954; font-weight: 600; }
+
+/* ── EDA dashboard ─────────────────────────────────────────────────────── */
+.eda-section-header {
+    font-size: 0.78em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #0F62FE;
+    border-left: 3px solid #0F62FE;
+    padding-left: 0.7em;
+    margin: 1.5em 0 0.8em;
+}
+.eda-intro {
+    background: #0d0d18;
+    border: 1px solid #1a1a2e;
+    border-radius: 10px;
+    padding: 1em 1.3em;
+    font-size: 0.88em;
+    color: #888;
+    margin-bottom: 1.2em;
+    line-height: 1.6;
+}
+.eda-caption {
+    font-size: 0.78em;
+    color: #555;
+    text-align: center;
+    margin-top: 4px;
+    padding: 0 0.5em 0.5em;
+    font-style: italic;
+}
+.img-wrap {
+    border: 1px solid #1a1a2e;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+    margin-bottom: 0.3em;
+}
+
+/* ── About tab ─────────────────────────────────────────────────────────── */
+.about-section {
+    font-size: 0.78em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #1DB954;
+    border-left: 3px solid #1DB954;
+    padding-left: 0.7em;
+    margin: 1.5em 0 0.8em;
+}
+.arch-block {
+    background: #0d0d18;
+    border: 1px solid #1e1e2e;
+    border-radius: 10px;
+    padding: 1.2em 1.5em;
+    font-family: 'Courier New', monospace;
+    font-size: 0.82em;
+    color: #a0a0c0;
+    line-height: 1.8;
+    overflow-x: auto;
+}
+.arch-phase {
+    color: #1DB954;
+    font-weight: 700;
+    font-size: 0.85em;
+    letter-spacing: 0.5px;
+}
+.arch-arrow { color: #0F62FE; }
+.about-table-wrap {
+    border: 1px solid #1a1a2e;
+    border-radius: 10px;
+    overflow: hidden;
+    font-size: 0.85em;
+    margin: 0.5em 0 1em;
+}
+.about-table-wrap table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #aaa;
+}
+.about-table-wrap th {
+    background: #111118;
+    color: #666;
+    text-transform: uppercase;
+    font-size: 0.72em;
+    letter-spacing: 0.8px;
+    padding: 9px 14px;
+    border-bottom: 1px solid #1e1e2e;
+    text-align: left;
+}
+.about-table-wrap td {
+    padding: 8px 14px;
+    border-bottom: 1px solid #131320;
+}
+.about-table-wrap tr:nth-child(even) td { background: #0d0d18; }
+.about-table-wrap tr:last-child td { border-bottom: none; }
+.about-table-wrap td:first-child { color: #E0E0E0; font-weight: 500; }
+.about-table-wrap td code {
+    background: #1a1a2e;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #1DB954;
+}
+.student-box {
+    background: linear-gradient(135deg, rgba(15,98,254,0.08), rgba(29,185,84,0.06));
+    border: 1px solid #1e2e3e;
+    border-radius: 12px;
+    padding: 1.2em 1.5em;
+    margin-top: 1.5em;
+    font-size: 0.85em;
+}
+.student-box .row { display: flex; gap: 1em; margin: 4px 0; }
+.student-box .lbl { color: #555; width: 80px; flex-shrink: 0; }
+.student-box .val { color: #C0C0C0; }
+.url-chip {
+    display: inline-block;
+    background: #0d0d18;
+    border: 1px solid #1e1e2e;
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-family: monospace;
+    font-size: 0.8em;
+    color: #888;
+    margin: 2px 0;
+}
+
+/* ── Header gradient title ─────────────────────────────────────────────── */
+.app-title {
+    font-size: 2.4em;
+    font-weight: 900;
+    background: linear-gradient(90deg, #1DB954 0%, #0F62FE 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    margin-bottom: 0.1em;
+}
+.app-tagline {
+    color: #555;
+    font-size: 0.95em;
+    margin-bottom: 0.6em;
+    letter-spacing: 0.3px;
+}
+.header-divider {
+    height: 1px;
+    background: linear-gradient(90deg, #1DB954 0%, #0F62FE 50%, transparent 100%);
+    margin: 0.8em 0 1.4em;
+    border: none;
+}
+.backend-error {
+    background: rgba(255,60,60,0.08);
+    border: 1px solid rgba(255,60,60,0.3);
+    border-radius: 10px;
+    padding: 0.9em 1.2em;
+    font-size: 0.88em;
+    color: #ff8080;
+    margin-bottom: 1em;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# =============================================================================
 # HEADER
 # =============================================================================
-st.title("🎵 Spotify Popularity Predictor")
-st.markdown(
-    "Enter a song's audio features and find out whether it will be **popular** "
-    "and what its predicted **popularity score** is."
-)
+st.markdown("""
+<div class="app-title">🎵 Spotify Popularity Predictor</div>
+<div class="app-tagline">Predict a song's commercial success from its audio DNA — powered by XGBoost</div>
+<div class="header-divider"></div>
+""", unsafe_allow_html=True)
 
 # =============================================================================
 # BACKEND HEALTH CHECK
@@ -103,11 +695,12 @@ def _check_backend() -> bool:
 
 backend_ok = _check_backend()
 if not backend_ok:
-    st.error(
-        f"**Cannot reach the FastAPI backend** at `{API_URL}`.\n\n"
-        "Start it with:\n```\nuvicorn app.api:app --reload --port 8000\n```\n"
-        "Then refresh this page."
-    )
+    st.markdown(f"""
+    <div class="backend-error">
+    <strong>⚠️ Backend offline</strong> — cannot reach FastAPI at <code>{API_URL}</code><br>
+    Start it with: <code>python -m uvicorn app.api:app --reload --port 8000</code> then refresh.
+    </div>
+    """, unsafe_allow_html=True)
 
 # =============================================================================
 # TABS
@@ -121,11 +714,6 @@ tab_predict, tab_eda, tab_about = st.tabs(
 # TAB 1 — PREDICTOR
 # ─────────────────────────────────────────────────────────────────────────────
 with tab_predict:
-    st.subheader("Enter audio features")
-    st.caption(
-        "Adjust the sliders to match the song you want to evaluate, "
-        "then click **Predict**."
-    )
 
     # ── Two-column layout: inputs on the left, results on the right ───────────
     col_inputs, col_results = st.columns([1.2, 1], gap="large")
@@ -133,7 +721,7 @@ with tab_predict:
     with col_inputs:
 
         # ── Genre & metadata ──────────────────────────────────────────────────
-        st.markdown("**Genre & metadata**")
+        st.markdown('<div class="section-label">Genre &amp; Metadata</div>', unsafe_allow_html=True)
         track_genre = st.selectbox(
             "Genre",
             options=GENRES,
@@ -147,14 +735,14 @@ with tab_predict:
             duration_min = st.slider(
                 "Duration (minutes)", min_value=0.5, max_value=15.0,
                 value=3.5, step=0.1,
-                help="Track length. 3–4 min is typical for popular songs.",
+                help="Track length. 3-4 min is typical for popular songs.",
             )
         duration_ms = int(duration_min * 60_000)
 
-        st.divider()
+        st.markdown('<div class="header-divider" style="margin:0.7em 0;"></div>', unsafe_allow_html=True)
 
         # ── Audio features ────────────────────────────────────────────────────
-        st.markdown("**Audio features**")
+        st.markdown('<div class="section-label">Audio Features</div>', unsafe_allow_html=True)
         c3, c4 = st.columns(2)
         with c3:
             danceability = st.slider(
@@ -191,10 +779,10 @@ with tab_predict:
                 help="Overall loudness. Typical studio tracks: -10 to -5 dB.",
             )
 
-        st.divider()
+        st.markdown('<div class="header-divider" style="margin:0.7em 0;"></div>', unsafe_allow_html=True)
 
         # ── Musical structure ─────────────────────────────────────────────────
-        st.markdown("**Musical structure**")
+        st.markdown('<div class="section-label">Musical Structure</div>', unsafe_allow_html=True)
         c5, c6, c7 = st.columns(3)
         with c5:
             tempo = st.slider(
@@ -208,7 +796,7 @@ with tab_predict:
                 format_func=lambda k: ["C","C#","D","D#","E","F",
                                        "F#","G","G#","A","A#","B"][k],
                 index=5,
-                help="Musical key. 0=C, 1=C#, … 11=B.",
+                help="Musical key. 0=C, 1=C#, ... 11=B.",
             )
         with c7:
             mode = st.radio(
@@ -222,17 +810,17 @@ with tab_predict:
             help="Beats per bar. 4/4 is by far the most common in popular music.",
         )
 
-        st.divider()
+        st.markdown('<div class="header-divider" style="margin:0.7em 0;"></div>', unsafe_allow_html=True)
 
         # ── Predict button ────────────────────────────────────────────────────
         predict_btn = st.button(
             "Predict popularity", type="primary", use_container_width=True,
             disabled=not backend_ok,
         )
+        st.caption("Model uses XGBoost trained on 106,907 Spotify tracks · random_state=42")
 
     # ── Right column: results ─────────────────────────────────────────────────
     with col_results:
-        st.markdown("**Prediction result**")
 
         if predict_btn:
             payload = {
@@ -253,7 +841,7 @@ with tab_predict:
                 "track_genre":     track_genre,
             }
 
-            with st.spinner("Asking the model …"):
+            with st.spinner("Asking the model ..."):
                 try:
                     resp = requests.post(
                         f"{API_URL}/predict",
@@ -278,26 +866,63 @@ with tab_predict:
 
                 # ── Verdict banner ────────────────────────────────────────────
                 if popular:
-                    st.success("### This song is likely POPULAR")
+                    st.markdown(f"""
+                    <div class="result-popular">
+                        <div class="result-icon">✅</div>
+                        <div>
+                            <div class="result-verdict popular-verdict">POPULAR</div>
+                            <div class="result-sub">This song is predicted to be a commercial hit</div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
                 else:
-                    st.warning("### This song is likely NOT popular")
+                    st.markdown(f"""
+                    <div class="result-not-popular">
+                        <div class="result-icon">🎯</div>
+                        <div>
+                            <div class="result-verdict notpopular-verdict">NOT POPULAR</div>
+                            <div class="result-sub">Below the popularity threshold of 70 / 100</div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-                # ── Key metrics ───────────────────────────────────────────────
-                m1, m2, m3 = st.columns(3)
-                m1.metric("Predicted score", f"{score:.1f} / 100")
-                m2.metric("Confidence",       f"{confidence * 100:.1f} %")
-                m3.metric("Threshold",         "70 / 100")
+                # ── Key metrics — custom KPI cards ────────────────────────────
+                st.markdown(f"""
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-value">{score:.1f}</div>
+                        <div class="kpi-label">Predicted Score</div>
+                        <div class="kpi-unit">out of 100</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value kpi-value-blue">{confidence*100:.1f}%</div>
+                        <div class="kpi-label">Confidence</div>
+                        <div class="kpi-unit">classifier prob.</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value kpi-value-gray">70</div>
+                        <div class="kpi-label">Threshold</div>
+                        <div class="kpi-unit">popularity cutoff</div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
 
                 # ── Popularity bar ────────────────────────────────────────────
-                st.markdown("**Score on the 0–100 scale:**")
-                st.progress(int(score))
+                st.markdown(f"""
+                <div class="score-bar-label">Score on the 0–100 scale</div>
+                <div class="score-bar-wrap">
+                    <div class="score-bar-fill" style="width:{min(score,100):.1f}%;"></div>
+                </div>
+                """, unsafe_allow_html=True)
 
                 # ── Confidence note ───────────────────────────────────────────
-                st.caption(
-                    f"The classifier gives a **{confidence*100:.1f} % probability** "
-                    f"that this song is popular (popularity ≥ 70). "
-                    f"The regressor predicts a score of **{score:.1f}**."
-                )
+                st.markdown(f"""
+                <div class="conf-note">
+                    The classifier gives a <strong>{confidence*100:.1f}% probability</strong>
+                    that this song is popular (popularity &ge; 70).
+                    The regressor independently predicts a score of <strong>{score:.1f} / 100</strong>.
+                </div>
+                """, unsafe_allow_html=True)
 
                 # ── Feature summary ───────────────────────────────────────────
                 with st.expander("Show the features you submitted"):
@@ -308,40 +933,56 @@ with tab_predict:
 
         else:
             # Placeholder before the user clicks Predict
-            st.info(
-                "Adjust the sliders on the left to describe your song, "
-                "then click **Predict popularity**."
-            )
             st.markdown("""
-**Quick guide — what the audio features mean:**
-
-| Feature | Low value | High value |
-|---------|-----------|------------|
-| Danceability | Hard to dance to | Easy to dance to |
-| Energy | Calm, soft | Intense, loud |
-| Valence | Sad / angry | Happy / euphoric |
-| Acousticness | Electronic / synthetic | Acoustic instruments |
-| Speechiness | Pure music | Mostly spoken words |
-| Instrumentalness | Has vocals | No vocals |
-| Liveness | Studio recording | Live audience |
-""")
+            <div class="placeholder-card">
+                <div class="placeholder-icon">🎵</div>
+                <div class="placeholder-text">
+                    Adjust the sliders on the left to describe your song,<br>
+                    then click <strong style="color:#1DB954;">Predict popularity</strong>.
+                </div>
+            </div>
+            <div class="guide-table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Feature</th><th>Low value</th><th>High value</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Danceability</td><td>Hard to dance to</td><td>Easy to dance to</td></tr>
+                        <tr><td>Energy</td><td>Calm, soft</td><td>Intense, loud</td></tr>
+                        <tr><td>Valence</td><td>Sad / angry</td><td>Happy / euphoric</td></tr>
+                        <tr><td>Acousticness</td><td>Electronic / synthetic</td><td>Acoustic instruments</td></tr>
+                        <tr><td>Speechiness</td><td>Pure music</td><td>Mostly spoken words</td></tr>
+                        <tr><td>Instrumentalness</td><td>Has vocals</td><td>No vocals</td></tr>
+                        <tr><td>Liveness</td><td>Studio recording</td><td>Live audience</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            """, unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 2 — EDA DASHBOARD
 # ─────────────────────────────────────────────────────────────────────────────
 with tab_eda:
-    st.subheader("Exploratory Data Analysis — saved charts")
-    st.caption(
-        "These charts were generated by `train.py` from the raw Spotify dataset. "
-        "They show what the data looks like before any modelling."
-    )
+
+    st.markdown("""
+    <div class="eda-intro">
+        <strong style="color:#C0C0C0;">What is EDA?</strong> Exploratory Data Analysis is the step we do
+        <em>before</em> any modelling — it means looking at the raw data to understand its shape,
+        spot problems, and find patterns. All charts below were generated by <code>train.py</code>
+        directly from the Spotify dataset. Nothing was changed before plotting — you see the data exactly as
+        it came from Kaggle.
+    </div>
+    """, unsafe_allow_html=True)
 
     # Helper: show a plot if the file exists; otherwise show a placeholder
     def _show_plot(filename: str, caption: str) -> None:
         path = os.path.join(PLOTS_DIR, filename)
         if os.path.exists(path):
-            st.image(path, caption=caption, use_container_width=True)
+            st.markdown('<div class="img-wrap">', unsafe_allow_html=True)
+            st.image(path, use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="eda-caption">{caption}</div>', unsafe_allow_html=True)
         else:
             st.info(
                 f"**{filename}** not found.  \n"
@@ -349,56 +990,55 @@ with tab_eda:
             )
 
     # ── Section 1: Target variable ────────────────────────────────────────────
-    st.markdown("### Target variable — Popularity")
+    st.markdown('<div class="eda-section-header">Target Variable — Popularity</div>', unsafe_allow_html=True)
     _show_plot(
         "01_popularity_distribution.png",
-        "Left: raw distribution of popularity scores (0–100). "
-        "Right: class balance — how many songs cross the 70 threshold.",
+        "Left: raw distribution of popularity scores (0-100). "
+        "Right: class balance — only 5.1% of songs cross the threshold of 70.",
     )
 
     # ── Section 2: Feature distributions ─────────────────────────────────────
-    st.markdown("### Audio feature distributions")
+    st.markdown('<div class="eda-section-header">Audio Feature Distributions</div>', unsafe_allow_html=True)
     _show_plot(
         "02_feature_distributions.png",
         "Histogram of each numeric feature. "
-        "Helps spot skewed or bimodal distributions.",
+        "Helps spot skewed or bimodal distributions that influence model choice.",
     )
 
     # ── Section 3: Correlations ───────────────────────────────────────────────
-    st.markdown("### Correlations")
+    st.markdown('<div class="eda-section-header">Correlations</div>', unsafe_allow_html=True)
     _show_plot(
         "03_correlation_heatmap.png",
-        "Pearson correlation matrix (lower triangle). "
-        "Red = positive correlation, blue = negative. "
-        "Look at the bottom row for features most correlated with popularity.",
+        "Pearson correlation matrix (lower triangle only). "
+        "Red = positive correlation, blue = negative. Bottom row shows correlation with popularity.",
     )
 
     # ── Section 4: Outliers ────────────────────────────────────────────────────
-    st.markdown("### Outlier detection")
+    st.markdown('<div class="eda-section-header">Outlier Detection</div>', unsafe_allow_html=True)
     _show_plot(
         "04_outlier_boxplots.png",
         "Boxplots for key features. Dots beyond the whiskers are outliers. "
-        "RobustScaler handles these without explicit removal.",
+        "We use RobustScaler in the Pipeline to handle these without removing rows.",
     )
 
     # ── Section 5: Feature–target relationships ───────────────────────────────
-    st.markdown("### Feature–target relationships")
+    st.markdown('<div class="eda-section-header">Feature-Target Relationships</div>', unsafe_allow_html=True)
     _show_plot(
         "05_feature_target_scatter.png",
-        "Each audio feature plotted against the raw popularity score. "
-        "A positive slope means higher values tend to be more popular.",
+        "Each audio feature plotted against the raw popularity score (5,000-row sample). "
+        "Weak slopes confirm no single feature dominates — we need an ensemble model.",
     )
 
     # ── Section 6: Genre popularity ───────────────────────────────────────────
-    st.markdown("### Genre analysis")
+    st.markdown('<div class="eda-section-header">Genre Analysis</div>', unsafe_allow_html=True)
     _show_plot(
         "06_genre_popularity.png",
         "Top 25 genres by mean popularity. "
-        "Genre is a useful feature — some genres are systematically more popular.",
+        "Genre is the strongest single predictor — pop, dance, and hip-hop score highest.",
     )
 
     # ── Section 7: Model evaluation plots ─────────────────────────────────────
-    st.markdown("### Model evaluation (XGBoost — best model)")
+    st.markdown('<div class="eda-section-header">Model Evaluation — XGBoost (Best Model)</div>', unsafe_allow_html=True)
     c_left, c_right = st.columns(2)
     with c_left:
         _show_plot(
@@ -408,14 +1048,13 @@ with tab_eda:
         )
         _show_plot(
             "08_roc_curve_xgb.png",
-            "ROC curve: trade-off between true positive rate and false positive rate. "
-            "AUC closer to 1.0 = better classifier.",
+            "ROC curve: AUC = 0.920. Random classifier would score 0.50.",
         )
     with c_right:
         _show_plot(
             "09_predicted_vs_actual_xgb.png",
-            "Predicted vs actual popularity scores. "
-            "Perfect model = all points on the red diagonal.",
+            "Predicted vs actual popularity. "
+            "Perfect predictions would lie on the red diagonal.",
         )
 
 
@@ -423,49 +1062,75 @@ with tab_eda:
 # TAB 3 — ABOUT
 # ─────────────────────────────────────────────────────────────────────────────
 with tab_about:
-    st.subheader("About this project")
+
+    st.markdown('<div class="about-section">Architecture</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="arch-block">
+        <span class="arch-phase">OFFLINE</span> &mdash; runs once on your machine<br>
+        <span style="color:#444;">&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;</span><br>
+        dataset.csv <span class="arch-arrow">&rarr;</span> train.py <span class="arch-arrow">&rarr;</span> EDA plots + classifier.pkl + regressor.pkl<br><br>
+        <span class="arch-phase">RUNTIME</span> &mdash; this app, always on<br>
+        <span style="color:#444;">&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;</span><br>
+        You <span class="arch-arrow">&rarr;</span> Streamlit (this page) <span class="arch-arrow">&rarr;</span> HTTP POST <span class="arch-arrow">&rarr;</span> FastAPI <span class="arch-arrow">&rarr;</span> .pkl <span class="arch-arrow">&rarr;</span> prediction
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="about-section">Two ML Tasks</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="about-table-wrap">
+        <table>
+            <thead><tr><th>Task</th><th>Target</th><th>Best model</th><th>Score</th></tr></thead>
+            <tbody>
+                <tr><td>Classification</td><td>popularity &ge; 70 &rarr; popular (1 / 0)</td><td>XGBoost (tuned)</td><td>F1 = 0.437 &nbsp;|&nbsp; AUC = 0.920</td></tr>
+                <tr><td>Regression</td><td>exact popularity score 0&ndash;100</td><td>XGBoost (tuned)</td><td>R&sup2; = 0.380 &nbsp;|&nbsp; RMSE = 16.7</td></tr>
+            </tbody>
+        </table>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="about-section">Model Ladder</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="about-table-wrap">
+        <table>
+            <thead><tr><th>#</th><th>Model</th><th>Purpose</th></tr></thead>
+            <tbody>
+                <tr><td>1</td><td>DummyClassifier / DummyRegressor</td><td>Baseline floor — must beat this</td></tr>
+                <tr><td>2</td><td>Logistic Regression / Ridge</td><td>Linear relationship benchmark</td></tr>
+                <tr><td>3</td><td>Decision Tree (depth=6)</td><td>Non-linear, interpretable, overfits without depth control</td></tr>
+                <tr><td>4</td><td>XGBoost + RandomizedSearchCV</td><td>Gradient boosting — best performer</td></tr>
+            </tbody>
+        </table>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="about-section">Key Design Decisions</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="about-table-wrap">
+        <table>
+            <thead><tr><th>Decision</th><th>Why</th></tr></thead>
+            <tbody>
+                <tr><td><code>random_state=42</code> everywhere</td><td>Fully reproducible results across runs</td></tr>
+                <tr><td>scikit-learn <code>Pipeline</code></td><td>No data leakage — scaler fitted on training data only</td></tr>
+                <tr><td><code>RobustScaler</code> not <code>StandardScaler</code></td><td>Handles outliers in loudness / tempo without removing rows</td></tr>
+                <tr><td>Models saved as <code>.pkl</code></td><td>Backend loads once at startup — never retrains live</td></tr>
+            </tbody>
+        </table>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="about-section">Links</div>', unsafe_allow_html=True)
     st.markdown(f"""
-**Student:** Amila Herenda
-**Course:** University ML Course
-**Dataset:** [Spotify Tracks Dataset](https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset)
-(Maharshi Pandya, Kaggle 2022) — ~114 000 tracks, 21 audio features, 114 genres.
-
----
-
-### Architecture
-
-```
-OFFLINE  (runs once on your machine)
-──────────────────────────────────────────────────────────
-dataset.csv → train.py → EDA plots + classifier.pkl + regressor.pkl
-
-RUNTIME  (this app)
-──────────────────────────────────────────────────────────
-You → Streamlit (this page) → HTTP POST → FastAPI → .pkl → prediction
-```
-
-### Two ML tasks
-
-| Task | Target | Best model |
-|------|--------|------------|
-| Classification | popularity ≥ 70 → 1, else 0 | XGBoost (tuned) |
-| Regression | exact popularity score 0–100 | XGBoost (tuned) |
-
-### Model ladder trained
-
-1. **DummyClassifier / DummyRegressor** — always-predict-mean baseline
-2. **Logistic Regression / Ridge** — linear models
-3. **Decision Tree** — non-linear, interpretable
-4. **XGBoost** — gradient boosting with RandomizedSearchCV
-
-### Key design decisions
-
-- `random_state=42` everywhere → fully reproducible results
-- scikit-learn `Pipeline` → no data leakage (scaler fitted on training data only)
-- `RobustScaler` instead of `StandardScaler` → handles outliers in loudness / tempo
-- Models saved as `.pkl` → backend loads once at startup, never retrains
-
----
-**Backend URL:** `{API_URL}`
-**API docs:** [{API_URL}/docs]({API_URL}/docs)
-""")
+    <div class="student-box">
+        <div class="row"><span class="lbl">Student</span><span class="val">Herend Amila</span></div>
+        <div class="row"><span class="lbl">Course</span><span class="val">Modelling in Advanced Data Analytics &mdash; FELU</span></div>
+        <div class="row"><span class="lbl">Dataset</span>
+            <span class="val"><a href="https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset"
+                style="color:#1DB954;">Spotify Tracks Dataset</a>
+            &nbsp;&mdash;&nbsp; Maharshi Pandya, Kaggle 2022 &nbsp;&mdash;&nbsp;
+            ~114,000 tracks, 21 audio features, 114 genres</span></div>
+        <div class="row"><span class="lbl">Backend</span>
+            <span class="val"><span class="url-chip">{API_URL}</span></span></div>
+        <div class="row"><span class="lbl">API docs</span>
+            <span class="val"><a href="{API_URL}/docs" style="color:#0F62FE;">{API_URL}/docs</a></span></div>
+    </div>
+    """, unsafe_allow_html=True)
