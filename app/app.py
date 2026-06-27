@@ -78,605 +78,374 @@ st.set_page_config(
 )
 
 # =============================================================================
-# CUSTOM CSS — dark premium theme
+# THEME STATE
 # =============================================================================
-st.markdown("""
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = True
+
+# =============================================================================
+# THEME CSS
+# All colors live in two dicts (_DARK / _LIGHT). _build_css() renders them
+# into a single <style> block — no duplicated CSS rules, only the values swap.
+# =============================================================================
+
+_DARK = dict(
+    bg_app="#0A0A0F",     bg_card="#111118",    bg_card2="#0d0d18",
+    border="#1e1e2e",     text="#E0E0E0",        text_sec="#C0C0C0",
+    text_muted="#888",    text_dim="#666",        text_vdim="#555",
+    text_edim="#444",     tab_list="#111118",    tab_text="#888",
+    tab_hover="#1a1a28",  input_bg="#13131f",    input_border="#252535",
+    progress_bg="#1a1a2e", expander_bg="#0f0f1a", sidebar_bg="#0d0d18",
+    sidebar_border="#1a1a2e", result_text="#F0F0F0", result_sub="#888",
+    table_hdr="#111118",  table_alt="#0d0d18",   table_row_bdr="#131320",
+    table_text="#aaa",    arch_bg="#0d0d18",     arch_text="#a0a0c0",
+    arch_sep="#444",      code_bg="#1a1a2e",     student_border="#1e2e3e",
+    chip_bg="#0d0d18",    error_bg="rgba(255,60,60,0.08)",
+    error_border="rgba(255,60,60,0.30)", error_text="#ff8080",
+    toggle_bg="#1a1a28",  toggle_border="#252535", toggle_text="#aaa",
+    toggle_hover="#222235", img_shadow="rgba(0,0,0,0.40)",
+    conf_bg="#0d0d18",    conf_border="#1a1a28", conf_text="#666",
+    conf_strong="#aaa",   metric_bg="#111118",   kpi_bg="#111118",
+    score_bg="#1a1a2e",   eda_intro_bg="#0d0d18", eda_img_bdr="#1a1a2e",
+    h_color="#F0F0F0",
+    pop_bg="linear-gradient(135deg,rgba(29,185,84,0.12),rgba(23,163,73,0.06))",
+    pop_bdr="rgba(29,185,84,0.40)", pop_glow="0 0 30px rgba(29,185,84,0.12)",
+    nop_bg="linear-gradient(135deg,rgba(255,152,0,0.10),rgba(255,120,0,0.05))",
+    nop_bdr="rgba(255,152,0,0.35)",
+    student_bg="linear-gradient(135deg,rgba(15,98,254,0.08),rgba(29,185,84,0.06))",
+)
+
+_LIGHT = dict(
+    bg_app="#F5F5F7",     bg_card="#FFFFFF",     bg_card2="#F8F8FA",
+    border="#E0E0E0",     text="#1A1A2E",         text_sec="#444",
+    text_muted="#777",    text_dim="#999",         text_vdim="#AAA",
+    text_edim="#BBB",     tab_list="#EAEAEA",     tab_text="#777",
+    tab_hover="#D8D8D8",  input_bg="#FFFFFF",     input_border="#CCC",
+    progress_bg="#E0E0E0", expander_bg="#F5F5F7", sidebar_bg="#FFFFFF",
+    sidebar_border="#E0E0E0", result_text="#1A1A2E", result_sub="#777",
+    table_hdr="#EEEEEE",  table_alt="#F5F5F7",   table_row_bdr="#F0F0F0",
+    table_text="#666",    arch_bg="#F0F0F5",      arch_text="#555577",
+    arch_sep="#CCC",      code_bg="#E8E8F0",      student_border="#C8D8E8",
+    chip_bg="#F0F0F5",    error_bg="rgba(255,60,60,0.04)",
+    error_border="rgba(255,60,60,0.15)", error_text="#cc4444",
+    toggle_bg="#FFFFFF",  toggle_border="#E0E0E0", toggle_text="#555",
+    toggle_hover="#F0F0F5", img_shadow="rgba(0,0,0,0.08)",
+    conf_bg="#F8F8FA",    conf_border="#E8E8EA", conf_text="#777",
+    conf_strong="#555",   metric_bg="#FFFFFF",   kpi_bg="#FFFFFF",
+    score_bg="#E0E0E0",   eda_intro_bg="#F0F0F5", eda_img_bdr="#E0E0E0",
+    h_color="#1A1A2E",
+    pop_bg="linear-gradient(135deg,rgba(29,185,84,0.07),rgba(23,163,73,0.03))",
+    pop_bdr="rgba(29,185,84,0.30)", pop_glow="0 2px 16px rgba(29,185,84,0.06)",
+    nop_bg="linear-gradient(135deg,rgba(255,152,0,0.07),rgba(255,120,0,0.03))",
+    nop_bdr="rgba(255,152,0,0.25)",
+    student_bg="linear-gradient(135deg,rgba(15,98,254,0.04),rgba(29,185,84,0.03))",
+)
+
+
+def _build_css(t: dict) -> str:
+    return f"""
 <style>
-/* ── Base & background ─────────────────────────────────────────────────── */
-.stApp {
-    background-color: #0A0A0F;
-    color: #E0E0E0;
-}
-.stApp > header {
-    background-color: transparent;
-}
-[data-testid="stAppViewContainer"] {
-    background-color: #0A0A0F;
-}
-[data-testid="stHeader"] {
-    background: transparent;
-}
-[data-testid="stToolbar"] {
-    right: 1rem;
-}
-
-/* ── Sidebar ───────────────────────────────────────────────────────────── */
-section[data-testid="stSidebar"] {
-    background-color: #0d0d18;
-    border-right: 1px solid #1a1a2e;
-}
-
-/* ── Remove default white blocks ───────────────────────────────────────── */
-.stTabs [data-baseweb="tab-panel"] {
-    background: transparent;
-    padding: 0;
-}
-[data-testid="stVerticalBlock"] > div:has(> [data-testid="stHorizontalBlock"]) {
-    background: transparent;
-}
+/* ── Base ─────────────────────────────────────────────────────────────── */
+.stApp {{ background-color: {t['bg_app']}; color: {t['text']}; }}
+.stApp > header {{ background-color: transparent; }}
+[data-testid="stAppViewContainer"] {{ background-color: {t['bg_app']}; }}
+[data-testid="stHeader"] {{ background: transparent; }}
+[data-testid="stToolbar"] {{ right: 1rem; }}
 
 /* ── Typography ────────────────────────────────────────────────────────── */
-h1, h2, h3, h4 {
-    color: #F0F0F0 !important;
-}
-p, li, label {
-    color: #C0C0C0;
-}
-.stMarkdown p {
-    color: #C0C0C0;
-}
+h1, h2, h3, h4 {{ color: {t['h_color']} !important; }}
+p, li, label {{ color: {t['text_sec']}; }}
+.stMarkdown p {{ color: {t['text_sec']}; }}
 
-/* ── Tabs — pill style ─────────────────────────────────────────────────── */
-.stTabs [data-baseweb="tab-list"] {
-    gap: 6px;
-    background: #111118;
-    border-radius: 14px;
-    padding: 5px 6px;
-    border: 1px solid #1e1e2e;
-}
-.stTabs [data-baseweb="tab"] {
-    border-radius: 10px;
-    color: #888;
-    padding: 8px 22px;
-    font-weight: 500;
-    font-size: 0.9em;
-    background: transparent;
-    border: none;
-    transition: all 0.2s ease;
-    letter-spacing: 0.3px;
-}
-.stTabs [data-baseweb="tab"]:hover {
-    color: #fff;
-    background: #1a1a28;
-}
-.stTabs [aria-selected="true"] {
-    background: linear-gradient(135deg, #1DB954, #17a349) !important;
-    color: #fff !important;
-    font-weight: 700 !important;
-    box-shadow: 0 2px 12px rgba(29, 185, 84, 0.35);
-}
+/* ── Sidebar ─────────────────────────────────────────────────────────────── */
+section[data-testid="stSidebar"] {{
+    background-color: {t['sidebar_bg']};
+    border-right: 1px solid {t['sidebar_border']};
+}}
 
-/* ── Primary button — large green ─────────────────────────────────────── */
-.stButton > button[kind="primary"] {
-    background: linear-gradient(135deg, #1DB954 0%, #17a349 100%);
-    color: #fff;
-    border: none;
-    border-radius: 50px;
-    font-size: 1.05em;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-    padding: 0.7em 2em;
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 20px rgba(29, 185, 84, 0.35);
-    text-transform: uppercase;
-}
-.stButton > button[kind="primary"]:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 28px rgba(29, 185, 84, 0.55);
-}
-.stButton > button[kind="primary"]:active {
-    transform: translateY(0px);
-}
-.stButton > button[kind="primary"]:disabled {
-    background: #2a2a3a;
-    box-shadow: none;
-    color: #555;
-}
+/* ── Tabs — pill nav ─────────────────────────────────────────────────────── */
+.stTabs [data-baseweb="tab-panel"] {{ background: transparent; padding: 0; }}
+.stTabs [data-baseweb="tab-list"] {{
+    gap: 6px; background: {t['tab_list']}; border-radius: 14px;
+    padding: 5px 6px; border: 1px solid {t['border']};
+}}
+.stTabs [data-baseweb="tab"] {{
+    border-radius: 10px; color: {t['tab_text']}; padding: 8px 22px;
+    font-weight: 500; font-size: 0.9em; background: transparent;
+    border: none; transition: all 0.2s ease; letter-spacing: 0.3px;
+}}
+.stTabs [data-baseweb="tab"]:hover {{ color: {t['text']}; background: {t['tab_hover']}; }}
+.stTabs [aria-selected="true"] {{
+    background: linear-gradient(135deg,#1DB954,#17a349) !important;
+    color: #fff !important; font-weight: 700 !important;
+    box-shadow: 0 2px 12px rgba(29,185,84,0.35);
+}}
 
-/* ── Secondary buttons ─────────────────────────────────────────────────── */
-.stButton > button[kind="secondary"] {
-    background: #1a1a2e;
-    color: #ccc;
-    border: 1px solid #2a2a3e;
-    border-radius: 8px;
-}
+/* ── Primary button ──────────────────────────────────────────────────────── */
+.stButton > button[kind="primary"] {{
+    background: linear-gradient(135deg,#1DB954 0%,#17a349 100%);
+    color: #fff; border: none; border-radius: 50px;
+    font-size: 1.05em; font-weight: 700; letter-spacing: 0.8px;
+    padding: 0.7em 2em; transition: all 0.25s ease;
+    box-shadow: 0 4px 20px rgba(29,185,84,0.35); text-transform: uppercase;
+}}
+.stButton > button[kind="primary"]:hover {{
+    transform: translateY(-2px); box-shadow: 0 6px 28px rgba(29,185,84,0.55);
+}}
+.stButton > button[kind="primary"]:active {{ transform: translateY(0); }}
+.stButton > button[kind="primary"]:disabled {{
+    background: {t['tab_hover']}; box-shadow: none; color: {t['text_vdim']};
+}}
 
-/* ── Sliders ───────────────────────────────────────────────────────────── */
-.stSlider [data-baseweb="slider"] {
-    margin-top: 4px;
-}
-.stSlider [data-testid="stTickBar"] {
-    display: none;
-}
-[data-testid="stSliderThumb"] {
+/* ── Theme toggle (secondary button) ────────────────────────────────────── */
+.stButton > button[kind="secondary"] {{
+    background: {t['toggle_bg']}; color: {t['toggle_text']};
+    border: 1px solid {t['toggle_border']}; border-radius: 20px;
+    font-size: 0.82em; font-weight: 600; padding: 5px 14px;
+    transition: all 0.2s ease; letter-spacing: 0.3px;
+}}
+.stButton > button[kind="secondary"]:hover {{
+    background: {t['toggle_hover']}; border-color: #1DB954; color: #1DB954;
+}}
+
+/* ── Sliders ─────────────────────────────────────────────────────────────── */
+[data-testid="stTickBar"] {{ display: none; }}
+[data-testid="stSliderThumb"] {{
     background: #1DB954 !important;
     box-shadow: 0 0 0 3px rgba(29,185,84,0.25);
-}
-[data-baseweb="slider"] [role="slider"] {
-    background: #1DB954;
-}
-[data-baseweb="slider"] > div > div:nth-child(2) {
-    background: #1DB954;
-}
+}}
+[data-baseweb="slider"] [role="slider"] {{ background: #1DB954; }}
+[data-baseweb="slider"] > div > div:nth-child(2) {{ background: #1DB954; }}
 
-/* ── Selectbox / dropdowns ─────────────────────────────────────────────── */
-.stSelectbox > div > div {
-    background: #13131f;
-    border: 1px solid #252535;
-    border-radius: 8px;
-    color: #E0E0E0;
-}
-.stSelectbox > div > div:hover {
-    border-color: #1DB954;
-}
-.stSelectbox [data-baseweb="select"] > div {
-    background: #13131f;
-    color: #E0E0E0;
-}
+/* ── Selectbox ───────────────────────────────────────────────────────────── */
+.stSelectbox > div > div {{
+    background: {t['input_bg']}; border: 1px solid {t['input_border']};
+    border-radius: 8px; color: {t['text']};
+}}
+.stSelectbox > div > div:hover {{ border-color: #1DB954; }}
+.stSelectbox [data-baseweb="select"] > div {{ background: {t['input_bg']}; color: {t['text']}; }}
 
-/* ── Radio buttons ─────────────────────────────────────────────────────── */
-.stRadio > div {
-    gap: 6px;
-}
-.stRadio > div > label {
-    background: #13131f;
-    border: 1px solid #252535;
-    border-radius: 8px;
-    padding: 6px 14px;
-    color: #ccc;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-.stRadio > div > label:has(input:checked) {
-    border-color: #1DB954;
-    color: #1DB954;
-    background: rgba(29,185,84,0.08);
-}
+/* ── Radio ───────────────────────────────────────────────────────────────── */
+.stRadio > div {{ gap: 6px; }}
+.stRadio > div > label {{
+    background: {t['input_bg']}; border: 1px solid {t['input_border']};
+    border-radius: 8px; padding: 6px 14px; color: {t['text_sec']};
+    cursor: pointer; transition: all 0.2s;
+}}
+.stRadio > div > label:has(input:checked) {{
+    border-color: #1DB954; color: #1DB954; background: rgba(29,185,84,0.08);
+}}
 
-/* ── Checkboxes ────────────────────────────────────────────────────────── */
-.stCheckbox > label {
-    color: #C0C0C0;
-}
+/* ── Checkbox ────────────────────────────────────────────────────────────── */
+.stCheckbox > label {{ color: {t['text_sec']}; }}
 
-/* ── Select-slider ─────────────────────────────────────────────────────── */
-.stSelectSlider [data-baseweb="slider"] > div > div:nth-child(2) {
-    background: #1DB954;
-}
+/* ── Progress bar ────────────────────────────────────────────────────────── */
+.stProgress > div > div > div {{
+    background: linear-gradient(90deg,#1DB954,#17a349);
+    border-radius: 8px; height: 10px !important;
+}}
+.stProgress > div > div {{
+    background: {t['progress_bg']}; border-radius: 8px; height: 10px !important;
+}}
 
-/* ── Divider ───────────────────────────────────────────────────────────── */
-hr {
-    border: none;
-    border-top: 1px solid #1e1e2e;
-    margin: 1em 0;
-}
+/* ── Expander ────────────────────────────────────────────────────────────── */
+.stExpander {{
+    border: 1px solid {t['border']}; border-radius: 10px;
+    background: {t['expander_bg']};
+}}
+.stExpander > details > summary {{ color: {t['text_muted']}; font-size: 0.85em; }}
 
-/* ── Metrics ───────────────────────────────────────────────────────────── */
-[data-testid="stMetricValue"] {
-    font-size: 1.9em !important;
-    font-weight: 800 !important;
-    color: #1DB954 !important;
-}
-[data-testid="stMetricLabel"] {
-    font-size: 0.78em !important;
-    color: #888 !important;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-}
-[data-testid="metric-container"] {
-    background: #111118;
-    border: 1px solid #1e1e2e;
-    border-radius: 12px;
-    padding: 1em 1.2em;
-}
+/* ── Dataframe ───────────────────────────────────────────────────────────── */
+[data-testid="stDataFrame"] {{
+    border: 1px solid {t['border']}; border-radius: 8px; background: {t['expander_bg']};
+}}
 
-/* ── Progress bar ──────────────────────────────────────────────────────── */
-.stProgress > div > div > div {
-    background: linear-gradient(90deg, #1DB954, #17a349);
-    border-radius: 8px;
-    height: 10px !important;
-}
-.stProgress > div > div {
-    background: #1a1a2e;
-    border-radius: 8px;
-    height: 10px !important;
-}
+/* ── Divider / caption / spinner ────────────────────────────────────────── */
+hr {{ border: none; border-top: 1px solid {t['border']}; margin: 1em 0; }}
+.stCaptionContainer p {{ color: {t['text_dim']} !important; font-size: 0.8em; }}
+.stSpinner > div {{ border-top-color: #1DB954 !important; }}
 
-/* ── Expander ──────────────────────────────────────────────────────────── */
-.stExpander {
-    border: 1px solid #1e1e2e;
-    border-radius: 10px;
-    background: #0f0f1a;
-}
-.stExpander > details > summary {
-    color: #888;
-    font-size: 0.85em;
-}
+/* ── Metrics ─────────────────────────────────────────────────────────────── */
+[data-testid="stMetricValue"] {{
+    font-size: 1.9em !important; font-weight: 800 !important; color: #1DB954 !important;
+}}
+[data-testid="stMetricLabel"] {{
+    font-size: 0.78em !important; color: {t['text_muted']} !important;
+    text-transform: uppercase; letter-spacing: 0.8px;
+}}
+[data-testid="metric-container"] {{
+    background: {t['metric_bg']}; border: 1px solid {t['border']};
+    border-radius: 12px; padding: 1em 1.2em;
+}}
 
-/* ── Dataframe / tables ────────────────────────────────────────────────── */
-[data-testid="stDataFrame"] {
-    border: 1px solid #1e1e2e;
-    border-radius: 8px;
-    background: #0f0f1a;
-}
+/* ─── CUSTOM HTML ELEMENTS ──────────────────────────────────────────────── */
 
-/* ── Info / warning / error / success boxes ────────────────────────────── */
-.stAlert {
-    border-radius: 10px;
-}
-[data-baseweb="notification"] {
-    background: #0f0f1a !important;
-}
-
-/* ── Spinner ───────────────────────────────────────────────────────────── */
-.stSpinner > div {
-    border-top-color: #1DB954 !important;
-}
-
-/* ── Caption ───────────────────────────────────────────────────────────── */
-.stCaptionContainer p {
-    color: #666 !important;
-    font-size: 0.8em;
-}
-
-/* ── Custom card containers ────────────────────────────────────────────── */
-.card {
-    background: #111118;
-    border: 1px solid #1e1e2e;
-    border-radius: 14px;
-    padding: 1.4em 1.6em 1em;
-    margin-bottom: 1em;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
-}
-.section-label {
-    font-size: 0.72em;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: #1DB954;
-    border-left: 3px solid #1DB954;
-    padding-left: 0.6em;
-    margin-bottom: 0.8em;
-    margin-top: 0.2em;
-}
-.section-label-blue {
-    font-size: 0.72em;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: #0F62FE;
-    border-left: 3px solid #0F62FE;
-    padding-left: 0.6em;
-    margin-bottom: 0.8em;
-    margin-top: 0.2em;
-}
-
-/* ── Result banners ────────────────────────────────────────────────────── */
-.result-popular {
-    background: linear-gradient(135deg, rgba(29,185,84,0.12), rgba(23,163,73,0.06));
-    border: 1px solid rgba(29,185,84,0.4);
-    border-radius: 14px;
-    padding: 1.4em 1.6em;
-    margin-bottom: 1.2em;
-    display: flex;
-    align-items: center;
-    gap: 1em;
-    box-shadow: 0 0 30px rgba(29,185,84,0.12);
-}
-.result-not-popular {
-    background: linear-gradient(135deg, rgba(255,152,0,0.1), rgba(255,120,0,0.05));
-    border: 1px solid rgba(255,152,0,0.35);
-    border-radius: 14px;
-    padding: 1.4em 1.6em;
-    margin-bottom: 1.2em;
-    display: flex;
-    align-items: center;
-    gap: 1em;
-}
-.result-icon { font-size: 2.4em; }
-.result-verdict {
-    font-size: 1.4em;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    color: #F0F0F0;
-}
-.result-sub {
-    font-size: 0.85em;
-    color: #888;
-    margin-top: 2px;
-}
-.popular-verdict { color: #1DB954; }
-.notpopular-verdict { color: #FF9800; }
-
-/* ── KPI grid ──────────────────────────────────────────────────────────── */
-.kpi-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-    margin: 1em 0;
-}
-.kpi-card {
-    background: #111118;
-    border: 1px solid #1e1e2e;
-    border-radius: 12px;
-    padding: 1em 0.8em;
-    text-align: center;
-}
-.kpi-value {
-    font-size: 1.8em;
-    font-weight: 800;
-    color: #1DB954;
-    line-height: 1;
-}
-.kpi-value-blue { color: #0F62FE; }
-.kpi-value-gray { color: #888; }
-.kpi-label {
-    font-size: 0.68em;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #666;
-    margin-top: 4px;
-}
-.kpi-unit {
-    font-size: 0.72em;
-    color: #444;
-    margin-top: 1px;
-}
-
-/* ── Score bar ─────────────────────────────────────────────────────────── */
-.score-bar-label {
-    font-size: 0.75em;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #666;
-    margin-bottom: 4px;
-}
-.score-bar-wrap {
-    background: #1a1a2e;
-    border-radius: 8px;
-    height: 12px;
-    overflow: hidden;
-}
-.score-bar-fill {
-    height: 100%;
-    border-radius: 8px;
-    background: linear-gradient(90deg, #1DB954, #17a349);
-    transition: width 0.6s ease;
-}
-
-/* ── Confidence note ───────────────────────────────────────────────────── */
-.conf-note {
-    font-size: 0.8em;
-    color: #666;
-    background: #0d0d18;
-    border: 1px solid #1a1a28;
-    border-radius: 8px;
-    padding: 0.7em 1em;
-    margin-top: 0.8em;
-    line-height: 1.5;
-}
-.conf-note strong { color: #aaa; }
-
-/* ── Placeholder card (before predict) ─────────────────────────────────── */
-.placeholder-card {
-    background: #0d0d18;
-    border: 1px dashed #252535;
-    border-radius: 14px;
-    padding: 2em 1.5em;
-    text-align: center;
-    color: #555;
-    margin-top: 0.5em;
-}
-.placeholder-icon { font-size: 2.5em; margin-bottom: 0.3em; }
-.placeholder-text { font-size: 0.9em; color: #555; }
-.guide-table-wrap {
-    margin-top: 1.2em;
-    border: 1px solid #1a1a2e;
-    border-radius: 10px;
-    overflow: hidden;
-    font-size: 0.82em;
-}
-.guide-table-wrap table {
-    width: 100%;
-    border-collapse: collapse;
-    color: #aaa;
-}
-.guide-table-wrap th {
-    background: #111118;
-    color: #666;
-    text-transform: uppercase;
-    font-size: 0.75em;
-    letter-spacing: 0.8px;
-    padding: 8px 12px;
-    border-bottom: 1px solid #1e1e2e;
-    text-align: left;
-}
-.guide-table-wrap td {
-    padding: 7px 12px;
-    border-bottom: 1px solid #131320;
-}
-.guide-table-wrap tr:nth-child(even) td { background: #0d0d18; }
-.guide-table-wrap tr:last-child td { border-bottom: none; }
-.guide-table-wrap td:first-child { color: #1DB954; font-weight: 600; }
-
-/* ── EDA dashboard ─────────────────────────────────────────────────────── */
-.eda-section-header {
-    font-size: 0.78em;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: #0F62FE;
-    border-left: 3px solid #0F62FE;
-    padding-left: 0.7em;
-    margin: 1.5em 0 0.8em;
-}
-.eda-intro {
-    background: #0d0d18;
-    border: 1px solid #1a1a2e;
-    border-radius: 10px;
-    padding: 1em 1.3em;
-    font-size: 0.88em;
-    color: #888;
-    margin-bottom: 1.2em;
-    line-height: 1.6;
-}
-.eda-caption {
-    font-size: 0.78em;
-    color: #555;
-    text-align: center;
-    margin-top: 4px;
-    padding: 0 0.5em 0.5em;
-    font-style: italic;
-}
-.img-wrap {
-    border: 1px solid #1a1a2e;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 6px 24px rgba(0,0,0,0.4);
-    margin-bottom: 0.3em;
-}
-
-/* ── About tab ─────────────────────────────────────────────────────────── */
-.about-section {
-    font-size: 0.78em;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: #1DB954;
-    border-left: 3px solid #1DB954;
-    padding-left: 0.7em;
-    margin: 1.5em 0 0.8em;
-}
-.arch-block {
-    background: #0d0d18;
-    border: 1px solid #1e1e2e;
-    border-radius: 10px;
-    padding: 1.2em 1.5em;
-    font-family: 'Courier New', monospace;
-    font-size: 0.82em;
-    color: #a0a0c0;
-    line-height: 1.8;
-    overflow-x: auto;
-}
-.arch-phase {
-    color: #1DB954;
-    font-weight: 700;
-    font-size: 0.85em;
-    letter-spacing: 0.5px;
-}
-.arch-arrow { color: #0F62FE; }
-.about-table-wrap {
-    border: 1px solid #1a1a2e;
-    border-radius: 10px;
-    overflow: hidden;
-    font-size: 0.85em;
-    margin: 0.5em 0 1em;
-}
-.about-table-wrap table {
-    width: 100%;
-    border-collapse: collapse;
-    color: #aaa;
-}
-.about-table-wrap th {
-    background: #111118;
-    color: #666;
-    text-transform: uppercase;
-    font-size: 0.72em;
-    letter-spacing: 0.8px;
-    padding: 9px 14px;
-    border-bottom: 1px solid #1e1e2e;
-    text-align: left;
-}
-.about-table-wrap td {
-    padding: 8px 14px;
-    border-bottom: 1px solid #131320;
-}
-.about-table-wrap tr:nth-child(even) td { background: #0d0d18; }
-.about-table-wrap tr:last-child td { border-bottom: none; }
-.about-table-wrap td:first-child { color: #E0E0E0; font-weight: 500; }
-.about-table-wrap td code {
-    background: #1a1a2e;
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-size: 0.9em;
-    color: #1DB954;
-}
-.student-box {
-    background: linear-gradient(135deg, rgba(15,98,254,0.08), rgba(29,185,84,0.06));
-    border: 1px solid #1e2e3e;
-    border-radius: 12px;
-    padding: 1.2em 1.5em;
-    margin-top: 1.5em;
-    font-size: 0.85em;
-}
-.student-box .row { display: flex; gap: 1em; margin: 4px 0; }
-.student-box .lbl { color: #555; width: 80px; flex-shrink: 0; }
-.student-box .val { color: #C0C0C0; }
-.url-chip {
-    display: inline-block;
-    background: #0d0d18;
-    border: 1px solid #1e1e2e;
-    border-radius: 6px;
-    padding: 3px 10px;
-    font-family: monospace;
-    font-size: 0.8em;
-    color: #888;
-    margin: 2px 0;
-}
-
-/* ── Header gradient title ─────────────────────────────────────────────── */
-.app-title {
-    font-size: 2.4em;
-    font-weight: 900;
-    background: linear-gradient(90deg, #1DB954 0%, #0F62FE 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: -0.5px;
-    line-height: 1.1;
-    margin-bottom: 0.1em;
-}
-.app-tagline {
-    color: #555;
-    font-size: 0.95em;
-    margin-bottom: 0.6em;
-    letter-spacing: 0.3px;
-}
-.header-divider {
+.app-title {{
+    font-size: 2.4em; font-weight: 900;
+    background: linear-gradient(90deg,#1DB954 0%,#0F62FE 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; letter-spacing: -0.5px; line-height: 1.1; margin-bottom: 0.1em;
+}}
+.app-tagline {{ color: {t['text_dim']}; font-size: 0.95em; margin-bottom: 0.6em; letter-spacing: 0.3px; }}
+.header-divider {{
     height: 1px;
-    background: linear-gradient(90deg, #1DB954 0%, #0F62FE 50%, transparent 100%);
-    margin: 0.8em 0 1.4em;
-    border: none;
-}
-.backend-error {
-    background: rgba(255,60,60,0.08);
-    border: 1px solid rgba(255,60,60,0.3);
-    border-radius: 10px;
-    padding: 0.9em 1.2em;
-    font-size: 0.88em;
-    color: #ff8080;
-    margin-bottom: 1em;
-}
+    background: linear-gradient(90deg,#1DB954 0%,#0F62FE 50%,transparent 100%);
+    margin: 0.8em 0 1.4em; border: none;
+}}
+.backend-error {{
+    background: {t['error_bg']}; border: 1px solid {t['error_border']};
+    border-radius: 10px; padding: 0.9em 1.2em;
+    font-size: 0.88em; color: {t['error_text']}; margin-bottom: 1em;
+}}
+.section-label {{
+    font-size: 0.72em; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.2px; color: #1DB954; border-left: 3px solid #1DB954;
+    padding-left: 0.6em; margin-bottom: 0.8em; margin-top: 0.2em;
+}}
+.result-popular {{
+    background: {t['pop_bg']}; border: 1px solid {t['pop_bdr']};
+    border-radius: 14px; padding: 1.4em 1.6em; margin-bottom: 1.2em;
+    display: flex; align-items: center; gap: 1em; box-shadow: {t['pop_glow']};
+}}
+.result-not-popular {{
+    background: {t['nop_bg']}; border: 1px solid {t['nop_bdr']};
+    border-radius: 14px; padding: 1.4em 1.6em; margin-bottom: 1.2em;
+    display: flex; align-items: center; gap: 1em;
+}}
+.result-icon {{ font-size: 2.4em; }}
+.result-verdict {{ font-size: 1.4em; font-weight: 800; letter-spacing: 0.5px; color: {t['result_text']}; }}
+.result-sub {{ font-size: 0.85em; color: {t['result_sub']}; margin-top: 2px; }}
+.popular-verdict {{ color: #1DB954; }}
+.notpopular-verdict {{ color: #FF9800; }}
+.kpi-grid {{ display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 1em 0; }}
+.kpi-card {{
+    background: {t['kpi_bg']}; border: 1px solid {t['border']};
+    border-radius: 12px; padding: 1em 0.8em; text-align: center;
+}}
+.kpi-value      {{ font-size: 1.8em; font-weight: 800; color: #1DB954; line-height: 1; }}
+.kpi-value-blue {{ color: #0F62FE; }}
+.kpi-value-gray {{ color: {t['text_muted']}; }}
+.kpi-label      {{ font-size: 0.68em; text-transform: uppercase; letter-spacing: 1px; color: {t['text_dim']}; margin-top: 4px; }}
+.kpi-unit       {{ font-size: 0.72em; color: {t['text_edim']}; margin-top: 1px; }}
+.score-bar-label {{ font-size: 0.75em; text-transform: uppercase; letter-spacing: 1px; color: {t['text_dim']}; margin-bottom: 4px; }}
+.score-bar-wrap {{ background: {t['score_bg']}; border-radius: 8px; height: 12px; overflow: hidden; }}
+.score-bar-fill {{
+    height: 100%; border-radius: 8px;
+    background: linear-gradient(90deg,#1DB954,#17a349); transition: width 0.6s ease;
+}}
+.conf-note {{
+    font-size: 0.8em; color: {t['conf_text']}; background: {t['conf_bg']};
+    border: 1px solid {t['conf_border']}; border-radius: 8px;
+    padding: 0.7em 1em; margin-top: 0.8em; line-height: 1.5;
+}}
+.conf-note strong {{ color: {t['conf_strong']}; }}
+.placeholder-card {{
+    background: {t['bg_card2']}; border: 1px dashed {t['input_border']};
+    border-radius: 14px; padding: 2em 1.5em;
+    text-align: center; color: {t['text_vdim']}; margin-top: 0.5em;
+}}
+.placeholder-icon {{ font-size: 2.5em; margin-bottom: 0.3em; }}
+.placeholder-text {{ font-size: 0.9em; color: {t['text_vdim']}; }}
+.guide-table-wrap {{
+    margin-top: 1.2em; border: 1px solid {t['border']};
+    border-radius: 10px; overflow: hidden; font-size: 0.82em;
+}}
+.guide-table-wrap table {{ width: 100%; border-collapse: collapse; color: {t['table_text']}; }}
+.guide-table-wrap th {{
+    background: {t['table_hdr']}; color: {t['text_dim']};
+    text-transform: uppercase; font-size: 0.75em; letter-spacing: 0.8px;
+    padding: 8px 12px; border-bottom: 1px solid {t['border']}; text-align: left;
+}}
+.guide-table-wrap td {{ padding: 7px 12px; border-bottom: 1px solid {t['table_row_bdr']}; }}
+.guide-table-wrap tr:nth-child(even) td {{ background: {t['table_alt']}; }}
+.guide-table-wrap tr:last-child td {{ border-bottom: none; }}
+.guide-table-wrap td:first-child {{ color: #1DB954; font-weight: 600; }}
+.eda-section-header {{
+    font-size: 0.78em; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.2px; color: #0F62FE; border-left: 3px solid #0F62FE;
+    padding-left: 0.7em; margin: 1.5em 0 0.8em;
+}}
+.eda-intro {{
+    background: {t['eda_intro_bg']}; border: 1px solid {t['border']};
+    border-radius: 10px; padding: 1em 1.3em; font-size: 0.88em;
+    color: {t['text_muted']}; margin-bottom: 1.2em; line-height: 1.6;
+}}
+.eda-caption {{
+    font-size: 0.78em; color: {t['text_vdim']}; text-align: center;
+    margin-top: 4px; padding: 0 0.5em 0.5em; font-style: italic;
+}}
+.img-wrap {{
+    border: 1px solid {t['eda_img_bdr']}; border-radius: 10px; overflow: hidden;
+    box-shadow: 0 6px 24px {t['img_shadow']}; margin-bottom: 0.3em;
+}}
+.about-section {{
+    font-size: 0.78em; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.2px; color: #1DB954; border-left: 3px solid #1DB954;
+    padding-left: 0.7em; margin: 1.5em 0 0.8em;
+}}
+.arch-block {{
+    background: {t['arch_bg']}; border: 1px solid {t['border']}; border-radius: 10px;
+    padding: 1.2em 1.5em; font-family: 'Courier New', monospace;
+    font-size: 0.82em; color: {t['arch_text']}; line-height: 1.8; overflow-x: auto;
+}}
+.arch-phase {{ color: #1DB954; font-weight: 700; font-size: 0.85em; letter-spacing: 0.5px; }}
+.arch-arrow {{ color: #0F62FE; }}
+.arch-sep   {{ color: {t['arch_sep']}; }}
+.about-table-wrap {{
+    border: 1px solid {t['border']}; border-radius: 10px; overflow: hidden;
+    font-size: 0.85em; margin: 0.5em 0 1em;
+}}
+.about-table-wrap table {{ width: 100%; border-collapse: collapse; color: {t['table_text']}; }}
+.about-table-wrap th {{
+    background: {t['table_hdr']}; color: {t['text_dim']}; text-transform: uppercase;
+    font-size: 0.72em; letter-spacing: 0.8px; padding: 9px 14px;
+    border-bottom: 1px solid {t['border']}; text-align: left;
+}}
+.about-table-wrap td {{ padding: 8px 14px; border-bottom: 1px solid {t['table_row_bdr']}; }}
+.about-table-wrap tr:nth-child(even) td {{ background: {t['table_alt']}; }}
+.about-table-wrap tr:last-child td {{ border-bottom: none; }}
+.about-table-wrap td:first-child {{ color: {t['text']}; font-weight: 500; }}
+.about-table-wrap td code {{
+    background: {t['code_bg']}; padding: 1px 6px;
+    border-radius: 4px; font-size: 0.9em; color: #1DB954;
+}}
+.student-box {{
+    background: {t['student_bg']}; border: 1px solid {t['student_border']};
+    border-radius: 12px; padding: 1.2em 1.5em; margin-top: 1.5em; font-size: 0.85em;
+}}
+.student-box .row {{ display: flex; gap: 1em; margin: 4px 0; }}
+.student-box .lbl {{ color: {t['text_vdim']}; width: 80px; flex-shrink: 0; }}
+.student-box .val {{ color: {t['text_sec']}; }}
+.url-chip {{
+    display: inline-block; background: {t['chip_bg']}; border: 1px solid {t['border']};
+    border-radius: 6px; padding: 3px 10px; font-family: monospace;
+    font-size: 0.8em; color: {t['text_muted']}; margin: 2px 0;
+}}
 </style>
-""", unsafe_allow_html=True)
+"""
+
+
+# Inject theme CSS
+st.markdown(_build_css(_DARK if st.session_state.dark_mode else _LIGHT), unsafe_allow_html=True)
 
 # =============================================================================
-# HEADER
+# HEADER — title left, theme toggle right
 # =============================================================================
-st.markdown("""
-<div class="app-title">🎵 Spotify Popularity Predictor</div>
-<div class="app-tagline">Predict a song's commercial success from its audio DNA — powered by XGBoost</div>
-<div class="header-divider"></div>
-""", unsafe_allow_html=True)
+hdr_col, btn_col = st.columns([7, 1])
+
+with hdr_col:
+    st.markdown("""
+    <div class="app-title">🎵 Spotify Popularity Predictor</div>
+    <div class="app-tagline">Predict a song's commercial success from its audio DNA — powered by XGBoost</div>
+    <div class="header-divider"></div>
+    """, unsafe_allow_html=True)
+
+with btn_col:
+    st.markdown("<div style='padding-top:0.4em'></div>", unsafe_allow_html=True)
+    toggle_label = "☀️ Light" if st.session_state.dark_mode else "🌙 Dark"
+    if st.button(toggle_label, key="theme_toggle", help="Switch between dark and light theme"):
+        st.session_state.dark_mode = not st.session_state.dark_mode
+        st.rerun()
 
 # =============================================================================
 # BACKEND HEALTH CHECK
@@ -967,7 +736,7 @@ with tab_eda:
 
     st.markdown("""
     <div class="eda-intro">
-        <strong style="color:#C0C0C0;">What is EDA?</strong> Exploratory Data Analysis is the step we do
+        <strong>What is EDA?</strong> Exploratory Data Analysis is the step we do
         <em>before</em> any modelling — it means looking at the raw data to understand its shape,
         spot problems, and find patterns. All charts below were generated by <code>train.py</code>
         directly from the Spotify dataset. Nothing was changed before plotting — you see the data exactly as
@@ -1067,10 +836,10 @@ with tab_about:
     st.markdown("""
     <div class="arch-block">
         <span class="arch-phase">OFFLINE</span> &mdash; runs once on your machine<br>
-        <span style="color:#444;">&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;</span><br>
+        <span class="arch-sep">&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;</span><br>
         dataset.csv <span class="arch-arrow">&rarr;</span> train.py <span class="arch-arrow">&rarr;</span> EDA plots + classifier.pkl + regressor.pkl<br><br>
         <span class="arch-phase">RUNTIME</span> &mdash; this app, always on<br>
-        <span style="color:#444;">&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;</span><br>
+        <span class="arch-sep">&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;</span><br>
         You <span class="arch-arrow">&rarr;</span> Streamlit (this page) <span class="arch-arrow">&rarr;</span> HTTP POST <span class="arch-arrow">&rarr;</span> FastAPI <span class="arch-arrow">&rarr;</span> .pkl <span class="arch-arrow">&rarr;</span> prediction
     </div>
     """, unsafe_allow_html=True)
