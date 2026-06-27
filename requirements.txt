@@ -1,0 +1,31 @@
+# ── Data handling ─────────────────────────────────────────────────────────────
+pandas>=2.1.0          # load CSV, clean data, build DataFrames
+numpy>=1.26.0          # fast numeric arrays; pandas and scikit-learn both need it
+
+# ── Visualisation (EDA plots) ─────────────────────────────────────────────────
+matplotlib>=3.8.0      # base plotting library — saves PNG files
+seaborn>=0.13.0        # built on matplotlib; makes nicer statistical charts with less code
+
+# ── Machine learning ──────────────────────────────────────────────────────────
+scikit-learn>=1.4.0    # Pipeline, scalers, Logistic/Ridge/DecisionTree, DummyClassifier,
+                       # train_test_split, cross_val_score, metrics, RFE — the whole toolkit
+xgboost>=2.0.0         # gradient boosting model (top of the model ladder)
+joblib>=1.3.0          # saves and loads .pkl files (pickle alternative; already used
+                       # internally by scikit-learn, listed here to be explicit)
+
+# ── FastAPI backend (api.py) ──────────────────────────────────────────────────
+fastapi>=0.110.0       # web framework that turns Python functions into REST endpoints
+uvicorn[standard]>=0.29.0  # ASGI server that runs FastAPI; [standard] adds websocket support
+pydantic>=2.0.0        # data validation — defines the shape of the JSON request/response
+                       # FastAPI uses pydantic internally for its request models
+
+# ── Streamlit frontend (app.py) ───────────────────────────────────────────────
+streamlit>=1.33.0      # turns a Python script into an interactive web UI
+requests>=2.31.0       # Streamlit calls FastAPI over HTTP; requests handles those calls
+
+# ── Deployment helpers ────────────────────────────────────────────────────────
+python-dotenv>=1.0.0   # reads .env files (stores API_URL etc. without hardcoding)
+
+# ── Quarto report (D1) ───────────────────────────────────────────────────────
+jupyter>=1.0.0         # Quarto uses the Jupyter kernel to execute Python code cells
+ipykernel>=6.29.0      # the actual Python kernel Jupyter/Quarto runs code inside

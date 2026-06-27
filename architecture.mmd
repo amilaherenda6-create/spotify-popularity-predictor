@@ -1,0 +1,81 @@
+flowchart TD
+    subgraph OFFLINE["⚙️  OFFLINE — Training Phase  (runs once on your machine)"]
+        direction TB
+        A[("📄 dataset.csv\n114k tracks · 21 features\nKaggle — Maharshi Pandya")]
+
+        subgraph EDA["Step 1 · Exploratory Data Analysis"]
+            B1["Distribution plots\n(popularity, tempo, energy …)"]
+            B2["Correlation heatmap"]
+            B3["Outlier detection\n(boxplots, IQR)"]
+            B4["Feature–target plots"]
+        end
+
+        C["Step 2 · Data Cleaning\nDrop duplicates · fill / drop missing values\nEncode genres · cap outliers"]
+
+        D["Step 3 · Feature Engineering\nRatios · interactions · binning\nPolynomial terms"]
+
+        E["Step 4 · Stratified Split\ntrain 70 % · val 15 % · test 15 %\nrandom_state = 42"]
+
+        subgraph PIPE["Step 5 · scikit-learn Pipeline  (no leakage — fitted on train only)"]
+            F1["StandardScaler"]
+            F2["Feature Selection\n(RFE / Lasso / Variance Threshold)"]
+        end
+
+        subgraph LADDER["Step 6 · Model Ladder"]
+            direction LR
+            G1["Dummy\nBaseline"]
+            G2["Logistic Reg /\nRidge Reg"]
+            G3["Decision\nTree"]
+            G4["XGBoost\n+ CV + tuning"]
+            G1 --> G2 --> G3 --> G4
+        end
+
+        H["Step 7 · Leaderboard Evaluation\nClassification: Accuracy · F1 · ROC-AUC · Confusion matrix\nRegression: R² · MAE · RMSE · Predicted vs Actual plot"]
+
+        PKL1[("💾 models/classifier.pkl")]
+        PKL2[("💾 models/regressor.pkl")]
+        PLOTS[("🖼️ eda_plots/*.png")]
+
+        A --> EDA
+        EDA --> PLOTS
+        EDA --> C --> D --> E --> PIPE --> LADDER --> H
+        H --> PKL1
+        H --> PKL2
+    end
+
+    subgraph RUNTIME["🌐  RUNTIME — Inference Phase  (live app · always on)"]
+        direction TB
+        U["👤 User\n(browser)"]
+
+        subgraph FRONT["Streamlit  ·  app/app.py  ·  Streamlit Cloud"]
+            S1["Sliders for audio features\n(danceability · energy · tempo\nloudness · speechiness …)"]
+            S2["🎵 Predictor tab"]
+            S3["📊 EDA Dashboard tab"]
+        end
+
+        subgraph BACK["FastAPI  ·  app/api.py  ·  Render / Railway"]
+            API1["POST /predict\naccepts JSON with audio features"]
+            API2["Loads .pkl once at startup\n(not on every request)"]
+            API3["Pipeline.predict() ×2"]
+        end
+
+        RES["Result displayed in Streamlit\n✅ Popular: Yes / No\n🎯 Predicted score: 0 – 100"]
+
+        U --> S1 --> S2
+        S2 -->|"HTTP POST /predict\n{ danceability: 0.8, energy: 0.7 … }"| API1
+        API1 --> API2 --> API3
+        API3 -->|"{ popular: true, score: 74.3 }"| RES
+        RES --> U
+        PKL1 & PKL2 -.->|"loaded at startup"| API2
+    end
+
+    style OFFLINE fill:#e8f4f8,stroke:#2196F3,stroke-width:2px,color:#000
+    style RUNTIME fill:#f0f8e8,stroke:#4CAF50,stroke-width:2px,color:#000
+    style EDA fill:#dbeafe,stroke:#3b82f6,stroke-width:1px,color:#000
+    style PIPE fill:#dbeafe,stroke:#3b82f6,stroke-width:1px,color:#000
+    style LADDER fill:#dbeafe,stroke:#3b82f6,stroke-width:1px,color:#000
+    style FRONT fill:#dcfce7,stroke:#16a34a,stroke-width:1px,color:#000
+    style BACK fill:#dcfce7,stroke:#16a34a,stroke-width:1px,color:#000
+    style PKL1 fill:#fef9c3,stroke:#ca8a04,color:#000
+    style PKL2 fill:#fef9c3,stroke:#ca8a04,color:#000
+    style PLOTS fill:#fef9c3,stroke:#ca8a04,color:#000
