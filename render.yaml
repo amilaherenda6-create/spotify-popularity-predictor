@@ -1,0 +1,29 @@
+# render.yaml — Render.com deployment configuration
+# Defines the FastAPI backend as a web service.
+# Render reads this file automatically when you connect the GitHub repo.
+#
+# How Render uses this:
+#   1. Clones your GitHub repo
+#   2. Runs buildCommand  (installs Python packages)
+#   3. Runs startCommand  (starts the web server)
+#   4. Routes traffic to $PORT (Render assigns the port automatically)
+#   5. Calls /health every 30 s — if it returns non-200, Render restarts the service
+
+services:
+  - type: web
+    name: spotify-popularity-api
+    runtime: python
+    # Python version — must match what you developed on locally
+    pythonVersion: "3.11"
+    # Install dependencies
+    buildCommand: pip install -r requirements.txt
+    # Start the FastAPI server
+    # --host 0.0.0.0  → listen on all interfaces (required on Render)
+    # --port $PORT    → Render injects the port number as an env variable
+    startCommand: uvicorn app.api:app --host 0.0.0.0 --port $PORT
+    # Health check — Render uses this to know the service is ready
+    healthCheckPath: /health
+    # Environment variables available inside the running service
+    envVars:
+      - key: PYTHONIOENCODING
+        value: utf-8

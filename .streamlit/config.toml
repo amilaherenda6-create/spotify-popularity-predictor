@@ -1,0 +1,14 @@
+# .streamlit/config.toml
+# Streamlit app configuration — committed to Git so Streamlit Cloud picks it up.
+
+[server]
+headless = true          # required for cloud deployment (no browser on the server)
+enableCORS = false       # CORS is handled by the FastAPI backend, not Streamlit
+enableXsrfProtection = false
+
+[theme]
+primaryColor = "#1DB954"           # Spotify green
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F0F2F6"
+textColor = "#191414"              # Spotify black
+font = "sans serif"
