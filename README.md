@@ -1,184 +1,231 @@
-# Spotify Popularity Predictor
+# 🎵 Spotify Popularity Predictor
 
-End-to-end machine learning project that predicts whether a Spotify track will be popular — and by how much — using its audio features alone.
+> End-to-end machine learning project — predicts whether a song will be popular on Spotify and estimates its exact popularity score, using audio features alone.
 
-**Student:** Amila Herenda  
-**Course:** University ML Course — Phase 2 Submission  
-**Dataset:** [Spotify Tracks Dataset](https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset) (Maharshi Pandya, Kaggle 2022)
+[![Live App](https://img.shields.io/badge/Live%20App-Streamlit%20Cloud-1DB954?style=for-the-badge&logo=streamlit)](https://spotify-popularity-predictor-dkb249nsp7axa3hkxdpkht.streamlit.app)
+[![API](https://img.shields.io/badge/API-Render-0066FF?style=for-the-badge&logo=render)](https://spotify-popularity-predictor-5bmz.onrender.com/docs)
+[![GitHub](https://img.shields.io/badge/Source-GitHub-181717?style=for-the-badge&logo=github)](https://github.com/amilaherenda6/spotify-popularity-predictor)
 
 ---
 
-## Live App
+| | |
+|---|---|
+| **Student** | Herend Amila |
+| **Course** | Modelling in Advanced Data Analytics — FELU |
+| **Professors** | <span style="color:#0F62FE">**Uroš Godnov**</span> · <span style="color:#0F62FE">**Aleš Gorišek**</span> |
+| **Date** | 28.06.2026 |
+| **Dataset** | [Spotify Tracks Dataset](https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset) — Maharshi Pandya, Kaggle 2022 |
+
+---
+
+## 🚀 Live Deployment
 
 | Component | URL |
 |-----------|-----|
-| Streamlit frontend | _TODO: add Streamlit Cloud link after deployment_ |
-| FastAPI backend | _TODO: add Render/Railway link after deployment_ |
-| API docs (auto-generated) | `<backend-url>/docs` |
+| **Streamlit app** (frontend) | https://spotify-popularity-predictor-dkb249nsp7axa3hkxdpkht.streamlit.app |
+| **FastAPI backend** | https://spotify-popularity-predictor-5bmz.onrender.com |
+| **API docs** (Swagger UI) | https://spotify-popularity-predictor-5bmz.onrender.com/docs |
+
+> **Note:** The Render backend runs on the free tier and may take ~30 seconds to wake up after inactivity. Subsequent requests are instant.
 
 ---
 
-## What this project does
+## What This Project Does
 
-Given audio features of a song (tempo, energy, danceability, etc.), the app answers two questions:
+Given 15 audio features of any song (tempo, energy, danceability, loudness, etc.), the app answers two questions simultaneously:
 
-1. **Classification** — Will this song be popular? (Yes / No, threshold: popularity ≥ 70)
-2. **Regression** — What is the predicted popularity score? (0–100)
+| Task | Question | Method |
+|------|----------|--------|
+| **Classification** | Will this song be popular? (Yes / No) | popularity ≥ 70 → label 1 |
+| **Regression** | What is the predicted popularity score? | predicts 0–100 directly |
 
-The app loads pre-trained models from `.pkl` files. It never retrains at runtime.
+The app loads pre-trained models from `.pkl` files at startup. **It never retrains at runtime.**
 
 ---
 
 ## Architecture
 
 ```
-OFFLINE (runs once on your machine)
-────────────────────────────────────
-dataset.csv → train.py → EDA plots + leaderboard + classifier.pkl + regressor.pkl
+OFFLINE — Training Phase  (runs once on your machine)
+──────────────────────────────────────────────────────────────
+dataset.csv
+    → EDA (6 charts saved to eda_plots/)
+    → Data cleaning (drop duplicates, encode genres, drop ID columns)
+    → Feature engineering (5 new features: ratios, interactions)
+    → Stratified 80/20 train/test split  (random_state=42)
+    → scikit-learn Pipeline (RobustScaler + OrdinalEncoder — no leakage)
+    → Model ladder: Dummy → Logistic/Ridge → Decision Tree → XGBoost + CV
+    → Leaderboard evaluation on held-out test set
+    → classifier.pkl + regressor.pkl saved to models/
 
-RUNTIME (live app, always on)
-────────────────────────────────────
-User → Streamlit (app.py) → HTTP POST → FastAPI (api.py) → loads .pkl → returns prediction
+RUNTIME — Inference Phase  (live app, always on)
+──────────────────────────────────────────────────────────────
+User (browser)
+    → Streamlit app.py  (sliders for all audio features)
+    → HTTP POST /predict  (JSON payload)
+    → FastAPI api.py  (loads .pkl once at startup)
+    → Pipeline.predict()  (preprocessing + model in one call)
+    → JSON response  →  Streamlit displays result
 ```
 
-See `architecture.mmd` for the full Mermaid diagram.
+See [`architecture.mmd`](architecture.mmd) for the full Mermaid diagram.
 
 ---
 
-## Project structure
+## Project Structure
 
 ```
 spotify-popularity-predictor/
-├── data/
-│   └── dataset.csv          # download from Kaggle (see below) — not in Git
-├── models/
-│   ├── classifier.pkl        # saved after running train.py
-│   └── regressor.pkl         # saved after running train.py
-├── eda_plots/                # PNG charts saved by train.py
-├── reports/
-│   ├── analysis_report.qmd   # Quarto analysis report (D1)
-│   └── slides.qmd            # Quarto reveal.js slides (D4)
 ├── app/
-│   ├── app.py                # Streamlit frontend
-│   └── api.py                # FastAPI backend
-├── train.py                  # offline training pipeline
-├── architecture.mmd          # Mermaid architecture diagram
-├── requirements.txt
+│   ├── api.py                    # FastAPI backend — loads .pkl, serves /predict
+│   └── app.py                    # Streamlit frontend — sliders + results + EDA dashboard
+├── data/
+│   └── dataset.csv               # download from Kaggle (not in Git — 20 MB)
+├── eda_plots/                    # 9 PNG charts saved by train.py
+├── models/
+│   ├── classifier.pkl            # fitted XGBoost Pipeline (0.73 MB)
+│   └── regressor.pkl             # fitted XGBoost Pipeline (0.93 MB)
+├── reports/
+│   ├── analysis_report.qmd       # D1 — Quarto analysis report
+│   ├── slides.qmd                # D4 — reveal.js slide deck
+│   ├── ai_workflow_reflection.md # D3 — AI workflow reflection
+│   └── executive_summary.md     # D5 — executive summary
+├── .streamlit/
+│   └── config.toml               # Streamlit theme (Spotify green)
+├── architecture.mmd              # Mermaid architecture diagram
+├── render.yaml                   # Render deployment config
+├── requirements.txt              # all Python dependencies
+├── train.py                      # offline training pipeline (935 lines)
 └── README.md
 ```
 
 ---
 
-## How to reproduce locally
+## How to Reproduce Locally
 
-### 1. Clone the repository
+### 1 — Clone
 
 ```bash
-git clone https://github.com/<your-username>/spotify-popularity-predictor.git
+git clone https://github.com/amilaherenda6/spotify-popularity-predictor.git
 cd spotify-popularity-predictor
 ```
 
-### 2. Create a virtual environment and install dependencies
+### 2 — Install dependencies
 
 ```bash
 python -m venv venv
-# Windows:
+
+# Windows
 venv\Scripts\activate
-# Mac/Linux:
+
+# Mac / Linux
 source venv/bin/activate
 
 pip install -r requirements.txt
 ```
 
-### 3. Download the dataset
+### 3 — Download the dataset
 
 1. Go to https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset
 2. Download `dataset.csv`
 3. Place it at `data/dataset.csv`
 
-### 4. Run the training pipeline
+> The `.pkl` model files are already in the repository — you can skip training and go straight to step 5 if you just want to run the app.
+
+### 4 — Run the training pipeline (optional — models already in repo)
 
 ```bash
 python train.py
 ```
 
 This will:
-- Run full EDA and save charts to `eda_plots/`
-- Train all models (Dummy → Logistic/Ridge → Decision Tree → XGBoost)
-- Print a leaderboard table to the console
-- Save `models/classifier.pkl` and `models/regressor.pkl`
+- Run full EDA and save 9 charts to `eda_plots/`
+- Train all 8 models (4 classifiers + 4 regressors)
+- Print the leaderboard to the console
+- Overwrite `models/classifier.pkl` and `models/regressor.pkl`
 
-### 5. Start the FastAPI backend
+Estimated runtime: **8–12 minutes** (XGBoost cross-validation is the slow step).
+
+### 5 — Start the FastAPI backend
 
 ```bash
+# If uvicorn is on your PATH:
 uvicorn app.api:app --reload --port 8000
+
+# If not (Windows common issue):
+python -m uvicorn app.api:app --reload --port 8000
 ```
 
-API docs available at: http://localhost:8000/docs
+Interactive API docs: http://localhost:8000/docs
 
-### 6. Start the Streamlit frontend
+### 6 — Start the Streamlit frontend
 
-In a second terminal (with venv activated):
+Open a second terminal (with venv activated):
 
 ```bash
-streamlit run app/app.py
+python -m streamlit run app/app.py
 ```
 
-App opens at: http://localhost:8501
+App opens automatically at: http://localhost:8501
 
 ---
 
-## Models trained
+## Key Results
 
-| Task | Baseline | Linear | Decision Tree | XGBoost |
-|------|----------|--------|---------------|---------|
-| Classification | DummyClassifier | Logistic Regression | DecisionTreeClassifier | XGBClassifier |
-| Regression | DummyRegressor | Ridge Regression | DecisionTreeRegressor | XGBRegressor |
+**Dataset:** 106,907 tracks (after deduplication) | Train: 85,525 | Test: 21,382 | `random_state=42`
 
-All models use `random_state=42`. Preprocessing (scaling, encoding) is fitted on training data only, inside a scikit-learn `Pipeline`, to prevent data leakage.
-
----
-
-## Key results
-
-Dataset: 106,907 tracks after deduplication | Train: 85,525 | Test: 21,382 | Positive class: 5.1 %
-
-**Classification** (target: popularity ≥ 70)
+**Classification** — target: popularity ≥ 70 → popular (only 5.1% of songs qualify)
 
 | Model | Accuracy | Precision | Recall | F1 | ROC-AUC |
-|-------|----------|-----------|--------|----|---------|
-| DummyClassifier | 0.949 | 0.000 | 0.000 | 0.000 | 0.500 |
+|-------|:--------:|:---------:|:------:|:--:|:-------:|
+| DummyClassifier (baseline) | 0.949 | 0.000 | 0.000 | 0.000 | 0.500 |
 | Logistic Regression | 0.579 | 0.082 | 0.711 | 0.147 | 0.712 |
-| Decision Tree | 0.491 | 0.083 | 0.895 | 0.152 | 0.722 |
-| **XGBoost** | **0.899** | **0.306** | **0.764** | **0.437** | **0.920** |
+| Decision Tree (depth=6) | 0.491 | 0.083 | 0.895 | 0.152 | 0.722 |
+| **XGBoost** ✓ | **0.899** | **0.306** | **0.764** | **0.437** | **0.920** |
 
-**Regression** (target: exact popularity score 0–100)
+**Regression** — target: exact popularity score (0–100)
 
 | Model | R² | MAE | RMSE |
-|-------|----|-----|------|
-| DummyRegressor | 0.000 | 17.8 | 21.2 |
+|-------|:--:|:---:|:----:|
+| DummyRegressor (baseline) | 0.000 | 17.8 | 21.2 |
 | Ridge Regression | 0.045 | 17.0 | 20.8 |
-| Decision Tree | 0.092 | 16.2 | 20.2 |
-| **XGBoost** | **0.380** | **12.2** | **16.7** |
+| Decision Tree (depth=6) | 0.092 | 16.2 | 20.2 |
+| **XGBoost** ✓ | **0.380** | **12.2** | **16.7** |
 
-XGBoost wins both tasks. ROC-AUC of 0.92 means the classifier ranks popular songs well above unpopular ones. R² of 0.38 means audio features explain ~38 % of popularity variance — the rest is artist fame, marketing, and timing, which audio cannot capture.
-
----
-
-## Reproducibility
-
-- `random_state=42` used in every split, model, and cross-validation call
-- All preprocessing steps fitted inside `Pipeline` on training data only
-- Exact package versions: run `pip freeze` after installing `requirements.txt`
+XGBoost wins both tasks. ROC-AUC of **0.92** shows the classifier reliably separates popular from unpopular songs. R² of **0.38** means audio features explain roughly 38% of popularity variance — the remaining 62% is driven by artist fame, marketing, release timing, and social media, which audio cannot capture.
 
 ---
 
 ## Deliverables
 
-| # | Deliverable | Location |
-|---|-------------|----------|
-| D1 | Reproducible analysis report | `reports/analysis_report.qmd` |
-| D2 | Deployed web app | See Live App links above |
-| D3 | AI-workflow reflection | `reports/ai_reflection.md` |
-| D4 | Presentation slides | `reports/slides.qmd` |
-| D5 | Executive summary | `reports/executive_summary.md` |
+| # | Deliverable | File |
+|---|-------------|------|
+| D1 | Reproducible analysis report (Quarto) | [`reports/analysis_report.qmd`](reports/analysis_report.qmd) |
+| D2 | Deployed web app (Streamlit + FastAPI) | [Live app](https://spotify-popularity-predictor-dkb249nsp7axa3hkxdpkht.streamlit.app) |
+| D3 | AI workflow reflection | [`reports/ai_workflow_reflection.md`](reports/ai_workflow_reflection.md) |
+| D4 | Presentation slides (Quarto reveal.js) | [`reports/slides.qmd`](reports/slides.qmd) |
+| D5 | Executive summary (plain language) | [`reports/executive_summary.md`](reports/executive_summary.md) |
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Data & EDA | pandas, numpy, matplotlib, seaborn |
+| ML pipeline | scikit-learn (Pipeline, ColumnTransformer, RobustScaler, OrdinalEncoder, SelectKBest) |
+| Models | DummyClassifier/Regressor, LogisticRegression, Ridge, DecisionTree, XGBoost |
+| Model persistence | joblib (.pkl files) |
+| Backend API | FastAPI + uvicorn + Pydantic |
+| Frontend | Streamlit |
+| Deployment | Streamlit Cloud (frontend) + Render (backend) |
+| Version control | Git + GitHub |
+
+---
+
+## Reproducibility
+
+- `random_state=42` used in every `train_test_split`, model constructor, and `RandomizedSearchCV` call
+- All preprocessing (scaling, encoding, imputation) fitted inside a scikit-learn `Pipeline` — **no data leakage**
+- `RobustScaler` used instead of `StandardScaler` — robust to the outliers present in `loudness`, `tempo`, and `duration_ms`
+- Models committed to the repository — results are reproducible without re-running `train.py`

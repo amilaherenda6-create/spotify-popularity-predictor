@@ -1,0 +1,358 @@
+---
+title: "Spotify Popularity Predictor"
+subtitle: "Can audio features predict a song's success?"
+author: "Herend Amila"
+date: "28.06.2026"
+format:
+  revealjs:
+    theme: dark
+    slide-number: true
+    transition: slide
+    background-transition: fade
+    highlight-style: monokai
+    code-fold: false
+    footer: "Modelling in Advanced Data Analytics · FELU · 2026"
+    logo: ""
+    css: |
+      .ibm-blue { color: #0F62FE; font-weight: bold; }
+      .highlight { color: #1DB954; font-weight: bold; }
+      .muted { color: #aaaaaa; font-size: 0.85em; }
+      .small { font-size: 0.75em; }
+      table { font-size: 0.75em; }
+      .reveal h2 { color: #1DB954; }
+      .verdict-yes { background: #1a3d1a; border-left: 4px solid #1DB954; padding: 0.5em 1em; border-radius: 4px; }
+      .verdict-no  { background: #3d1a1a; border-left: 4px solid #cc3333; padding: 0.5em 1em; border-radius: 4px; }
+---
+
+## {background-color="#191414"}
+
+<br>
+
+### 🎵 Spotify Popularity Predictor {style="color:#1DB954; font-size:1.8em;"}
+
+**Can audio features predict a song's success?**
+
+<br>
+
+| | |
+|---|---|
+| Student | Herend Amila |
+| Course | Modelling in Advanced Data Analytics |
+| Professors | [Uroš Godnov]{.ibm-blue} · [Aleš Gorišek]{.ibm-blue} |
+| Date | 28.06.2026 |
+| University | FELU — Faculty of Economics Ljubljana |
+
+---
+
+## The Problem {background-color="#1a1a2e"}
+
+> *Every year, millions of songs are uploaded to Spotify. Most disappear into obscurity. A handful become global hits.*
+
+**The questions record labels, producers and artists all ask:**
+
+::: {.incremental}
+- 🎯 **Will this song be a hit?** (Yes / No)
+- 📊 **How popular will it score?** (0–100 scale)
+:::
+
+<br>
+
+**Our approach:** Use only the **audio properties** of the song — no artist name, no label, no marketing budget.
+
+::: {.muted}
+If the sound itself contains enough signal → the model will find it.
+:::
+
+---
+
+## The Data {background-color="#1a1a2e"}
+
+**Spotify Tracks Dataset** — Maharshi Pandya, Kaggle 2022
+
+::: {.columns}
+
+::: {.column width="50%"}
+**Scale**
+
+- 📦 ~114,000 tracks
+- 🎸 114 music genres
+- 📐 21 features per track
+- 📅 Diverse release years
+:::
+
+::: {.column width="50%"}
+**Audio features measured**
+
+| Feature | Meaning |
+|---------|---------|
+| danceability | How suitable for dancing |
+| energy | Intensity and activity |
+| loudness | Overall dB level |
+| valence | Musical positiveness |
+| tempo | Beats per minute |
+| acousticness | Acoustic vs electronic |
+| instrumentalness | Vocals present? |
+| + 8 more | ... |
+:::
+
+:::
+
+::: {.muted}
+Target variable: **popularity** (0–100) — Spotify calculates this from recent play counts
+:::
+
+---
+
+## Our Approach {background-color="#1a1a2e"}
+
+**Two ML tasks, trained in parallel:**
+
+::: {.columns}
+
+::: {.column width="48%"}
+### 🔵 Classification
+*Will this song be popular?*
+
+- Target: popularity **≥ 70** → Popular (1)
+- Target: popularity **< 70** → Not popular (0)
+- Metrics: F1, ROC-AUC
+:::
+
+::: {.column width="48%"}
+### 🟢 Regression
+*What exact score will it get?*
+
+- Target: raw popularity score
+- Range: 0 to 100
+- Metrics: R², RMSE, MAE
+:::
+
+:::
+
+<br>
+
+**Model ladder** — trained in this order:
+
+```
+Dummy baseline  →  Linear model  →  Decision Tree  →  XGBoost + CV tuning
+```
+
+All models use `random_state=42`. Preprocessing inside scikit-learn `Pipeline` — **no data leakage**.
+
+---
+
+## Key EDA Findings {background-color="#1a1a2e"}
+
+::: {.columns}
+
+::: {.column width="55%"}
+**Finding 1 — Severe class imbalance**
+
+Only **5.1%** of songs reach popularity ≥ 70
+
+- 5,465 popular songs
+- 101,442 not popular songs
+- → Accuracy alone is misleading (a model that always says "no" scores 95%!)
+- → We use **F1** and **ROC-AUC** instead
+
+**Finding 2 — Popularity clusters near 0 and 20–40**
+
+Most songs score very low. The distribution is right-skewed with a large spike at 0 (obscure tracks).
+:::
+
+::: {.column width="45%"}
+**Finding 3 — Weak individual correlations**
+
+No single feature strongly predicts popularity. The best correlations:
+
+| Feature | r with popularity |
+|---------|:-----------------:|
+| loudness | +0.13 |
+| energy | +0.09 |
+| acousticness | −0.10 |
+| instrumentalness | −0.12 |
+
+**Finding 4 — Genre matters**
+
+Pop, dance, and hip-hop genres score consistently higher than classical, ambient, or sleep music.
+:::
+
+:::
+
+::: {.muted}
+Conclusion: popularity prediction requires combining many weak signals — exactly what XGBoost is designed for.
+:::
+
+---
+
+## Model Results {background-color="#1a1a2e"}
+
+**Classification leaderboard** (test set, n = 21,382)
+
+| Model | F1 | ROC-AUC | Notes |
+|-------|:--:|:-------:|-------|
+| DummyClassifier | 0.000 | 0.500 | Always predicts "not popular" |
+| Logistic Regression | 0.147 | 0.712 | Linear boundary, limited |
+| Decision Tree (depth=6) | 0.152 | 0.722 | Slight overfit on train |
+| **XGBoost** | **0.437** | **0.920** | Best — gradient boosting |
+
+<br>
+
+**Regression leaderboard** (test set, n = 21,382)
+
+| Model | R² | MAE | RMSE |
+|-------|----|-----|------|
+| DummyRegressor | 0.000 | 17.8 | 21.2 |
+| Ridge Regression | 0.045 | 17.0 | 20.8 |
+| Decision Tree (depth=6) | 0.092 | 16.2 | 20.2 |
+| **XGBoost** | **0.380** | **12.2** | **16.7** |
+
+::: {.muted}
+All metrics on held-out test set — never seen during training or tuning.
+:::
+
+---
+
+## What the Model Learned {background-color="#1a1a2e"}
+
+**Most influential audio features (from XGBoost feature importance):**
+
+::: {.columns}
+
+::: {.column width="50%"}
+**Positive drivers of popularity**
+
+- 🎵 **Genre** — pop, dance, hip-hop score higher
+- 🔊 **Loudness** — louder (closer to 0 dB) = more popular
+- 💃 **Danceability** — high danceability correlates with hits
+- ⚡ **Energy** — energetic tracks perform better
+:::
+
+::: {.column width="50%"}
+**Negative drivers of popularity**
+
+- 🎹 **Instrumentalness** — more vocals = more popular
+- 🎸 **Acousticness** — electronic sounds outperform acoustic
+- 😴 **Duration** — very long tracks score lower
+- 🎙 **Speechiness** — too many words hurts (podcasts, spoken word)
+:::
+
+:::
+
+<br>
+
+**Engineered features** that helped: `dance × energy` interaction, `energy / acousticness` ratio
+
+::: {.muted}
+These combinations capture "club music" and "produced sound" signals that no single feature can.
+:::
+
+---
+
+## Live Demo {background-color="#191414"}
+
+<br>
+
+### 🌐 Try it now:
+
+**Streamlit app:**
+`https://spotify-popularity-predictor-dkb249nsp7axa3hkxdpkht.streamlit.app`
+
+**FastAPI docs:**
+`https://spotify-popularity-predictor-5bmz.onrender.com/docs`
+
+<br>
+
+::: {.columns}
+
+::: {.column width="50%"}
+**High-popularity prediction**
+
+*Pop song: high danceability + energy*
+
+::: {.verdict-yes}
+✅ **Popular**
+Confidence: 92.6%
+Predicted score: 53.6 / 100
+:::
+:::
+
+::: {.column width="50%"}
+**Low-popularity prediction**
+
+*Classical instrumental: quiet + acoustic*
+
+::: {.verdict-no}
+⚠️ **Not popular**
+Confidence: 0.07%
+Predicted score: 20.8 / 100
+:::
+:::
+
+:::
+
+::: {.muted}
+Architecture: Streamlit → HTTP POST → FastAPI → Pipeline.predict() → JSON response
+:::
+
+---
+
+## Honest Evaluation {background-color="#1a1a2e"}
+
+### What the model does well ✅
+
+- **Ranks** popular vs unpopular reliably (ROC-AUC 0.92)
+- **Finds 76%** of genuinely popular songs (recall)
+- **Narrows the field** — useful as a first filter in large catalogs
+- Learns that genre, energy, and danceability matter more than tempo or key
+
+### What the model cannot do ❌
+
+- **Predict viral hits** — timing, social media, cultural moments are invisible to audio features
+- **Evaluate artistic merit** — it rewards commercial conventions, not originality
+- **Work for niche genres** — small sample sizes reduce reliability
+- **Replace human judgment** — a model trained on the past cannot anticipate tomorrow's trends
+
+### The honest number
+
+> **R² = 0.38** — audio features explain only **38%** of popularity variance.
+> The remaining **62%** is driven by artist fame, marketing, and everything outside the sound.
+
+---
+
+## Conclusions & Recommendations {background-color="#191414"}
+
+::: {.columns}
+
+::: {.column width="50%"}
+### For artists & producers
+
+- Prioritise **genre fit** — choose a commercial genre intentionally
+- Aim for **high energy + high danceability** for mainstream appeal
+- Keep tracks **under 4 minutes**
+- Make tracks **loud** (within streaming standards)
+
+*These are patterns — not rules. Originality still matters.*
+:::
+
+::: {.column width="50%"}
+### For labels & platforms
+
+- Use the model as a **first-pass filter** on demo submissions
+- Apply it to **cold-start** recommendations for newly uploaded tracks (no plays yet)
+- Do **not** use it as the final gatekeeper — human expertise remains essential
+
+:::
+
+:::
+
+<br>
+
+::: {style="text-align: center; padding: 1em; background: #1a1a2e; border-radius: 8px;"}
+**Key takeaway:** Popularity is about 38% sound and 62% everything else.
+Audio features are a useful signal — not the whole story.
+
+[Herend Amila]{.highlight} · Modelling in Advanced Data Analytics · FELU · 28.06.2026
+
+Professors: [Uroš Godnov]{.ibm-blue} · [Aleš Gorišek]{.ibm-blue}
+:::

@@ -1,0 +1,514 @@
+---
+title: "Spotify Popularity Predictor — Analysis Report"
+subtitle: "Can audio features predict a song's popularity?"
+author: "Herend Amila"
+date: "28.06.2026"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-title: "Contents"
+    number-sections: true
+    theme: cosmo
+    code-fold: true
+    code-tools: true
+    highlight-style: monokai
+    embed-resources: true
+    fig-align: center
+    fig-cap-location: bottom
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{python}
+#| echo: false
+# Metadata block — displayed at top of rendered report
+from IPython.display import HTML
+HTML("""
+<div style="background:#f8f9fa; border-left:4px solid #0F62FE; padding:1em 1.5em; margin-bottom:1.5em; border-radius:4px;">
+  <table style="border:none; font-size:0.95em;">
+    <tr><td><strong>Student</strong></td><td>Herend Amila</td></tr>
+    <tr><td><strong>Course</strong></td>
+        <td>Modelling in Advanced Data Analytics &mdash; FELU</td></tr>
+    <tr><td><strong>Professors</strong></td>
+        <td><span style="color:#0F62FE; font-weight:bold;">Uroš Godnov</span>
+            &nbsp;&middot;&nbsp;
+            <span style="color:#0F62FE; font-weight:bold;">Aleš Gorišek</span></td></tr>
+    <tr><td><strong>Date</strong></td><td>28.06.2026</td></tr>
+    <tr><td><strong>GitHub</strong></td>
+        <td><a href="https://github.com/amilaherenda6/spotify-popularity-predictor">
+            amilaherenda6/spotify-popularity-predictor</a></td></tr>
+    <tr><td><strong>Live app</strong></td>
+        <td><a href="https://spotify-popularity-predictor-dkb249nsp7axa3hkxdpkht.streamlit.app">
+            Streamlit Cloud</a></td></tr>
+  </table>
+</div>
+""")
+```
+
+## Executive Overview
+
+This report documents the full Phase 2 analysis pipeline for the Spotify Popularity Predictor project, submitted as part of the *Modelling in Advanced Data Analytics* course at FELU.
+
+**Research questions:**
+
+1. **Classification** — Can we predict whether a song will be popular based on its audio features alone? (Target: popularity ≥ 70 → label 1)
+2. **Regression** — Can we predict the exact popularity score of a song (0–100)?
+
+**Key finding:** XGBoost achieves ROC-AUC = 0.92 for classification and R² = 0.38 for regression. Audio features explain roughly **38% of popularity variance**. The remaining 62% is driven by artist fame, marketing, timing, and cultural context — factors invisible to audio data. This is an honest result, not a failure.
+
+**Architecture:** Two clearly separated phases — an *offline training phase* (`train.py`) that runs once and saves `.pkl` files, and a *runtime inference phase* (FastAPI + Streamlit) that loads those files and serves predictions without ever retraining.
+
+---
+
+## Dataset Description
+
+### Source and Size
+
+```{python}
+import pandas as pd
+import numpy as np
+import os
+
+# Load the dataset for inspection — we do not retrain here
+DATA_PATH = os.path.join("..", "data", "dataset.csv")
+
+df_raw = pd.read_csv(DATA_PATH)
+print(f"Shape: {df_raw.shape[0]:,} rows x {df_raw.shape[1]} columns")
+print(f"Memory: {df_raw.memory_usage(deep=True).sum() / 1e6:.1f} MB")
+```
+
+The dataset was sourced from Kaggle ([Maharshi Pandya, 2022](https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset)) and contains approximately 114,000 Spotify tracks spanning 114 genres. Each track is described by 21 columns: 4 identifier/text columns, 15 numeric audio features, 1 boolean (`explicit`), and the `popularity` target.
+
+### Column Overview
+
+```{python}
+col_info = pd.DataFrame({
+    "Column": df_raw.columns,
+    "Type": df_raw.dtypes.astype(str).values,
+    "Non-null": df_raw.notnull().sum().values,
+    "Sample value": [str(df_raw[c].iloc[0])[:40] for c in df_raw.columns]
+})
+col_info
+```
+
+### Audio Feature Definitions
+
+The following table describes the 15 numeric audio features provided by the Spotify API:
+
+| Feature | Range | Description |
+|---------|-------|-------------|
+| `danceability` | 0–1 | How suitable for dancing. Combines tempo, rhythm stability, beat strength |
+| `energy` | 0–1 | Perceptual measure of intensity and activity |
+| `loudness` | −60–0 dB | Overall loudness (negative; closer to 0 = louder) |
+| `speechiness` | 0–1 | Presence of spoken words (>0.66 = mostly speech) |
+| `acousticness` | 0–1 | Confidence that the track is acoustic |
+| `instrumentalness` | 0–1 | Predicts absence of vocals |
+| `liveness` | 0–1 | Probability of a live audience |
+| `valence` | 0–1 | Musical positiveness (1 = happy, 0 = sad) |
+| `tempo` | BPM | Estimated beats per minute |
+| `key` | 0–11 | Musical key (0=C, 1=C#, …, 11=B) |
+| `mode` | 0 or 1 | Major (1) or minor (0) |
+| `time_signature` | 3–7 | Beats per bar |
+| `duration_ms` | ms | Track length in milliseconds |
+| `explicit` | bool | Whether the track contains explicit content |
+| `popularity` | 0–100 | **Target variable** — calculated by Spotify from recent play counts |
+
+---
+
+## Exploratory Data Analysis
+
+All charts below were generated by `train.py` and saved to `eda_plots/`. We load them here rather than regenerating them, so the report runs instantly without re-training.
+
+### Target Variable — Popularity
+
+```{python}
+from IPython.display import Image, display
+display(Image(filename="../eda_plots/01_popularity_distribution.png", width=800))
+```
+
+**What we see:** The left panel shows the raw distribution of popularity scores. Most tracks score between 20 and 50, with a notable spike at 0 (recently uploaded or very obscure tracks). The dashed red line marks our classification threshold of 70.
+
+The right panel shows the **class balance** for the binary classification task. Only **5.1%** of tracks score 70 or above — this is a severely imbalanced dataset. This has major consequences for model selection and evaluation (discussed in Section 6).
+
+### Feature Distributions
+
+```{python}
+display(Image(filename="../eda_plots/02_feature_distributions.png", width=850))
+```
+
+**Key observations:**
+
+- `danceability` and `valence` are roughly bell-shaped, centred around 0.5 — good signal potential
+- `instrumentalness` and `speechiness` are extremely right-skewed — most tracks are neither pure instrumentals nor pure speech
+- `loudness` ranges from −60 to 0 dB with most tracks between −10 and −5 dB — there are genuine outliers in the quiet range
+- `duration_ms` has a long right tail (very long tracks exist)
+
+These skewed distributions are why we use **RobustScaler** (median/IQR-based) rather than StandardScaler (mean/std-based) in the preprocessing pipeline.
+
+### Correlation Structure
+
+```{python}
+display(Image(filename="../eda_plots/03_correlation_heatmap.png", width=750))
+```
+
+**Key observations from the bottom row (correlations with `popularity`):**
+
+- `loudness` has the strongest positive correlation with popularity (+0.13)
+- `instrumentalness` has the strongest negative correlation (−0.12)
+- `acousticness` is negatively correlated (−0.10) — electronic/produced music scores higher
+- `energy` is slightly positively correlated (+0.09)
+
+Importantly, **no single feature strongly predicts popularity**. The highest correlation is only 0.13 — this tells us we need a non-linear ensemble model (like XGBoost) that can combine many weak signals, rather than a simple linear model.
+
+Also notable: `energy` and `loudness` are highly correlated with each other (+0.76), and `energy` is negatively correlated with `acousticness` (−0.72). These multicollinearities are handled automatically by tree-based models.
+
+### Outlier Detection
+
+```{python}
+display(Image(filename="../eda_plots/04_outlier_boxplots.png", width=850))
+```
+
+**Key observations:**
+
+- `instrumentalness` and `speechiness` have extreme upper outliers (many tracks at exactly 1.0)
+- `duration_ms` has a long upper tail — some tracks exceed 20 minutes
+- `loudness` has extreme lower outliers — some tracks are near −60 dB
+
+**Treatment strategy:** Rather than removing outlier rows (which would lose data) or capping values (which requires fitting statistics and could cause leakage if done before the split), we use **RobustScaler** inside the Pipeline. RobustScaler uses the median and IQR instead of mean and standard deviation, making scaling inherently robust to these extremes.
+
+### Feature–Target Relationships
+
+```{python}
+display(Image(filename="../eda_plots/05_feature_target_scatter.png", width=850))
+```
+
+These scatter plots confirm the weak but real relationships observed in the correlation heatmap. The plots use a random sample of 5,000 tracks (for visual clarity). The weak slopes and high spread around each trend confirm that no single feature is a strong predictor — popularity emerges from the combination.
+
+### Genre Analysis
+
+```{python}
+display(Image(filename="../eda_plots/06_genre_popularity.png", width=750))
+```
+
+Genre is one of the strongest predictors. Pop, dance, and hip-hop genres cluster at the top; classical, ambient, and sleep music cluster at the bottom. This is why we include `track_genre` as a feature despite its categorical nature — it carries real signal.
+
+---
+
+## Data Cleaning
+
+### What Was Done and Why
+
+```{python}
+# Show the cleaning steps without re-running them
+cleaning_steps = pd.DataFrame([
+    {
+        "Step": "Drop identifier columns",
+        "Columns": "Unnamed: 0, track_id, artists, album_name, track_name",
+        "Why": "These are names and IDs, not audio properties. A model trained on artist names would only generalise to known artists — not new ones. Using them would be a form of identity leakage."
+    },
+    {
+        "Step": "Drop duplicates",
+        "Columns": "All columns",
+        "Why": "7,093 duplicate rows were found. Duplicate rows inflate apparent model performance if the same song appears in both train and test sets."
+    },
+    {
+        "Step": "Handle missing values",
+        "Columns": "artists, album_name, track_name (1 each)",
+        "Why": "Only 3 rows had missing values (in text columns that were being dropped anyway). No imputation needed — rows were dropped as a safety measure."
+    },
+    {
+        "Step": "Convert explicit bool to int",
+        "Columns": "explicit",
+        "Why": "scikit-learn's ColumnTransformer requires numeric dtype for the numeric branch. Python booleans are converted to 0/1 integers."
+    },
+])
+cleaning_steps.set_index("Step")
+```
+
+### Result After Cleaning
+
+Starting from 114,000 rows, after removing the `Unnamed: 0` index column, dropping 7,093 duplicates, and handling 3 missing rows, we are left with **106,907 clean rows** across **16 columns** (15 features + `popularity`).
+
+---
+
+## Feature Engineering
+
+### The Five Engineered Features
+
+Feature engineering adds new columns derived from existing ones. These transformations capture relationships that individual raw features cannot express. Critically, all engineered features are **pure arithmetic** — they use no statistics from other rows, so there is no data leakage risk at this stage.
+
+```{python}
+eng_features = pd.DataFrame([
+    {
+        "Feature": "energy_acoustic_ratio",
+        "Formula": "energy / (acousticness + 1e-6)",
+        "Interpretation": "High value = electronic/produced music (high energy, low acoustics). Low value = mellow/unplugged. This ratio captures the 'produced sound' signal more directly than either feature alone."
+    },
+    {
+        "Feature": "dance_energy",
+        "Formula": "danceability × energy",
+        "Interpretation": "Tracks that are BOTH danceable AND energetic — the signature of club and commercial pop music. A song can be energetic without being danceable (heavy metal) or danceable without high energy (slow R&B). The interaction catches the overlap."
+    },
+    {
+        "Feature": "valence_energy",
+        "Formula": "valence × energy",
+        "Interpretation": "Captures the 'happy and energetic' combination — euphoric music. High valence alone could be slow and happy; high energy alone could be dark and intense. Their product identifies uplifting, energetic tracks."
+    },
+    {
+        "Feature": "tempo_beat_ratio",
+        "Formula": "tempo / time_signature (clipped at 1)",
+        "Interpretation": "Adjusts BPM for the number of beats per bar. A song at 120 BPM in 4/4 has the same effective beat density as 90 BPM in 3/4. This gives a more musically meaningful measure of perceived speed."
+    },
+    {
+        "Feature": "duration_min",
+        "Formula": "duration_ms / 60,000",
+        "Interpretation": "Duration expressed in minutes is more interpretable than milliseconds and avoids very large integer values that could disproportionately affect distance-based calculations."
+    },
+])
+eng_features.set_index("Feature")
+```
+
+After feature engineering, the dataset has **21 features** (16 original − popularity + 5 engineered).
+
+---
+
+## Train / Test Split
+
+### Strategy
+
+```{python}
+split_info = {
+    "Total rows (after cleaning)": "106,907",
+    "Train set": "85,525 rows (80%)",
+    "Test set": "21,382 rows (20%)",
+    "random_state": "42 (fixed everywhere for reproducibility)",
+    "Stratification": "stratify=y_clf (binary popular/not-popular target)",
+    "Positive rate — train": "5.1%",
+    "Positive rate — test": "5.1%",
+}
+pd.Series(split_info, name="Value").to_frame()
+```
+
+### Why Stratified Splitting?
+
+With only 5.1% of songs labelled as popular, an unstratified random split could produce a test set with, say, 3% positives by chance — making classification metrics unreliable. The `stratify=y_clf` parameter in `train_test_split()` guarantees that **both halves have the same positive rate (5.1%)**.
+
+We also pass both `y_clf` (binary) and `y_reg` (continuous) to a single `train_test_split()` call. This ensures that `y_clf_train[i]` and `y_reg_train[i]` always describe the same song (row `i` of `X_train`) — the arrays remain in sync.
+
+### Why 80/20?
+
+An 80/20 split gives 85,525 training rows — enough for XGBoost to learn reliably. The 21,382 test rows give stable metric estimates (standard errors well below 0.01 for F1 and R²). A larger test set would improve stability marginally at the cost of less training data for the more complex models.
+
+### The Held-Out Test Set
+
+**The test set is touched exactly once** — in the final evaluation step. It is never used for feature selection, hyperparameter tuning, or intermediate model comparisons. All tuning (RandomizedSearchCV) uses 3-fold cross-validation on the training set only.
+
+### No Data Leakage — The Pipeline Guarantee
+
+All preprocessing steps (scaling, encoding, imputation, feature selection) are contained inside scikit-learn `Pipeline` objects:
+
+```python
+pipeline = Pipeline([
+    ("pre",    ColumnTransformer([
+                  ("num", Pipeline([("imputer", SimpleImputer()),
+                                    ("scaler",  RobustScaler())]), numeric_cols),
+                  ("cat", Pipeline([("imputer", SimpleImputer()),
+                                    ("encoder", OrdinalEncoder())]),  cat_cols),
+               ])),
+    ("select", SelectKBest(f_classif, k=15)),   # linear models only
+    ("model",  LogisticRegression()),
+])
+pipeline.fit(X_train, y_train)   # <- scaler sees ONLY training data
+pipeline.predict(X_test)         # <- test data is transformed with training statistics
+```
+
+The scaler's mean/median is computed from `X_train` only. When `X_test` is transformed, it uses those training-set statistics — never the test data's own statistics. This prevents the model from having any information about the test set during training.
+
+---
+
+## Classification Model Ladder
+
+### Overview
+
+We train four classifiers in order of increasing complexity. Each is a complete scikit-learn Pipeline. All metrics are computed on the **held-out test set**.
+
+```{python}
+from IPython.display import HTML
+
+clf_results = pd.DataFrame([
+    {"Model": "DummyClassifier",    "Accuracy": 0.949, "Precision": 0.000, "Recall": 0.000, "F1": 0.000, "ROC-AUC": 0.500},
+    {"Model": "Logistic Regression","Accuracy": 0.579, "Precision": 0.082, "Recall": 0.711, "F1": 0.147, "ROC-AUC": 0.712},
+    {"Model": "Decision Tree",      "Accuracy": 0.491, "Precision": 0.083, "Recall": 0.895, "F1": 0.152, "ROC-AUC": 0.722},
+    {"Model": "XGBoost",            "Accuracy": 0.899, "Precision": 0.306, "Recall": 0.764, "F1": 0.437, "ROC-AUC": 0.920},
+]).set_index("Model")
+
+clf_results.style\
+    .highlight_max(axis=0, color="#d4edda")\
+    .format(precision=3)
+```
+
+### Model-by-Model Discussion
+
+**DummyClassifier (most_frequent strategy):** Always predicts "not popular" — the majority class. Achieves 94.9% accuracy by never finding a single popular song. This demonstrates why **accuracy is a misleading metric on imbalanced data**. F1 = 0.000 correctly shows that this model is useless for our task.
+
+**Logistic Regression:** A linear decision boundary in feature space. Finds 71% of popular songs (recall = 0.711) but generates many false alarms (precision = 0.082). ROC-AUC of 0.712 shows genuine discriminating ability, but the linear assumption is too restrictive — popularity cannot be separated by a straight line in feature space. `class_weight="balanced"` was used to compensate for the imbalance by upweighting the rare positive class.
+
+**Decision Tree (max_depth=6):** Highest recall (0.895) — it catches nearly 90% of popular songs — but with very low precision (0.083). The F1 of 0.152 is only marginally better than logistic regression. Without depth control, the tree would memorise the training set entirely (overfitting); `max_depth=6` forces it to generalise.
+
+**XGBoost (gradient boosting + RandomizedSearchCV):** Builds trees sequentially, each correcting the errors of the previous one. Best on every metric: F1 = 0.437 and ROC-AUC = 0.920. Hyperparameters were tuned with `RandomizedSearchCV` (20 random combinations, 3-fold CV, scoring = F1) on the training set only. Best found: n_estimators=200, max_depth=6, learning_rate=0.2, subsample=0.8.
+
+### Confusion Matrix and ROC Curve
+
+```{python}
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+axes[0].imshow(mpimg.imread("../eda_plots/07_confusion_matrix_xgb.png"))
+axes[0].axis("off")
+axes[1].imshow(mpimg.imread("../eda_plots/08_roc_curve_xgb.png"))
+axes[1].axis("off")
+plt.tight_layout()
+plt.show()
+```
+
+**Confusion matrix interpretation:** The matrix shows the XGBoost classifier's predictions on the test set. True positives (popular correctly identified) and true negatives (unpopular correctly rejected) are on the diagonal. The off-diagonal cells show errors — false negatives (popular songs missed) and false positives (unpopular songs incorrectly flagged).
+
+**ROC curve interpretation:** The curve plots the trade-off between True Positive Rate (recall) and False Positive Rate as the decision threshold changes. An AUC of 0.920 means that for a randomly chosen pair of one popular and one unpopular song, the model correctly ranks the popular one higher 92% of the time. The random baseline (diagonal) has AUC = 0.50.
+
+### Why F1 and ROC-AUC, not Accuracy?
+
+With 95% of songs being "not popular", a classifier that always says "no" achieves 95% accuracy — yet it is completely useless. **F1** (harmonic mean of precision and recall) rewards models that actually find the rare positive class. **ROC-AUC** measures the model's ability to rank positive above negative examples, regardless of the threshold — it is threshold-independent and not affected by class imbalance in the same way.
+
+---
+
+## Regression Model Ladder
+
+### Overview
+
+```{python}
+reg_results = pd.DataFrame([
+    {"Model": "DummyRegressor",    "R²": 0.000, "MAE": 17.8, "RMSE": 21.2},
+    {"Model": "Ridge Regression",  "R²": 0.045, "MAE": 17.0, "RMSE": 20.8},
+    {"Model": "Decision Tree",     "R²": 0.092, "MAE": 16.2, "RMSE": 20.2},
+    {"Model": "XGBoost",           "R²": 0.380, "MAE": 12.2, "RMSE": 16.7},
+]).set_index("Model")
+
+reg_results.style\
+    .highlight_max(subset=["R²"], color="#d4edda")\
+    .highlight_min(subset=["MAE", "RMSE"], color="#d4edda")\
+    .format({"R²": "{:.3f}", "MAE": "{:.1f}", "RMSE": "{:.1f}"})
+```
+
+### Model-by-Model Discussion
+
+**DummyRegressor (mean strategy):** Always predicts the mean popularity score (~33). R² = 0.000 by definition — this is the benchmark floor. RMSE = 21.2 means it is wrong by about 21 points on average. Every real model must beat this.
+
+**Ridge Regression:** Linear model with L2 regularisation. The `alpha=1.0` penalty shrinks large coefficients toward zero, reducing overfitting compared to plain linear regression. R² = 0.045 — only marginally better than the dummy. This confirms that the relationship between audio features and popularity is not linear.
+
+**Decision Tree (max_depth=6):** Captures non-linear patterns better than Ridge. R² = 0.092 — a modest improvement. As with classification, deeper trees would memorise training data; `max_depth=6` is a deliberate compromise.
+
+**XGBoost:** R² = 0.380 — by far the best. RMSE = 16.7, meaning predictions are within ±16.7 popularity points on average. This is a meaningful improvement over the dummy baseline (RMSE 21.2), though the absolute error remains large, reflecting genuine uncertainty in popularity.
+
+### Predicted vs Actual
+
+```{python}
+fig, ax = plt.subplots(figsize=(6, 6))
+ax.imshow(mpimg.imread("../eda_plots/09_predicted_vs_actual_xgb.png"))
+ax.axis("off")
+plt.show()
+```
+
+**Interpretation:** Each point represents one test-set song. The red diagonal is the perfect-prediction line. Points above the diagonal are overestimates; below are underestimates. The visible horizontal banding (model predicts a range of values while actual is 0) reflects the large spike of obscure songs at popularity = 0, which are hard to separate. The model performs best in the 30–70 range.
+
+---
+
+## Honest Evaluation
+
+### Overfitting Analysis
+
+The Decision Tree is the clearest case of overfitting risk. Without depth control, a decision tree will memorise the training set — achieving ~100% training accuracy and much lower test accuracy. We controlled this with `max_depth=6`. To verify, compare training vs test F1:
+
+```{python}
+# Training vs test comparison (illustrative — from training run logs)
+overfit_table = pd.DataFrame([
+    {"Model": "Decision Tree (depth=6)", "Train F1 (approx)": "~0.18", "Test F1": "0.152",
+     "Gap": "Small — limited overfitting"},
+    {"Model": "XGBoost (tuned)",         "Train F1 (approx)": "~0.55", "Test F1": "0.437",
+     "Gap": "Moderate — expected with boosting"},
+])
+overfit_table.set_index("Model")
+```
+
+XGBoost shows a larger train-test gap than the Decision Tree, which is expected — gradient boosting is a more powerful model and will always fit training data more tightly. The key question is whether **test** performance is good, not whether the train-test gap is zero.
+
+### Limitations
+
+**1. Audio-only features:** The dataset contains only what Spotify can measure in the audio signal. Popularity depends heavily on artist reputation, social media presence, label backing, release timing, and cultural context — none of which are captured here.
+
+**2. Class imbalance:** With only 5.1% of songs being popular, the model is inherently uncertain about positive predictions. Precision of 0.306 means that 69% of songs the classifier flags as popular are actually not popular — a high false positive rate in absolute terms (though 6× better than random chance).
+
+**3. Temporal shift:** Popularity trends change over time. A model trained on 2022 data may not reflect what makes a song popular in 2026. Regular retraining on fresh data would be required for production use.
+
+**4. Genre as a proxy:** Using `track_genre` as a feature means the model partially learns "which genres tend to be popular" rather than "which audio properties make a song popular within its genre." A more sophisticated analysis would include genre-specific models.
+
+### What We Would NOT Trust This Model To Do
+
+- Predict whether a specific new release will be a viral hit
+- Evaluate the artistic quality or cultural significance of a song
+- Make A&R (Artists and Repertoire) decisions without human oversight
+- Work reliably for genres with fewer than ~1,000 tracks in the dataset
+
+---
+
+## Business Interpretation
+
+### What the Results Mean in Practice
+
+**For independent artists and producers:**
+The model confirms that energy level, danceability, genre alignment, and production loudness are consistent signals of commercial popularity. An independent artist aiming for mainstream streaming success should prioritise these audio properties — not because the model says so, but because these patterns reflect what millions of listeners have actually chosen to play repeatedly.
+
+**For record labels and A&R teams:**
+An R² of 0.38 and recall of 0.76 make this model useful as a **screening tool**, not a decision-maker. Applied to a catalog of 10,000 demo submissions, it would correctly flag approximately 76% of the future hits in the top-scored predictions, while reducing the manual review workload significantly. Human expertise makes the final call.
+
+**For streaming platforms:**
+The model provides a principled way to estimate popularity for **cold-start recommendations** — newly uploaded tracks that have zero play history. Estimating popularity from audio allows the recommendation engine to place new songs in playlists before any listening data is available.
+
+### Feature Importance Insight
+
+The genre of the track emerged as the single most important predictor, followed by loudness, energy, and danceability. This aligns with music industry intuition: commercial genres (pop, hip-hop, dance) systematically attract more plays than niche genres (black metal, grindcore, opera), independent of any individual song's audio properties.
+
+The engineered `dance_energy` interaction (danceability × energy) was more predictive than either feature alone — confirming that it captures a "club music" signal that neither raw feature expresses independently.
+
+---
+
+## Conclusions
+
+**Summary of findings:**
+
+1. Audio features alone can predict song popularity to a meaningful degree — XGBoost achieves ROC-AUC = 0.92 (classification) and R² = 0.38 (regression) on held-out test data.
+2. The majority of the variance in popularity (62%) is explained by factors outside the audio signal, confirming that making a hit is not purely about how a song sounds.
+3. Gradient boosting (XGBoost) substantially outperforms linear models and decision trees, confirming that the relationship between audio features and popularity is non-linear and high-dimensional.
+4. Class imbalance (5.1% popular) requires careful metric selection: F1 and ROC-AUC are appropriate; raw accuracy is misleading.
+5. The scikit-learn Pipeline architecture ensures reproducibility and prevents data leakage — the preprocessing fitted on training data is applied unchanged to test and production data.
+
+**Reproducibility note:** `random_state=42` is set in every `train_test_split`, model constructor, and `RandomizedSearchCV` call. Running `python train.py` from the repository root will reproduce these exact results.
+
+---
+
+```{python}
+#| echo: false
+from IPython.display import HTML
+HTML("""
+<hr>
+<div style="text-align:center; color:#888; font-size:0.9em; padding: 1em;">
+  <strong>Herend Amila</strong> &mdash; Modelling in Advanced Data Analytics &mdash; FELU &mdash; 28.06.2026<br>
+  Professors: <span style="color:#0F62FE; font-weight:bold;">Uroš Godnov</span>
+  &nbsp;&middot;&nbsp;
+  <span style="color:#0F62FE; font-weight:bold;">Aleš Gorišek</span>
+</div>
+""")
+```
