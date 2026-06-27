@@ -5,7 +5,7 @@ author: "Herend Amila"
 date: "03.07.2026"
 format:
   revealjs:
-    theme: white
+    theme: dark
     css: styles_slides.css
     slide-number: true
     transition: fade
@@ -17,16 +17,16 @@ format:
 
 <br>
 
-### 🎵 Spotify Popularity Predictor {style="color:#0F62FE; font-size:1.8em;"}
+### 🎵 Spotify Popularity Predictor {style="color:#1DB954; font-size:1.8em; font-weight:900;"}
 
 **Can audio features predict a song's success?**
 
-::: {style="text-align: center; margin-top: 20px;"}
-![](imb_logo.png){height=80px}
+::: {style="display: flex; justify-content: center; align-items: center; gap: 30px; margin-top: 16px; margin-bottom: 16px;"}
+![](imb_logo.png){height=55px}
+![](spotify_logo.png){height=55px}
 :::
 
-<br>
-
+::: {.title-info-table}
 | | |
 |---|---|
 | Student | Herend Amila |
@@ -35,6 +35,7 @@ format:
 | Programme | International Full-Time Master's in Business and Organisation |
 | Date | 03.07.2026 |
 | University | FELU — Faculty of Economics Ljubljana |
+:::
 
 ---
 
@@ -99,19 +100,25 @@ format:
 ::: {.columns}
 
 ::: {.column width="48%"}
+::: {.green-card}
 ### 🎯 Yes/No Prediction
 *Will this song be popular?*
 
-- A score of **70 or above** = Popular ✅
-- Below 70 = Not yet popular
+A score of **70 or above** = Popular ✅
+
+Below 70 = Not yet popular
+:::
 :::
 
 ::: {.column width="48%"}
+::: {.blue-card}
 ### 📊 Score Prediction
 *How popular will it actually be?*
 
-- Predicts the exact number (0 to 100)
-- The closer to 100, the bigger the hit
+Predicts the **exact number** (0 to 100)
+
+The closer to 100, the bigger the hit
+:::
 :::
 
 :::
@@ -143,13 +150,11 @@ Only **1 in 20 songs** reaches the top tier (score ≥ 70)
 
 **Finding 2 — Most songs score low**
 
-The majority of songs sit between 20 and 40 out of 100. Many very new or obscure tracks score 0.
+The majority sit between 20 and 40 out of 100. Many new or obscure tracks score 0.
 :::
 
 ::: {.column width="45%"}
 **Finding 3 — No single signal decides everything**
-
-No one measurement alone predicts a hit. The strongest connections to popularity:
 
 | Signal | Connection |
 |---------|:-----------:|
@@ -184,7 +189,7 @@ Pop, dance, and hip-hop score higher than classical, ambient, or sleep music.
 
 **Score prediction — how close are our guesses?**
 
-| Approach | Average error | Improvement vs. guessing |
+| Approach | Average error | Improvement |
 |-------|----|-----|
 | Always predicting the average | ±21 popularity points | — |
 | Simple pattern matching | ±21 points | 4% better |
@@ -202,6 +207,7 @@ Pop, dance, and hip-hop score higher than classical, ambient, or sleep music.
 ::: {.columns}
 
 ::: {.column width="50%"}
+::: {.green-card}
 **Boosts popularity ↑**
 
 - 🎵 **Genre** — pop, dance, hip-hop lead
@@ -209,14 +215,17 @@ Pop, dance, and hip-hop score higher than classical, ambient, or sleep music.
 - 💃 **Danceability** — easy to dance to = more streams
 - ⚡ **Energy** — intense, driving tracks perform better
 :::
+:::
 
 ::: {.column width="50%"}
+::: {.blue-card}
 **Reduces popularity ↓**
 
 - 🎹 **Instrumentalness** — songs without vocals score lower
 - 🎸 **Acousticness** — electronic/produced sounds win
 - 😴 **Duration** — very long tracks score lower
 - 🎙 **Speechiness** — too much talking hurts
+:::
 :::
 
 :::
@@ -228,8 +237,6 @@ We also created **new signals** by combining existing ones — for example, a "c
 ---
 
 ## Try It Live
-
-<br>
 
 ### 🌐 Open the app now:
 
@@ -301,6 +308,7 @@ Predicted score: 20.8 / 100
 ::: {.columns}
 
 ::: {.column width="50%"}
+::: {.green-card}
 ### For artists & producers
 
 - Choose your **genre intentionally** — commercial genres attract more streams
@@ -310,24 +318,26 @@ Predicted score: 20.8 / 100
 
 *These are patterns from data — not rules. Originality still matters.*
 :::
+:::
 
 ::: {.column width="50%"}
+::: {.blue-card}
 ### For labels & A&R teams
 
 - Use this tool as a **first-pass filter** on demo submissions
 - Apply it to **surface newly uploaded tracks** before any listening data exists
 - Do **not** use it as the final gatekeeper — human taste remains essential
-
+:::
 :::
 
 :::
 
 <br>
 
-::: {style="text-align: center; padding: 1em; background: #F0F4FF; border-radius: 8px; border-left: 4px solid #0F62FE;"}
+::: {.closing-box}
 **Key takeaway:** Popularity is about 38% sound and 62% everything else.
 
-[Herend Amila]{.ibm-blue} · Modelling in Advanced Data Analytics · FELU · 03.07.2026
+[Herend Amila]{.highlight} · Modelling in Advanced Data Analytics · FELU · 03.07.2026
 
 Professors: [Uroš Godnov]{.ibm-blue} · [Aleš Gorišek]{.ibm-blue}
 :::

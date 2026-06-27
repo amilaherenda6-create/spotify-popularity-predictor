@@ -6,7 +6,7 @@
 <script src="slides_files/libs/quarto-html/tippy.umd.min.js"></script>
 <link href="slides_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="slides_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="slides_files/libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<link href="slides_files/libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.38">
 
   <meta name="author" content="Herend Amila">
@@ -33,7 +33,7 @@
       vertical-align: middle;
     }
   </style>
-  <link rel="stylesheet" href="slides_files/libs/revealjs/dist/theme/quarto-2740581606dc327e82f18f789b69d8a0.css">
+  <link rel="stylesheet" href="slides_files/libs/revealjs/dist/theme/quarto-4df01d85d5cf19cc6202400f4f043f84.css">
   <link rel="stylesheet" href="styles_slides.css">
   <link href="slides_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="slides_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
@@ -127,7 +127,7 @@
     }
   </style>
 </head>
-<body class="quarto-light">
+<body class="quarto-dark">
   <div class="reveal">
     <div class="slides">
 
@@ -148,12 +148,12 @@ Herend Amila
 <section id="section" class="slide level2 center">
 <h2></h2>
 <p><br></p>
-<h3 style="color:#0F62FE; font-size:1.8em;" id="spotify-popularity-predictor">🎵 Spotify Popularity Predictor</h3>
+<h3 style="color:#1DB954; font-size:1.8em; font-weight:900;" id="spotify-popularity-predictor">🎵 Spotify Popularity Predictor</h3>
 <p><strong>Can audio features predict a song’s success?</strong></p>
-<div style="text-align: center; margin-top: 20px;">
-<p><img data-src="imb_logo.png" height="80"></p>
+<div style="display: flex; justify-content: center; align-items: center; gap: 30px; margin-top: 16px; margin-bottom: 16px;">
+<p><img data-src="imb_logo.png" height="55"> <img data-src="spotify_logo.png" height="55"></p>
 </div>
-<p><br></p>
+<div class="title-info-table">
 <table class="caption-top">
 <colgroup>
 <col style="width: 50%">
@@ -186,6 +186,7 @@ Herend Amila
 </tr>
 </tbody>
 </table>
+</div>
 </section>
 <section id="the-problem" class="slide level2 center">
 <h2>The Problem</h2>
@@ -261,19 +262,19 @@ Herend Amila
 <p><strong>We answer two questions simultaneously:</strong></p>
 <div class="columns">
 <div class="column" style="width:48%;">
-<h3 id="yesno-prediction">🎯 Yes/No Prediction</h3>
+<section id="yesno-prediction" class="green-card">
+<h3>🎯 Yes/No Prediction</h3>
 <p><em>Will this song be popular?</em></p>
-<ul>
-<li>A score of <strong>70 or above</strong> = Popular ✅</li>
-<li>Below 70 = Not yet popular</li>
-</ul>
+<p>A score of <strong>70 or above</strong> = Popular ✅</p>
+<p>Below 70 = Not yet popular</p>
+</section>
 </div><div class="column" style="width:48%;">
-<h3 id="score-prediction">📊 Score Prediction</h3>
+<section id="score-prediction" class="blue-card">
+<h3>📊 Score Prediction</h3>
 <p><em>How popular will it actually be?</em></p>
-<ul>
-<li>Predicts the exact number (0 to 100)</li>
-<li>The closer to 100, the bigger the hit</li>
-</ul>
+<p>Predicts the <strong>exact number</strong> (0 to 100)</p>
+<p>The closer to 100, the bigger the hit</p>
+</section>
 </div></div>
 <p><br></p>
 <p><strong>We tested 4 approaches — from simple to powerful:</strong></p>
@@ -319,10 +320,9 @@ Herend Amila
 <li>This makes prediction genuinely hard — hits are rare</li>
 </ul>
 <p><strong>Finding 2 — Most songs score low</strong></p>
-<p>The majority of songs sit between 20 and 40 out of 100. Many very new or obscure tracks score 0.</p>
+<p>The majority sit between 20 and 40 out of 100. Many new or obscure tracks score 0.</p>
 </div><div class="column" style="width:45%;">
 <p><strong>Finding 3 — No single signal decides everything</strong></p>
-<p>No one measurement alone predicts a hit. The strongest connections to popularity:</p>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -395,7 +395,7 @@ Herend Amila
 <tr class="header">
 <th>Approach</th>
 <th>Average error</th>
-<th>Improvement vs.&nbsp;guessing</th>
+<th>Improvement</th>
 </tr>
 </thead>
 <tbody>
@@ -428,6 +428,7 @@ Herend Amila
 <p><strong>The audio signals that most influence popularity:</strong></p>
 <div class="columns">
 <div class="column" style="width:50%;">
+<div class="green-card">
 <p><strong>Boosts popularity ↑</strong></p>
 <ul>
 <li>🎵 <strong>Genre</strong> — pop, dance, hip-hop lead</li>
@@ -435,7 +436,9 @@ Herend Amila
 <li>💃 <strong>Danceability</strong> — easy to dance to = more streams</li>
 <li>⚡ <strong>Energy</strong> — intense, driving tracks perform better</li>
 </ul>
+</div>
 </div><div class="column" style="width:50%;">
+<div class="blue-card">
 <p><strong>Reduces popularity ↓</strong></p>
 <ul>
 <li>🎹 <strong>Instrumentalness</strong> — songs without vocals score lower</li>
@@ -443,13 +446,13 @@ Herend Amila
 <li>😴 <strong>Duration</strong> — very long tracks score lower</li>
 <li>🎙 <strong>Speechiness</strong> — too much talking hurts</li>
 </ul>
+</div>
 </div></div>
 <p><br></p>
 <p>We also created <strong>new signals</strong> by combining existing ones — for example, a “club music score” (danceability × energy) — which improved predictions beyond what any single measurement could achieve.</p>
 </section>
 <section id="try-it-live" class="slide level2 center">
 <h2>Try It Live</h2>
-<p><br></p>
 <h3 id="open-the-app-now">🌐 Open the app now:</h3>
 <p><strong><a href="https://spotify-popularity-predictor-dkb249nsp7axa3hkxdpkht.streamlit.app">spotify-popularity-predictor-dkb249nsp7axa3hkxdpkht.streamlit.app</a></strong></p>
 <p><br></p>
@@ -498,7 +501,8 @@ Herend Amila
 <h2>Recommendations</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
-<h3 id="for-artists-producers">For artists &amp; producers</h3>
+<section id="for-artists-producers" class="green-card">
+<h3>For artists &amp; producers</h3>
 <ul>
 <li>Choose your <strong>genre intentionally</strong> — commercial genres attract more streams</li>
 <li>Aim for <strong>high energy and danceability</strong> if mainstream success is the goal</li>
@@ -506,18 +510,21 @@ Herend Amila
 <li>Produce <strong>loudly</strong> (within streaming platform standards)</li>
 </ul>
 <p><em>These are patterns from data — not rules. Originality still matters.</em></p>
+</section>
 </div><div class="column" style="width:50%;">
-<h3 id="for-labels-ar-teams">For labels &amp; A&amp;R teams</h3>
+<section id="for-labels-ar-teams" class="blue-card">
+<h3>For labels &amp; A&amp;R teams</h3>
 <ul>
 <li>Use this tool as a <strong>first-pass filter</strong> on demo submissions</li>
 <li>Apply it to <strong>surface newly uploaded tracks</strong> before any listening data exists</li>
 <li>Do <strong>not</strong> use it as the final gatekeeper — human taste remains essential</li>
 </ul>
+</section>
 </div></div>
 <p><br></p>
-<div style="text-align: center; padding: 1em; background: #F0F4FF; border-radius: 8px; border-left: 4px solid #0F62FE;">
+<div class="closing-box">
 <p><strong>Key takeaway:</strong> Popularity is about 38% sound and 62% everything else.</p>
-<p><span class="ibm-blue">Herend Amila</span> · Modelling in Advanced Data Analytics · FELU · 03.07.2026</p>
+<p><span class="highlight">Herend Amila</span> · Modelling in Advanced Data Analytics · FELU · 03.07.2026</p>
 <p>Professors: <span class="ibm-blue">Uroš Godnov</span> · <span class="ibm-blue">Aleš Gorišek</span></p>
 </div>
 
