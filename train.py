@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-train.py — Offline Training Pipeline
+train.py - Offline Training Pipeline
 Spotify Popularity Predictor
 Author: Amila Herenda
 
@@ -8,9 +8,9 @@ Run once on your machine:
     python train.py
 
 Outputs:
-    eda_plots/*.png         — EDA visualisations (saved as PNG, not displayed)
-    models/classifier.pkl  — full scikit-learn Pipeline (preprocessor + model)
-    models/regressor.pkl   — full scikit-learn Pipeline (preprocessor + model)
+    eda_plots/*.png         - EDA visualisations (saved as PNG, not displayed)
+    models/classifier.pkl  - full scikit-learn Pipeline (preprocessor + model)
+    models/regressor.pkl   - full scikit-learn Pipeline (preprocessor + model)
 
 The app (api.py) loads these .pkl files at startup and never retrains.
 """
@@ -25,7 +25,7 @@ import numpy as np
 import pandas as pd
 
 import matplotlib
-matplotlib.use("Agg")          # non-interactive backend — works on servers without a display
+matplotlib.use("Agg")          # non-interactive backend - works on servers without a display
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -48,7 +48,7 @@ from xgboost import XGBClassifier, XGBRegressor
 
 warnings.filterwarnings("ignore")   # suppress sklearn convergence / XGBoost version warnings
 
-# ── Global constants — change ONE place, affects the whole project ─────────────
+# ── Global constants - change ONE place, affects the whole project ─────────────
 SEED                 = 42    # random_state used everywhere -> reproducible results
 POPULARITY_THRESHOLD = 70    # popularity >= 70  ->  label 1 (popular)
 TEST_SIZE            = 0.20  # 20 % of rows held out for final evaluation
@@ -68,10 +68,10 @@ plt.rcParams["figure.dpi"] = 100
 def load_data() -> pd.DataFrame:
     """
     Read dataset.csv and print a quick overview.
-    No transformations here — we want to see the raw data first.
+    No transformations here - we want to see the raw data first.
     """
     print("\n" + "=" * 60)
-    print("STEP 1 — LOAD DATA")
+    print("STEP 1 - LOAD DATA")
     print("=" * 60)
 
     if not os.path.exists(DATA_PATH):
@@ -107,12 +107,12 @@ def run_eda(df: pd.DataFrame) -> None:
     Generate and save EDA plots.
 
     WHY run EDA before cleaning?
-    We want to see the data exactly as it came from Kaggle — warts and all.
+    We want to see the data exactly as it came from Kaggle - warts and all.
     If we cleaned first, we would lose visibility into how bad the raw data was.
     Professor's principle: 'bad data analysis = model learns the wrong thing.'
     """
     print("\n" + "=" * 60)
-    print("STEP 2 — EXPLORATORY DATA ANALYSIS")
+    print("STEP 2 - EXPLORATORY DATA ANALYSIS")
     print("=" * 60)
 
     # ── Missing values & duplicates ───────────────────────────────────────────
@@ -123,7 +123,7 @@ def run_eda(df: pd.DataFrame) -> None:
     dupes = df.duplicated().sum()
     print(f"\nDuplicate rows: {dupes:,}")
 
-    # ── Plot 1: Target variable — popularity distribution ─────────────────────
+    # ── Plot 1: Target variable - popularity distribution ─────────────────────
     print("\nPlot 1: Popularity distribution ...")
     binary = (df["popularity"] >= POPULARITY_THRESHOLD).astype(int)
     counts = binary.value_counts().sort_index()
@@ -147,7 +147,7 @@ def run_eda(df: pd.DataFrame) -> None:
         axes[1].text(i, v + 300, f"{v:,}\n({v / len(df) * 100:.1f} %)",
                      ha="center", fontsize=9)
 
-    plt.suptitle("Target Variable — Popularity", fontsize=13, fontweight="bold")
+    plt.suptitle("Target Variable - Popularity", fontsize=13, fontweight="bold")
     plt.tight_layout()
     _save_fig("01_popularity_distribution.png")
 
@@ -204,7 +204,7 @@ def run_eda(df: pd.DataFrame) -> None:
     for j in range(len(box_cols), len(axes)):
         axes[j].set_visible(False)
 
-    plt.suptitle("Boxplots — Outlier Detection", fontsize=13, fontweight="bold")
+    plt.suptitle("Boxplots - Outlier Detection", fontsize=13, fontweight="bold")
     plt.tight_layout()
     _save_fig("04_outlier_boxplots.png")
 
@@ -245,7 +245,7 @@ def run_eda(df: pd.DataFrame) -> None:
         plt.tight_layout()
         _save_fig("06_genre_popularity.png")
 
-    print("\nEDA complete — all plots saved to eda_plots/")
+    print("\nEDA complete - all plots saved to eda_plots/")
 
 
 # =============================================================================
@@ -260,13 +260,13 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     Drop identifier columns:
         track_id, artists, album_name, track_name are names/IDs, not audio
         features. A model trained on artist names would only work for artists
-        already in the dataset — it wouldn't generalise to new artists. That
+        already in the dataset - it wouldn't generalise to new artists. That
         is a form of data leakage through the identity of the song, not its
         sound. We want the model to predict popularity from AUDIO only.
 
     Drop duplicates:
         The same row repeated twice adds no new information but inflates
-        metrics — the model appears better than it is because test rows
+        metrics - the model appears better than it is because test rows
         may have appeared in training.
 
     Missing values:
@@ -279,7 +279,7 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
         numeric branches. Casting to int (0/1) makes it numeric.
     """
     print("\n" + "=" * 60)
-    print("STEP 3 — DATA CLEANING")
+    print("STEP 3 - DATA CLEANING")
     print("=" * 60)
 
     # ── Drop identifier / free-text columns ───────────────────────────────────
@@ -300,7 +300,7 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
         df = df.dropna()
         print(f"After dropna: {len(df):,} rows")
     else:
-        print("No missing values found — nothing to drop.")
+        print("No missing values found - nothing to drop.")
 
     # ── Convert bool -> int ───────────────────────────────────────────────────
     if "explicit" in df.columns and df["explicit"].dtype == bool:
@@ -322,7 +322,7 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     Raw audio features measure individual dimensions. Their combinations can
     capture relationships the model might otherwise miss. For example,
     `energy * danceability` is high only when a song is both energetic AND
-    danceable — neither column alone captures that joint property.
+    danceable - neither column alone captures that joint property.
 
     IMPORTANT: These are pure arithmetic transformations of existing columns.
     No external data, no statistics from other rows. Therefore there is
@@ -333,7 +333,7 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     inside the Pipeline so they are fitted on training data only.
     """
     print("\n" + "=" * 60)
-    print("STEP 4 — FEATURE ENGINEERING")
+    print("STEP 4 - FEATURE ENGINEERING")
     print("=" * 60)
 
     df = df.copy()
@@ -352,7 +352,7 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     # A song at 120 BPM in 4/4 has the same feel as 90 BPM in 3/4
     df["tempo_beat_ratio"] = df["tempo"] / df["time_signature"].clip(lower=1)
 
-    # Duration in minutes — milliseconds are hard to interpret
+    # Duration in minutes - milliseconds are hard to interpret
     df["duration_min"] = df["duration_ms"] / 60_000
 
     new_cols = [
@@ -379,7 +379,7 @@ def prepare_and_split(df: pd.DataFrame):
     WHY stratify on y_clf?
     Only ~10-15 % of songs have popularity >= 70. Without stratification,
     random splitting might give you a test set with 8 % positives and a
-    train set with 14 % — the class rates would differ, making the
+    train set with 14 % - the class rates would differ, making the
     evaluation misleading. stratify= guarantees the same ratio in both halves.
 
     WHY pass BOTH y_clf and y_reg to train_test_split together?
@@ -389,7 +389,7 @@ def prepare_and_split(df: pd.DataFrame):
     get out of sync.
     """
     print("\n" + "=" * 60)
-    print("STEP 5 — TARGETS & TRAIN / TEST SPLIT")
+    print("STEP 5 - TARGETS & TRAIN / TEST SPLIT")
     print("=" * 60)
 
     y_clf = (df["popularity"] >= POPULARITY_THRESHOLD).astype(int)
@@ -420,7 +420,7 @@ def prepare_and_split(df: pd.DataFrame):
 def build_preprocessor(X_sample: pd.DataFrame) -> ColumnTransformer:
     """
     Build a ColumnTransformer that handles numeric and categorical columns
-    separately. Returns an UNFITTED transformer — it is fitted later inside
+    separately. Returns an UNFITTED transformer - it is fitted later inside
     each Pipeline's .fit() call, which is what prevents data leakage.
 
     Why ColumnTransformer?
@@ -430,7 +430,7 @@ def build_preprocessor(X_sample: pd.DataFrame) -> ColumnTransformer:
 
     Why RobustScaler instead of StandardScaler?
     StandardScaler centres on the mean and divides by standard deviation.
-    Both statistics are sensitive to outliers — one extreme value inflates
+    Both statistics are sensitive to outliers - one extreme value inflates
     the std and shrinks every other value after scaling. RobustScaler uses
     the median and IQR (interquartile range), which are resistant to
     outliers. Since loudness, duration_ms, and tempo have heavy tails,
@@ -489,7 +489,7 @@ def _evaluate_classifier(name, pipeline, X_train, y_train, X_test, y_test) -> di
 
     IMPORTANT: we always report TEST metrics, never train metrics.
     The professor said 'honest evaluation'. A model that memorises training
-    data will look great on train but fail on new songs — that is overfitting.
+    data will look great on train but fail on new songs - that is overfitting.
     Test metrics tell you how the model performs on data it has NEVER seen.
     """
     pipeline.fit(X_train, y_train)
@@ -534,32 +534,32 @@ def train_classification_ladder(X_train, y_train, X_test, y_test) -> tuple:
     Train four classifiers in order of increasing complexity.
     Each model is a complete Pipeline: preprocessor -> (selector) -> model.
 
-    Model 1 — DummyClassifier:
-        Always predicts the most common class. This is our FLOOR — if we
+    Model 1 - DummyClassifier:
+        Always predicts the most common class. This is our FLOOR - if we
         cannot beat this, our model has learned nothing at all.
 
-    Model 2 — Logistic Regression:
+    Model 2 - Logistic Regression:
         Linear decision boundary. Fast and interpretable. class_weight=
         'balanced' automatically adjusts for our imbalanced classes by
         upweighting the rare 'popular' class during training.
         SelectKBest keeps the 15 most informative features (by ANOVA F-score)
         to avoid noise from less useful columns.
 
-    Model 3 — Decision Tree:
+    Model 3 - Decision Tree:
         Non-linear, splits on feature thresholds. Highly interpretable (you
-        can literally draw it). Prone to overfitting — we cap max_depth=6 to
+        can literally draw it). Prone to overfitting - we cap max_depth=6 to
         limit how deeply it can memorise training data.
 
-    Model 4 — XGBoost + RandomizedSearchCV:
-        Gradient boosting — builds trees sequentially, each correcting the
+    Model 4 - XGBoost + RandomizedSearchCV:
+        Gradient boosting - builds trees sequentially, each correcting the
         errors of the previous one. Usually the best performer.
         RandomizedSearchCV tries n_iter=20 random hyperparameter combinations
         with 3-fold cross-validation, instead of exhaustive grid search which
-        would take hours. Tuned on TRAINING data only — test set never seen
+        would take hours. Tuned on TRAINING data only - test set never seen
         during tuning.
     """
     print("\n" + "=" * 60)
-    print("STEP 6a — CLASSIFICATION MODEL LADDER")
+    print("STEP 6a - CLASSIFICATION MODEL LADDER")
     print("=" * 60)
     results = []
 
@@ -663,7 +663,7 @@ def _plot_confusion_matrix(pipeline, X_test, y_test) -> None:
     ConfusionMatrixDisplay(cm, display_labels=["Not popular", "Popular"]).plot(
         ax=ax, colorbar=False, cmap="Blues"
     )
-    ax.set_title("XGBoost Classifier — Confusion Matrix (test set)")
+    ax.set_title("XGBoost Classifier - Confusion Matrix (test set)")
     plt.tight_layout()
     _save_fig("07_confusion_matrix_xgb.png")
 
@@ -678,7 +678,7 @@ def _plot_roc_curve(pipeline, X_test, y_test) -> None:
     ax.plot([0, 1], [0, 1], "k--", linewidth=1, label="Random classifier")
     ax.set_xlabel("False Positive Rate")
     ax.set_ylabel("True Positive Rate")
-    ax.set_title("ROC Curve — XGBoost Classifier (test set)")
+    ax.set_title("ROC Curve - XGBoost Classifier (test set)")
     ax.legend()
     plt.tight_layout()
     _save_fig("08_roc_curve_xgb.png")
@@ -691,26 +691,26 @@ def train_regression_ladder(X_train, y_train, X_test, y_test) -> tuple:
     """
     Train four regressors in order of increasing complexity.
 
-    Model 1 — DummyRegressor (mean strategy):
-        Always predicts the mean popularity score. Again our FLOOR — R2 of 0
+    Model 1 - DummyRegressor (mean strategy):
+        Always predicts the mean popularity score. Again our FLOOR - R2 of 0
         by definition. Any real model must exceed this.
 
-    Model 2 — Ridge Regression:
+    Model 2 - Ridge Regression:
         Linear with L2 regularisation. The alpha parameter penalises large
         coefficients, shrinking them toward zero. This reduces overfitting
         compared to plain linear regression. SelectKBest selects the top
         features by F-statistic.
 
-    Model 3 — Decision Tree:
-        Non-linear regression tree. Same overfitting concern as classifier —
+    Model 3 - Decision Tree:
+        Non-linear regression tree. Same overfitting concern as classifier -
         we cap max_depth=6.
 
-    Model 4 — XGBoost + RandomizedSearchCV:
+    Model 4 - XGBoost + RandomizedSearchCV:
         Same gradient boosting approach as classification but minimising
         squared error instead of log-loss.
     """
     print("\n" + "=" * 60)
-    print("STEP 6b — REGRESSION MODEL LADDER")
+    print("STEP 6b - REGRESSION MODEL LADDER")
     print("=" * 60)
     results = []
 
@@ -803,7 +803,7 @@ def _plot_predicted_vs_actual(y_test: np.ndarray, y_pred: np.ndarray) -> None:
     ax.set_ylabel("Predicted Popularity")
     ax.set_xlim(0, 100)
     ax.set_ylim(0, 100)
-    ax.set_title("XGBoost Regressor — Predicted vs Actual (test set)")
+    ax.set_title("XGBoost Regressor - Predicted vs Actual (test set)")
     ax.legend()
     plt.tight_layout()
     _save_fig("09_predicted_vs_actual_xgb.png")
@@ -822,7 +822,7 @@ def print_leaderboard(clf_results: list, reg_results: list) -> None:
     than just reporting the XGBoost numbers in isolation.
     """
     print("\n" + "=" * 60)
-    print("STEP 7 — LEADERBOARD  (all metrics on the HELD-OUT test set)")
+    print("STEP 7 - LEADERBOARD  (all metrics on the HELD-OUT test set)")
     print("=" * 60)
 
     # Strip private keys (those starting with _) before building the table
@@ -855,14 +855,14 @@ def save_models(best_clf, best_reg) -> None:
         2. Encodes track_genre (using the mapping learned from training)
         3. Runs the model
     If we saved only the XGBoost model weights, we would have to manually
-    re-apply the exact same scaler in api.py — any mismatch would silently
+    re-apply the exact same scaler in api.py - any mismatch would silently
     produce wrong predictions.
 
     Professor's test: 'if you shut down the computer, are the parameters
-    still there tomorrow?' — YES, because they are on disk in the .pkl file.
+    still there tomorrow?' - YES, because they are on disk in the .pkl file.
     """
     print("\n" + "=" * 60)
-    print("STEP 8 — SAVE MODELS  (.pkl files)")
+    print("STEP 8 - SAVE MODELS  (.pkl files)")
     print("=" * 60)
 
     os.makedirs(MODELS_DIR, exist_ok=True)
@@ -882,43 +882,43 @@ def save_models(best_clf, best_reg) -> None:
 # =============================================================================
 def main() -> None:
     print("\n" + "#" * 60)
-    print("  SPOTIFY POPULARITY PREDICTOR — OFFLINE TRAINING")
+    print("  SPOTIFY POPULARITY PREDICTOR - OFFLINE TRAINING")
     print("#" * 60)
 
     os.makedirs(PLOTS_DIR, exist_ok=True)
     os.makedirs(MODELS_DIR, exist_ok=True)
 
-    # Step 1 — Load raw data
+    # Step 1 - Load raw data
     df = load_data()
 
-    # Step 2 — EDA (run on raw data before any changes)
+    # Step 2 - EDA (run on raw data before any changes)
     run_eda(df)
 
-    # Step 3 — Clean
+    # Step 3 - Clean
     df = clean_data(df)
 
-    # Step 4 — Engineer new features
+    # Step 4 - Engineer new features
     df = engineer_features(df)
 
-    # Step 5 — Split into train / test
+    # Step 5 - Split into train / test
     X_train, X_test, y_clf_train, y_clf_test, y_reg_train, y_reg_test = (
         prepare_and_split(df)
     )
 
-    # Step 6a — Classification model ladder
+    # Step 6a - Classification model ladder
     clf_results, best_clf = train_classification_ladder(
         X_train, y_clf_train, X_test, y_clf_test
     )
 
-    # Step 6b — Regression model ladder
+    # Step 6b - Regression model ladder
     reg_results, best_reg = train_regression_ladder(
         X_train, y_reg_train, X_test, y_reg_test
     )
 
-    # Step 7 — Print leaderboard
+    # Step 7 - Print leaderboard
     print_leaderboard(clf_results, reg_results)
 
-    # Step 8 — Save models
+    # Step 8 - Save models
     save_models(best_clf, best_reg)
 
     print("\n" + "#" * 60)
