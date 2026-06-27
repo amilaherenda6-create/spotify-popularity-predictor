@@ -1,0 +1,150 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+* {
+  font-family: 'Inter', sans-serif;
+}
+
+body, .reveal {
+  background-color: #F8FAFF;
+}
+
+.reveal h1, .reveal h2, .reveal h3 {
+  color: #0F62FE;
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.reveal .slides section {
+  text-align: center;
+}
+
+.reveal p, .reveal li {
+  text-align: center;
+  color: #1A1A2E;
+  line-height: 1.6;
+}
+
+.reveal ul {
+  list-style: none;
+  padding: 0;
+}
+
+.reveal ul li::before {
+  content: "● ";
+  color: #1DB954;
+  font-weight: bold;
+}
+
+.reveal table {
+  margin: 0 auto;
+  border-collapse: collapse;
+  width: 80%;
+}
+
+.reveal table th {
+  background-color: #0F62FE;
+  color: white;
+  padding: 10px 16px;
+  text-align: center;
+}
+
+.reveal table td {
+  padding: 8px 16px;
+  text-align: center;
+  color: #1A1A2E;
+}
+
+.reveal table tr:nth-child(even) {
+  background-color: #F0F4FF;
+}
+
+.reveal table tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.reveal .footer {
+  font-size: 0.45em;
+  color: #888;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.reveal .footer::before {
+  content: '';
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  background-image: url('imb_logo.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: middle;
+}
+
+.reveal .slide-number {
+  color: #0F62FE;
+  font-size: 0.5em;
+}
+
+.reveal strong {
+  color: #0F62FE;
+}
+
+/* ── Custom span classes ─────────────────────────────────────────────────── */
+.ibm-blue {
+  color: #0F62FE;
+  font-weight: bold;
+}
+
+.highlight {
+  color: #1DB954;
+  font-weight: bold;
+}
+
+.muted {
+  color: #888888;
+  font-size: 0.85em;
+}
+
+.small {
+  font-size: 0.75em;
+}
+
+/* ── Verdict boxes (live demo slide) ─────────────────────────────────────── */
+.verdict-yes {
+  background: #e8f5e9;
+  border-left: 4px solid #1DB954;
+  padding: 0.6em 1em;
+  border-radius: 6px;
+  text-align: left;
+  color: #1A1A2E;
+}
+
+.verdict-no {
+  background: #fff3e0;
+  border-left: 4px solid #FF9800;
+  padding: 0.6em 1em;
+  border-radius: 6px;
+  text-align: left;
+  color: #1A1A2E;
+}
+
+/* ── Blockquotes ─────────────────────────────────────────────────────────── */
+.reveal blockquote {
+  background: #F0F4FF;
+  border-left: 4px solid #0F62FE;
+  border-radius: 4px;
+  padding: 0.6em 1.2em;
+  color: #1A1A2E;
+  font-style: italic;
+  width: 90%;
+  margin: 0.5em auto;
+}
+
+/* ── Incremental lists ───────────────────────────────────────────────────── */
+.reveal .fragment {
+  color: #1A1A2E;
+}
