@@ -10,6 +10,7 @@ format:
     slide-number: true
     transition: fade
     center: true
+    navigation-mode: linear
     footer: "Modelling in Advanced Data Analytics · FELU Ljubljana · International Full-Time Master's Programme in Business and Organisation · Herend Amila · 03.07.2026"
 ---
 
