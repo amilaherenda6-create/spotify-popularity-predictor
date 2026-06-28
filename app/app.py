@@ -19,6 +19,7 @@ Set the backend URL via:
 import os
 import requests
 import streamlit as st
+import pandas as pd
 
 # =============================================================================
 # CONFIGURATION
@@ -825,6 +826,62 @@ with tab_eda:
             "Predicted vs actual popularity. "
             "Perfect predictions would lie on the red diagonal.",
         )
+
+    # ── Section 8: Model Leaderboard ──────────────────────────────────────────
+    st.markdown("### 🏆 Model Leaderboard — All Models Compared")
+    st.caption("Honest comparison of all 4 models on the held-out test set. Baseline (random guessing) is included so we can see how much each model improves.")
+
+    st.markdown("**Classification Task** — Can we predict if a song is popular? (popularity ≥ 70)")
+
+    clf_data = {
+        "Model": [
+            "1. Random Guessing (Baseline)",
+            "2. Logistic Regression",
+            "3. Decision Tree (depth=6)",
+            "4. XGBoost (tuned) ✅ Best"
+        ],
+        "Accuracy": ["95.2%", "95.2%", "95.3%", "95.8%"],
+        "F1 Score": ["0.000", "0.141", "0.143", "0.437"],
+        "ROC-AUC": ["0.500", "0.706", "0.708", "0.920"],
+        "Notes": [
+            "Always predicts NOT popular -- useless",
+            "Linear model, limited by class imbalance",
+            "Slightly better, starts to overfit",
+            "Best overall -- handles imbalance well"
+        ]
+    }
+
+    clf_df = pd.DataFrame(clf_data)
+    st.dataframe(clf_df, use_container_width=True, hide_index=True)
+
+    st.caption("⚠️ Note: Accuracy is misleading here — 95.2% of songs are NOT popular, so always guessing 'not popular' gives 95.2% accuracy. F1 Score and ROC-AUC are the honest metrics.")
+
+    st.divider()
+
+    st.markdown("**Regression Task** — Can we predict the exact popularity score (0–100)?")
+
+    reg_data = {
+        "Model": [
+            "1. Random Guessing (Baseline)",
+            "2. Ridge Regression",
+            "3. Decision Tree (depth=6)",
+            "4. XGBoost (tuned) ✅ Best"
+        ],
+        "R²": ["0.000", "0.062", "0.089", "0.380"],
+        "MAE": ["18.5", "17.2", "16.8", "13.1"],
+        "RMSE": ["22.1", "21.4", "21.1", "16.7"],
+        "Notes": [
+            "Always predicts mean score -- baseline floor",
+            "Captures some linear signal",
+            "Better but overfits on training data",
+            "Best -- explains 38% of score variance"
+        ]
+    }
+
+    reg_df = pd.DataFrame(reg_data)
+    st.dataframe(reg_df, use_container_width=True, hide_index=True)
+
+    st.caption("📊 R²=0.38 means our best model explains 38% of what makes a song popular. The remaining 62% comes from factors not in the audio data — marketing, artist fame, timing, social media.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
