@@ -200,13 +200,24 @@ section[data-testid="stSidebar"] {{
 
 /* ── Theme toggle (secondary button) ────────────────────────────────────── */
 .stButton > button[kind="secondary"] {{
-    background: {t['toggle_bg']}; color: {t['toggle_text']};
-    border: 1px solid {t['toggle_border']}; border-radius: 20px;
-    font-size: 0.82em; font-weight: 600; padding: 5px 14px;
-    transition: all 0.2s ease; letter-spacing: 0.3px;
+    background: linear-gradient(135deg, {t['toggle_bg']}, {t['toggle_hover']}) !important;
+    color: {t['text']} !important;
+    border: 1.5px solid #1DB954 !important;
+    border-radius: 50px !important;
+    font-size: 0.84em !important;
+    font-weight: 700 !important;
+    padding: 6px 18px !important;
+    letter-spacing: 0.4px !important;
+    transition: all 0.25s ease !important;
+    box-shadow: 0 0 10px rgba(29,185,84,0.15) !important;
+    min-width: 90px !important;
 }}
 .stButton > button[kind="secondary"]:hover {{
-    background: {t['toggle_hover']}; border-color: #1DB954; color: #1DB954;
+    background: linear-gradient(135deg,rgba(29,185,84,0.18),rgba(29,185,84,0.08)) !important;
+    border-color: #1DB954 !important;
+    color: #1DB954 !important;
+    box-shadow: 0 0 18px rgba(29,185,84,0.35) !important;
+    transform: translateY(-1px) !important;
 }}
 
 /* ── rs ─────────────────────────────────────────────────────────────── */
@@ -478,6 +489,18 @@ st.markdown("""
 /* Tab hover lift */
 .stTabs [data-baseweb="tab"] { transition: all 0.2s ease !important; }
 .stTabs [data-baseweb="tab"]:hover { transform: translateY(-2px) !important; }
+
+/* Main title animation */
+.app-title {
+    animation: titleDrop 0.8s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+@keyframes titleDrop {
+    from { opacity: 0; transform: translateY(-24px); letter-spacing: 4px; }
+    to   { opacity: 1; transform: translateY(0);     letter-spacing: -0.5px; }
+}
+.app-tagline {
+    animation: fadeIn 1.1s ease-in !important;
+}
 
 /* ── Compact layout — fit predictor on one screen ─────────────────────── */
 .block-container {
