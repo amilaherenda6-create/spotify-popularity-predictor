@@ -183,41 +183,42 @@ section[data-testid="stSidebar"] {{
 }}
 
 /* ── Primary button ──────────────────────────────────────────────────────── */
-.stButton > button[kind="primary"] {{
-    background: linear-gradient(135deg,#1DB954 0%,#17a349 100%);
-    color: #fff; border: none; border-radius: 50px;
-    font-size: 1.05em; font-weight: 700; letter-spacing: 0.8px;
-    padding: 0.7em 2em; transition: all 0.25s ease;
-    box-shadow: 0 4px 20px rgba(29,185,84,0.35); text-transform: uppercase;
+[data-testid="baseButton-primary"] {{
+    background: linear-gradient(135deg,#1DB954 0%,#17a349 100%) !important;
+    color: #fff !important; border: none !important; border-radius: 50px !important;
+    font-size: 1.05em !important; font-weight: 700 !important; letter-spacing: 0.8px !important;
+    padding: 0.7em 2em !important; transition: all 0.25s ease !important;
+    box-shadow: 0 4px 20px rgba(29,185,84,0.35) !important; text-transform: uppercase !important;
 }}
-.stButton > button[kind="primary"]:hover {{
-    transform: translateY(-2px); box-shadow: 0 6px 28px rgba(29,185,84,0.55);
+[data-testid="baseButton-primary"]:hover {{
+    transform: translateY(-2px) !important; box-shadow: 0 6px 28px rgba(29,185,84,0.55) !important;
 }}
-.stButton > button[kind="primary"]:active {{ transform: translateY(0); }}
-.stButton > button[kind="primary"]:disabled {{
-    background: {t['tab_hover']}; box-shadow: none; color: {t['text_vdim']};
+[data-testid="baseButton-primary"]:active {{ transform: translateY(0) !important; }}
+[data-testid="baseButton-primary"]:disabled {{
+    background: {t['tab_hover']} !important; box-shadow: none !important; color: {t['text_vdim']} !important;
 }}
 
-/* ── Theme toggle (secondary button) ────────────────────────────────────── */
-.stButton > button[kind="secondary"] {{
-    background: linear-gradient(135deg, {t['toggle_bg']}, {t['toggle_hover']}) !important;
+/* ── Theme toggle ────────────────────────────────────────────────────────── */
+[data-testid="baseButton-secondary"] {{
+    background: {t['toggle_bg']} !important;
     color: {t['text']} !important;
     border: 1.5px solid #1DB954 !important;
     border-radius: 50px !important;
-    font-size: 0.84em !important;
+    font-size: 0.85em !important;
     font-weight: 700 !important;
-    padding: 6px 18px !important;
-    letter-spacing: 0.4px !important;
+    padding: 7px 20px !important;
+    letter-spacing: 0.3px !important;
     transition: all 0.25s ease !important;
-    box-shadow: 0 0 10px rgba(29,185,84,0.15) !important;
-    min-width: 90px !important;
+    box-shadow: 0 2px 12px rgba(29,185,84,0.20) !important;
+    width: 100% !important;
+    white-space: nowrap !important;
 }}
-.stButton > button[kind="secondary"]:hover {{
-    background: linear-gradient(135deg,rgba(29,185,84,0.18),rgba(29,185,84,0.08)) !important;
+[data-testid="baseButton-secondary"]:hover {{
+    background: rgba(29,185,84,0.12) !important;
     border-color: #1DB954 !important;
     color: #1DB954 !important;
-    box-shadow: 0 0 18px rgba(29,185,84,0.35) !important;
-    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 20px rgba(29,185,84,0.35) !important;
+    transform: translateY(-2px) !important;
 }}
 
 /* ── rs ─────────────────────────────────────────────────────────────── */
@@ -452,12 +453,11 @@ st.markdown("""
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Predict button hover lift */
-.stButton > button {
+/* Predict button hover lift — primary only, never touches the toggle */
+[data-testid="baseButton-primary"] {
     transition: all 0.3s ease !important;
-    box-shadow: 0 0 0 0 rgba(29, 185, 84, 0.4) !important;
 }
-.stButton > button:hover {
+[data-testid="baseButton-primary"]:hover {
     transform: translateY(-2px) !important;
     box-shadow: 0 8px 25px rgba(29, 185, 84, 0.4) !important;
 }
@@ -522,7 +522,7 @@ hr { margin: 0.3rem 0 !important; }
 # =============================================================================
 # HEADER — title left, theme toggle right
 # =============================================================================
-hdr_col, btn_col = st.columns([7, 1])
+hdr_col, btn_col = st.columns([6, 1.4])
 
 with hdr_col:
     st.markdown("""
@@ -532,8 +532,8 @@ with hdr_col:
     """, unsafe_allow_html=True)
 
 with btn_col:
-    st.markdown("<div style='padding-top:0.4em'></div>", unsafe_allow_html=True)
-    toggle_label = "☀️ Light" if st.session_state.dark_mode else "🌙 Dark"
+    st.markdown("<div style='padding-top:0.6em'></div>", unsafe_allow_html=True)
+    toggle_label = "☀️ Light mode" if st.session_state.dark_mode else "🌙 Dark mode"
     if st.button(toggle_label, key="theme_toggle", help="Switch between dark and light theme"):
         st.session_state.dark_mode = not st.session_state.dark_mode
         st.rerun()
@@ -804,16 +804,16 @@ with tab_predict:
             <div class="guide-table-wrap">
                 <table>
                     <thead>
-                        <tr><th>Feature</th><th>Low value</th><th>High value</th></tr>
+                        <tr><th>Feature</th><th>⬇️ Low value</th><th>⬆️ High value</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>Danceability</td><td>Hard to dance to</td><td>Easy to dance to</td></tr>
-                        <tr><td>Energy</td><td>Calm, soft</td><td>Intense, loud</td></tr>
-                        <tr><td>Valence</td><td>Sad / angry</td><td>Happy / euphoric</td></tr>
-                        <tr><td>Acousticness</td><td>Electronic / synthetic</td><td>Acoustic instruments</td></tr>
-                        <tr><td>Speechiness</td><td>Pure music</td><td>Mostly spoken words</td></tr>
-                        <tr><td>Instrumentalness</td><td>Has vocals</td><td>No vocals</td></tr>
-                        <tr><td>Liveness</td><td>Studio recording</td><td>Live audience</td></tr>
+                        <tr><td>💃 Danceability</td><td>Hard to dance to</td><td>Easy to dance to</td></tr>
+                        <tr><td>⚡ Energy</td><td>Calm, soft</td><td>Intense, loud</td></tr>
+                        <tr><td>😊 Valence</td><td>Sad / angry</td><td>Happy / euphoric</td></tr>
+                        <tr><td>🎸 Acousticness</td><td>Electronic / synthetic</td><td>Acoustic instruments</td></tr>
+                        <tr><td>🎙️ Speechiness</td><td>Pure music</td><td>Mostly spoken words</td></tr>
+                        <tr><td>🎹 Instrumentalness</td><td>Has vocals</td><td>No vocals</td></tr>
+                        <tr><td>🎤 Liveness</td><td>Studio recording</td><td>Live audience</td></tr>
                     </tbody>
                 </table>
             </div>
