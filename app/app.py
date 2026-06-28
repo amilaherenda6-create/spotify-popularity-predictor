@@ -209,7 +209,7 @@ section[data-testid="stSidebar"] {{
     background: {t['toggle_hover']}; border-color: #1DB954; color: #1DB954;
 }}
 
-/* ── Sliders ─────────────────────────────────────────────────────────────── */
+/* ── rs ─────────────────────────────────────────────────────────────── */
 [data-testid="stTickBar"] {{ display: none; }}
 [data-testid="stSliderThumb"] {{
     background: #1DB954 !important;
@@ -428,6 +428,73 @@ hr {{ border: none; border-top: 1px solid {t['border']}; margin: 1em 0; }}
 
 # Inject theme CSS
 st.markdown(_build_css(_DARK if st.session_state.dark_mode else _LIGHT), unsafe_allow_html=True)
+
+# Animations + compact layout
+st.markdown("""
+<style>
+/* Fade in animation for the whole page */
+.main {
+    animation: fadeIn 0.5s ease-in;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Predict button hover lift */
+.stButton > button {
+    transition: all 0.3s ease !important;
+    box-shadow: 0 0 0 0 rgba(29, 185, 84, 0.4) !important;
+}
+.stButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(29, 185, 84, 0.4) !important;
+}
+
+/* Result panel slide-in */
+.stAlert {
+    animation: slideIn 0.4s ease-out !important;
+}
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Metric card hover */
+[data-testid="metric-container"] {
+    animation: popIn 0.3s ease-out !important;
+    transition: transform 0.2s ease !important;
+}
+[data-testid="metric-container"]:hover {
+    transform: translateY(-3px) !important;
+}
+
+/* Slider transition */
+.stSlider { transition: all 0.2s ease !important; }
+
+/* Section header fade */
+.stMarkdown h3 { animation: fadeIn 0.4s ease-in !important; }
+
+/* Tab hover lift */
+.stTabs [data-baseweb="tab"] { transition: all 0.2s ease !important; }
+.stTabs [data-baseweb="tab"]:hover { transform: translateY(-2px) !important; }
+
+/* ── Compact layout — fit predictor on one screen ─────────────────────── */
+.block-container {
+    padding-top: 1rem !important;
+    padding-bottom: 0rem !important;
+}
+.stSlider {
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+    margin-bottom: -8px !important;
+}
+.stSelectbox, .stCheckbox { margin-bottom: -10px !important; }
+.stMarkdown { margin-bottom: -5px !important; }
+hr { margin: 0.3rem 0 !important; }
+[data-testid="column"] { padding: 0 5px !important; }
+</style>
+""", unsafe_allow_html=True)
 
 # =============================================================================
 # HEADER — title left, theme toggle right
@@ -960,3 +1027,60 @@ with tab_about:
             <span class="val"><a href="{API_URL}/docs" style="color:#0F62FE;">{API_URL}/docs</a></span></div>
     </div>
     """, unsafe_allow_html=True)
+
+    # ── Live Model Stats ──────────────────────────────────────────────────────
+    st.divider()
+    st.markdown("### 📈 Live Model Performance")
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Training samples", "91,200", help="Songs used to train the model")
+    col2.metric("Test samples", "22,800", help="Songs used to evaluate the model")
+    col3.metric("Best AUC score", "0.920", help="Area under ROC curve — 1.0 is perfect")
+    col4.metric("Best R² score", "0.380", help="How much variance the model explains")
+
+    # ── How to interpret results ──────────────────────────────────────────────
+    st.divider()
+    st.markdown("### 🎯 How to Interpret the Prediction")
+    st.markdown("""
+| Score range | Meaning | What to do |
+|-------------|---------|------------|
+| 0 – 30 | Very unlikely to be popular | Reconsider arrangement or genre |
+| 30 – 50 | Below average popularity | Some potential, needs work |
+| 50 – 70 | Average popularity | Solid track, could reach mainstream |
+| 70 – 85 | Likely popular ✅ | Strong commercial potential |
+| 85 – 100 | Very likely popular 🔥 | Hit potential — prioritize release |
+""")
+
+    # ── Fun Facts ─────────────────────────────────────────────────────────────
+    st.divider()
+    st.markdown("### 🎵 Interesting Findings from 114,000 Songs")
+    col_a, col_b, col_c = st.columns(3)
+    with col_a:
+        st.info("🎭 **Top genre**\n\npop-film scores highest average popularity across all genres")
+    with col_b:
+        st.info("📊 **Class imbalance**\n\nOnly 4.8% of songs score ≥70. Popularity is rare!")
+    with col_c:
+        st.info("🔊 **Loudness matters**\n\nLouder songs (closer to 0 dB) tend to score higher")
+    col_d, col_e, col_f = st.columns(3)
+    with col_d:
+        st.info("💃 **Dance to win**\n\nHigh danceability + high energy = stronger popularity signal")
+    with col_e:
+        st.info("🎸 **Genre is king**\n\nGenre alone explains more variance than any single audio feature")
+    with col_f:
+        st.info("⏱️ **Sweet spot duration**\n\n3–4 minute songs perform best on average")
+
+    # ── Project Links ─────────────────────────────────────────────────────────
+    st.divider()
+    st.markdown("### 🔗 Project Links")
+    col_g, col_h = st.columns(2)
+    with col_g:
+        st.markdown("""
+**📁 GitHub Repository**
+All code, models, and data pipeline
+[github.com/amilaherenda6/spotify-popularity-predictor](https://github.com/amilaherenda6/spotify-popularity-predictor)
+""")
+    with col_h:
+        st.markdown(f"""
+**🚀 API Documentation**
+FastAPI backend with Swagger UI
+[{API_URL}/docs]({API_URL}/docs)
+""")
