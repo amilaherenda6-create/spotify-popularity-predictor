@@ -1,7 +1,7 @@
 ﻿---
 title: "Spotify Popularity Predictor"
 subtitle: "Can audio features predict a song's success?"
-author: "Herend Amila"
+author: "Herenda Amila"
 date: "03.07.2026"
 format:
   revealjs:
@@ -21,7 +21,7 @@ format:
     max-scale: 2.0
     slide-level: 1
     title-slide: false
-    footer: "Modelling in Advanced Data Analytics · FELU Ljubljana · Herend Amila · 03.07.2026"
+    footer: "Modelling in Advanced Data Analytics · FELU Ljubljana · Herenda Amila · 03.07.2026"
 ---
 
 ::: {.title-slide-wrap}
@@ -40,7 +40,7 @@ Can audio features predict a song's success?
 ::: {.title-info}
 | | |
 |---|---|
-| Student | Herend Amila |
+| Student | Herenda Amila |
 | Course | Modelling in Advanced Data Analytics |
 | Professors | Uroš Godnov · Aleš Gorišek |
 | Programme | International Full-Time Master's in Business and Organisation |
@@ -342,7 +342,63 @@ Predicted score: **20.8 / 100**
 ::: {.closing-box}
 **Key takeaway:** Popularity is about 38% sound and 62% everything else.
 
-**Herend Amila** · Modelling in Advanced Data Analytics · FELU · 03.07.2026
+**Herenda Amila** · Modelling in Advanced Data Analytics · FELU · 03.07.2026
 
 Professors: **Uroš Godnov** · **Aleš Gorišek**
 :::
+
+---
+
+# Tools We Used
+
+**The technology behind this project — explained simply:**
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.green-card}
+**Data & Modelling**
+
+- 🐍 **Python** — our programming language
+- 🤖 **XGBoost** — our prediction engine
+- 📊 **scikit-learn** — model training toolkit
+- 🐼 **pandas** — data cleaning and analysis
+:::
+:::
+::: {.column width="50%"}
+::: {.blue-card}
+**App & Deployment**
+
+- 🌐 **Streamlit** — our web app builder
+- ⚡ **FastAPI** — connects app to model
+- 🤝 **Claude Code** — AI assistant that helped write the code
+- 📁 **GitHub** — where we store and share everything
+:::
+:::
+:::
+
+---
+
+# Thank You
+
+::: {.title-logos}
+![](imb_logo.png){height=60px}
+![](spotify_logo.png){height=60px}
+:::
+
+**Herenda Amila**
+
+Modelling in Advanced Data Analytics
+
+Faculty of Economics Ljubljana (FELU)
+
+International Full-Time Master's Programme in Business and Organisation
+
+03.07.2026
+
+::: {.closing-box}
+Professors: **Uroš Godnov** · **Aleš Gorišek**
+:::
+
+**🌐 Try the app:**
+
+[spotify-popularity-predictor-dkb249nsp7axa3hkxdpkht.streamlit.app](https://spotify-popularity-predictor-dkb249nsp7axa3hkxdpkht.streamlit.app)
