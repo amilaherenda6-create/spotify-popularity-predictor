@@ -50,8 +50,6 @@ Can audio features predict a song's success?
 
 :::
 
----
-
 # The Problem
 
 > *Every year, millions of songs are uploaded to Spotify. Most are never heard. A handful become global hits.*
@@ -64,8 +62,6 @@ Can audio features predict a song's success?
 **Our approach:** Analyse only the **audio characteristics** of a song — no artist name, no label, no marketing budget.
 
 *If the sound itself contains the secret to success, our tool will find it.*
-
----
 
 # The Data
 
@@ -91,8 +87,6 @@ Can audio features predict a song's success?
 | Acousticness | Live vs electronic |
 :::
 :::
-
----
 
 # Our Approach
 
@@ -132,8 +126,6 @@ The closer to 100, the bigger the hit
 | 3 | Decision Tree (depth = 6) |
 | 4 | **XGBoost — fine-tuned for best results** |
 
----
-
 # What We Found
 
 ::: {.columns}
@@ -165,8 +157,6 @@ Pop, dance, and hip-hop score highest.
 :::
 :::
 
----
-
 # How Well Does It Work?
 
 **Yes/No prediction — can we identify a hit?**
@@ -188,8 +178,6 @@ Pop, dance, and hip-hop score highest.
 | **XGBoost (best)** | **±17 points** | **38% better** |
 
 *All results tested on songs the model had never seen before.*
-
----
 
 # 🏆 Model Leaderboard
 
@@ -224,8 +212,6 @@ Pop, dance, and hip-hop score highest.
 :::
 :::
 
----
-
 # What Matters Most?
 
 **Audio signals that most influence popularity:**
@@ -254,8 +240,6 @@ Pop, dance, and hip-hop score highest.
 :::
 
 We also created **new signals** by combining features — a "club score" (danceability × energy) improved predictions beyond any single measurement.
-
----
 
 # Try It Live
 
@@ -290,8 +274,6 @@ Predicted score: **20.8 / 100**
 
 *Adjust any audio slider and get an instant prediction*
 
----
-
 # Honest Limitations
 
 **What the model does well ✅**
@@ -310,8 +292,6 @@ Predicted score: **20.8 / 100**
 
 > Audio features explain only **38%** of why a song becomes popular.  
 > The remaining **62%** is artist fame, marketing, timing, and everything outside the sound.
-
----
 
 # Recommendations
 
@@ -347,8 +327,6 @@ Predicted score: **20.8 / 100**
 Professors: **Uroš Godnov** · **Aleš Gorišek**
 :::
 
----
-
 # Tools We Used
 
 **The technology behind this project — explained simply:**
@@ -375,8 +353,6 @@ Professors: **Uroš Godnov** · **Aleš Gorišek**
 :::
 :::
 :::
-
----
 
 # Thank You
 
