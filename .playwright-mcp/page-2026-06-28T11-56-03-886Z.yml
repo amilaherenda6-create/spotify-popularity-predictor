@@ -1,0 +1,81 @@
+- generic [active] [ref=e1]:
+  - application [ref=e2]:
+    - generic:
+      - generic [ref=e3]:
+        - heading "Spotify Popularity Predictor" [level=1] [ref=e4]
+        - paragraph [ref=e5]: Can audio features predict a song’s success?
+        - generic [ref=e8]: Herenda Amila
+        - paragraph [ref=e9]: 2026-03-07
+      - generic:
+        - heading [level=2]: Spotify Popularity Predictor
+        - paragraph:
+          - strong: Can audio features predict a song’s success?
+        - generic:
+          - paragraph:
+            - img
+            - img
+        - generic:
+          - paragraph:
+            - strong: "Student:"
+            - text: Herenda Amila ·
+            - strong: "Course:"
+            - text: Modelling in Advanced Data Analytics ·
+            - strong: "Date:"
+            - text: 03.07.2026
+            - strong: "Professors:"
+            - text: Uroš Godnov · Aleš Gorišek ·
+            - strong: "University:"
+            - text: Faculty of Economics Ljubljana (FELU)
+      - generic:
+        - heading [level=2]: The Problem
+        - blockquote:
+          - paragraph:
+            - emphasis: Every year, millions of songs are uploaded to Spotify. Most are never heard. A handful become global hits.
+        - paragraph:
+          - strong: "The question every artist, producer, and label manager asks:"
+        - list:
+          - listitem:
+            - text: ▸ 🎯
+            - strong: Will this song be a hit?
+            - text: (Yes or No)
+          - listitem:
+            - text: ▸ 📊
+            - strong: How popular will it be?
+            - text: (on a scale of 0 to 100)
+        - paragraph:
+          - strong: "Our approach:"
+          - text: Analyse only the
+          - strong: audio characteristics
+          - text: of a song — no artist name, no label, no marketing budget.
+        - paragraph:
+          - emphasis: If the sound itself contains the secret to success, our tool will find it.
+      - text: ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸
+    - link [ref=e11] [cursor=pointer]:
+      - /url: "#"
+    - paragraph [ref=e14]: Modelling in Advanced Data Analytics · FELU · International Full-Time Master’s Programme in Business and Organisation · 03.07.2026
+    - link "1 / 14" [ref=e19] [cursor=pointer]:
+      - /url: "#/title-slide"
+    - complementary:
+      - button "next slide" [ref=e20] [cursor=pointer]
+    - text: Speaker notes
+    - generic [ref=e23]: Spotify Popularity Predictor Can audio features predict a song’s success? Herenda Amila 2026-03-07
+  - navigation [ref=e24]:
+    - list [ref=e25]:
+      - listitem [ref=e26] [cursor=pointer]: Slides
+      - listitem [ref=e28] [cursor=pointer]: Tools
+      - listitem [ref=e30] [cursor=pointer]: Close
+    - list [ref=e33]:
+      - listitem [ref=e34] [cursor=pointer]: Spotify Popularity Predictor
+      - listitem [ref=e35] [cursor=pointer]: Spotify Popularity Predictor
+      - listitem [ref=e36] [cursor=pointer]: The Problem
+      - listitem [ref=e37] [cursor=pointer]: The Data
+      - listitem [ref=e38] [cursor=pointer]: Our Approach
+      - listitem [ref=e39] [cursor=pointer]: Classification Goal
+      - listitem [ref=e40] [cursor=pointer]: Regression Goal
+      - listitem [ref=e41] [cursor=pointer]: Data Insights
+      - listitem [ref=e42] [cursor=pointer]: Performance
+      - listitem [ref=e43] [cursor=pointer]: What Matters Most
+      - listitem [ref=e44] [cursor=pointer]: Deployment
+      - listitem [ref=e45] [cursor=pointer]: Limitations
+      - listitem [ref=e46] [cursor=pointer]: Recommendations
+      - listitem [ref=e47] [cursor=pointer]: Thank You

@@ -81,51 +81,18 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="spotify-popularity-predictor" class="level1 title-main title-slide-wrap">
-<h1 class="title-main">Spotify Popularity Predictor</h1>
-<div class="title-sub">
-<p>Can audio features predict a song’s success?</p>
+<section id="spotify-popularity-predictor" class="level2">
+<h2 class="anchored" data-anchor-id="spotify-popularity-predictor">Spotify Popularity Predictor</h2>
+<p><strong>Can audio features predict a song’s success?</strong></p>
+<div style="display:flex; justify-content:center; align-items:center; gap:32px; margin-top:24px;">
+<p><img src="imb_logo.png" height="72"> <img src="spotify_logo.png" height="72"></p>
 </div>
-<div class="title-logos">
-<p><img src="imb_logo.png" height="60"> <img src="spotify_logo.png" height="60"></p>
-</div>
-<div class="title-info">
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<tbody>
-<tr class="odd">
-<td>Student</td>
-<td>Herenda Amila</td>
-</tr>
-<tr class="even">
-<td>Course</td>
-<td>Modelling in Advanced Data Analytics</td>
-</tr>
-<tr class="odd">
-<td>Professors</td>
-<td>Uroš Godnov · Aleš Gorišek</td>
-</tr>
-<tr class="even">
-<td>Programme</td>
-<td>International Full-Time Master’s in Business and Organisation</td>
-</tr>
-<tr class="odd">
-<td>Date</td>
-<td>03.07.2026</td>
-</tr>
-<tr class="even">
-<td>University</td>
-<td>FELU — Faculty of Economics Ljubljana</td>
-</tr>
-</tbody>
-</table>
+<div style="margin-top:22px; font-size:0.84em; color:#4C5764; text-align:center; line-height:1.6; max-width:760px;">
+<p><strong>Student:</strong> Herenda Amila · <strong>Course:</strong> Modelling in Advanced Data Analytics · <strong>Date:</strong> 03.07.2026 <br> <strong>Professors:</strong> Uroš Godnov · Aleš Gorišek · <strong>University:</strong> Faculty of Economics Ljubljana (FELU)</p>
 </div>
 </section>
-<section id="the-problem" class="level1">
-<h1>The Problem</h1>
+<section id="the-problem" class="level2">
+<h2 class="anchored" data-anchor-id="the-problem">The Problem</h2>
 <blockquote class="blockquote">
 <p><em>Every year, millions of songs are uploaded to Spotify. Most are never heard. A handful become global hits.</em></p>
 </blockquote>
@@ -137,440 +104,197 @@ ul.task-list li input[type="checkbox"] {
 <p><strong>Our approach:</strong> Analyse only the <strong>audio characteristics</strong> of a song — no artist name, no label, no marketing budget.</p>
 <p><em>If the sound itself contains the secret to success, our tool will find it.</em></p>
 </section>
-<section id="the-data" class="level1">
-<h1>The Data</h1>
-<p><strong>Source:</strong> Spotify Tracks Dataset (Kaggle 2022) · 114,000 tracks · 21 audio features · 114 genres</p>
-<div class="columns">
-<div class="column" style="width:45%;">
-<p><strong>What we worked with</strong></p>
+<section id="the-data" class="level2">
+<h2 class="anchored" data-anchor-id="the-data">The Data</h2>
+<p><strong>What we built the model on</strong></p>
 <ul>
-<li>📦 114,000 Spotify songs</li>
-<li>🎸 114 different music genres</li>
-<li>📐 21 measurements per song</li>
-<li>🎯 Target: popularity score (0–100)</li>
+<li>114,000 Spotify tracks</li>
+<li>21 audio features per song</li>
+<li>114 music genres</li>
 </ul>
-</div><div class="column" style="width:55%;">
+<p><strong>Key signal set</strong></p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Feature</th>
-<th>What it measures</th>
+<th>Why it matters</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>Danceability</td>
-<td>Suitability for dancing</td>
+<td>Higher values often mean stronger playlist appeal</td>
 </tr>
 <tr class="even">
 <td>Energy</td>
-<td>Intensity and activity</td>
+<td>Intense songs tend to attract more listeners</td>
 </tr>
 <tr class="odd">
 <td>Loudness</td>
-<td>Overall loudness (dB)</td>
+<td>Louder tracks stand out in stream-heavy playlists</td>
 </tr>
 <tr class="even">
 <td>Valence</td>
-<td>Positiveness / mood</td>
+<td>Mood and emotion influence sharing and engagement</td>
 </tr>
 <tr class="odd">
 <td>Tempo</td>
-<td>Speed (beats per minute)</td>
+<td>Faster beats perform better in pop and dance genres</td>
 </tr>
 <tr class="even">
 <td>Acousticness</td>
-<td>Live vs electronic</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</section>
-<section id="our-approach" class="level1">
-<h1>Our Approach</h1>
-<p><strong>We answer two questions simultaneously:</strong></p>
-<div class="columns">
-<div class="column" style="width:48%;">
-<div class="green-card">
-<p><strong>🎯 Yes/No Prediction</strong></p>
-<p><em>Will this song be popular?</em></p>
-<p>A score of <strong>70 or above</strong> = Popular ✅</p>
-<p>Below 70 = Not yet popular</p>
-</div>
-</div><div class="column" style="width:48%;">
-<div class="blue-card">
-<p><strong>📊 Score Prediction</strong></p>
-<p><em>How popular will it actually be?</em></p>
-<p>Predicts the <strong>exact number</strong> (0 to 100)</p>
-<p>The closer to 100, the bigger the hit</p>
-</div>
-</div>
-</div>
-<p><strong>We tested 4 approaches — from simple to powerful:</strong></p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Step</th>
-<th>What we tried</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Random guessing — our starting point</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Logistic Regression / Ridge Regression</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Decision Tree (depth = 6)</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td><strong>XGBoost — fine-tuned for best results</strong></td>
+<td>Lower values usually align with mainstream hits</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="what-we-found" class="level1">
-<h1>What We Found</h1>
-<div class="columns">
-<div class="column" style="width:50%;">
-<p><strong>Finding 1 — Most songs are NOT popular</strong></p>
-<p>Only <strong>1 in 20 songs</strong> reaches the top tier (score ≥ 70)</p>
+<section id="our-approach" class="level2">
+<h2 class="anchored" data-anchor-id="our-approach">Our Approach</h2>
+<p><strong>A practical prediction workflow</strong></p>
 <ul>
-<li>5,465 popular songs out of 106,907 total</li>
-<li>Hits are genuinely rare — prediction is hard</li>
+<li>Clean the dataset and filter unusable records</li>
+<li>Train classification and regression models</li>
+<li>Compare against simple baselines</li>
+<li>Deploy a live app for real-time scoring</li>
 </ul>
-<p><strong>Finding 2 — Most songs score low</strong></p>
-<p>Majority cluster between 20 and 40. Many new or obscure tracks score 0.</p>
-</div><div class="column" style="width:50%;">
-<p><strong>Finding 3 — No single signal decides everything</strong></p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Signal</th>
-<th style="text-align: center;">Connection</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Loudness</td>
-<td style="text-align: center;">Moderate positive</td>
-</tr>
-<tr class="even">
-<td>Energy</td>
-<td style="text-align: center;">Slight positive</td>
-</tr>
-<tr class="odd">
-<td>Acousticness</td>
-<td style="text-align: center;">Slight negative</td>
-</tr>
-<tr class="even">
-<td>Instrumentalness</td>
-<td style="text-align: center;">Moderate negative</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Finding 4 — Genre is the strongest predictor</strong></p>
-<p>Pop, dance, and hip-hop score highest.</p>
-</div>
-</div>
 </section>
-<section id="how-well-does-it-work" class="level1">
-<h1>How Well Does It Work?</h1>
-<p><strong>Yes/No prediction — can we identify a hit?</strong></p>
+<section id="classification-goal" class="level2">
+<h2 class="anchored" data-anchor-id="classification-goal">Classification Goal</h2>
+<p><strong>Can this song be popular?</strong></p>
+<ul>
+<li>We define a hit as popularity ≥ 70</li>
+<li>The model outputs a yes/no recommendation</li>
+<li>This is a fast filter for release decisions</li>
+</ul>
+</section>
+<section id="regression-goal" class="level2">
+<h2 class="anchored" data-anchor-id="regression-goal">Regression Goal</h2>
+<p><strong>How popular will the song score?</strong></p>
+<ul>
+<li>Predicts Spotify popularity on a 0–100 scale</li>
+<li>Gives a more nuanced view than binary hit/no-hit</li>
+<li>Helps compare tracks within the same release batch</li>
+</ul>
+</section>
+<section id="data-insights" class="level2">
+<h2 class="anchored" data-anchor-id="data-insights">Data Insights</h2>
+<ul>
+<li>Only 1 in 20 songs reaches the hit threshold (score ≥ 70)</li>
+<li>Most songs cluster between 20 and 40 popularity points</li>
+<li>Loud, energetic, danceable tracks perform better</li>
+<li>Genre is the strongest single predictor</li>
+</ul>
+</section>
+<section id="performance" class="level2">
+<h2 class="anchored" data-anchor-id="performance">Performance</h2>
+<p><strong>Classification results</strong></p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
-<th>Approach</th>
-<th style="text-align: center;">Hit detection</th>
-<th style="text-align: center;">Overall reliability</th>
+<th>Model</th>
+<th>F1 score</th>
+<th>AUC</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Random guessing</td>
-<td style="text-align: center;">0% — misses every hit</td>
-<td style="text-align: center;">50%</td>
+<td>Random baseline</td>
+<td>0.00</td>
+<td>0.50</td>
 </tr>
 <tr class="even">
-<td>Logistic Regression</td>
-<td style="text-align: center;">Finds some hits</td>
-<td style="text-align: center;">71%</td>
+<td>Logistic regression</td>
+<td>0.14</td>
+<td>0.71</td>
 </tr>
 <tr class="odd">
-<td>Decision Tree</td>
-<td style="text-align: center;">Similar to above</td>
-<td style="text-align: center;">72%</td>
+<td>Decision tree</td>
+<td>0.14</td>
+<td>0.71</td>
 </tr>
 <tr class="even">
-<td><strong>XGBoost (best)</strong></td>
-<td style="text-align: center;"><strong>Finds 76 in 100 hits</strong></td>
-<td style="text-align: center;"><strong>92%</strong></td>
+<td><strong>XGBoost</strong></td>
+<td><strong>0.44</strong></td>
+<td><strong>0.92</strong></td>
 </tr>
 </tbody>
 </table>
-<p><strong>Score prediction — how close are our guesses?</strong></p>
+<p><strong>Regression results</strong></p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
-<th>Approach</th>
+<th>Model</th>
+<th>R²</th>
 <th>Average error</th>
-<th>Improvement</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Always predict average</td>
-<td>±22 popularity points</td>
-<td>—</td>
+<td>Baseline average</td>
+<td>0.00</td>
+<td>±22 points</td>
 </tr>
 <tr class="even">
-<td>Logistic / Ridge</td>
+<td>Ridge regression</td>
+<td>0.06</td>
 <td>±21 points</td>
-<td>4% better</td>
 </tr>
 <tr class="odd">
-<td>Decision Tree</td>
+<td>Decision tree</td>
+<td>0.09</td>
 <td>±21 points</td>
-<td>9% better</td>
 </tr>
 <tr class="even">
-<td><strong>XGBoost (best)</strong></td>
+<td><strong>XGBoost</strong></td>
+<td><strong>0.38</strong></td>
 <td><strong>±17 points</strong></td>
-<td><strong>38% better</strong></td>
 </tr>
 </tbody>
 </table>
-<p><em>All results tested on songs the model had never seen before.</em></p>
 </section>
-<section id="model-leaderboard" class="level1">
-<h1>🏆 Model Leaderboard</h1>
-<div class="columns">
-<div class="column" style="width:50%;">
-<div class="green-card">
-<p><strong>Classification — Is it a hit?</strong></p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Model</th>
-<th style="text-align: center;">F1</th>
-<th style="text-align: center;">AUC</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Random guessing</td>
-<td style="text-align: center;">0.000</td>
-<td style="text-align: center;">0.50</td>
-</tr>
-<tr class="even">
-<td>Logistic Regression</td>
-<td style="text-align: center;">0.141</td>
-<td style="text-align: center;">0.71</td>
-</tr>
-<tr class="odd">
-<td>Decision Tree</td>
-<td style="text-align: center;">0.143</td>
-<td style="text-align: center;">0.71</td>
-</tr>
-<tr class="even">
-<td><strong>XGBoost ✅</strong></td>
-<td style="text-align: center;"><strong>0.437</strong></td>
-<td style="text-align: center;"><strong>0.92</strong></td>
-</tr>
-</tbody>
-</table>
-<p><em>F1 and AUC are the honest metrics — accuracy alone misleads.</em></p>
-</div>
-</div><div class="column" style="width:50%;">
-<div class="blue-card">
-<p><strong>Regression — Exact score?</strong></p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Model</th>
-<th style="text-align: center;">R²</th>
-<th style="text-align: center;">RMSE</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Random guessing</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">22.1</td>
-</tr>
-<tr class="even">
-<td>Ridge Regression</td>
-<td style="text-align: center;">0.06</td>
-<td style="text-align: center;">21.4</td>
-</tr>
-<tr class="odd">
-<td>Decision Tree</td>
-<td style="text-align: center;">0.09</td>
-<td style="text-align: center;">21.1</td>
-</tr>
-<tr class="even">
-<td><strong>XGBoost ✅</strong></td>
-<td style="text-align: center;"><strong>0.38</strong></td>
-<td style="text-align: center;"><strong>16.7</strong></td>
-</tr>
-</tbody>
-</table>
-<p><em>R²=0.38 means the model explains 38% of popularity variance.</em></p>
-</div>
-</div>
-</div>
+<section id="what-matters-most" class="level2">
+<h2 class="anchored" data-anchor-id="what-matters-most">What Matters Most</h2>
+<ul>
+<li>Genre is the most powerful signal</li>
+<li>Loudness and energy consistently help tracks score higher</li>
+<li>Danceability supports playlist performance</li>
+<li>Acoustic, slow, and instrumental songs tend to score lower</li>
+</ul>
 </section>
-<section id="what-matters-most" class="level1">
-<h1>What Matters Most?</h1>
-<p><strong>Audio signals that most influence popularity:</strong></p>
-<div class="columns">
-<div class="column" style="width:50%;">
-<div class="green-card">
-<p><strong>Boosts popularity ↑</strong></p>
+<section id="deployment" class="level2">
+<h2 class="anchored" data-anchor-id="deployment">Deployment</h2>
 <ul>
-<li>🎵 <strong>Genre</strong> — pop, dance, hip-hop lead</li>
-<li>🔊 <strong>Loudness</strong> — louder = more streams</li>
-<li>💃 <strong>Danceability</strong> — playlists reward it</li>
-<li>⚡ <strong>Energy</strong> — intense tracks perform better</li>
+<li>Streamlit app for live song scoring</li>
+<li>FastAPI backend for model serving</li>
+<li>Simple audio-feature input form</li>
+<li>Clear results for artists and label teams</li>
 </ul>
-</div>
-</div><div class="column" style="width:50%;">
-<div class="blue-card">
-<p><strong>Reduces popularity ↓</strong></p>
-<ul>
-<li>🎹 <strong>Instrumentalness</strong> — no vocals = lower score</li>
-<li>🎸 <strong>Acousticness</strong> — electronic beats win</li>
-<li>😴 <strong>Duration</strong> — very long tracks score lower</li>
-<li>🎙️ <strong>Speechiness</strong> — too much talking hurts</li>
-</ul>
-</div>
-</div>
-</div>
-<p>We also created <strong>new signals</strong> by combining features — a “club score” (danceability × energy) improved predictions beyond any single measurement.</p>
 </section>
-<section id="try-it-live" class="level1">
-<h1>Try It Live</h1>
-<p><strong>🌐 Open the app:</strong></p>
-<p><strong><a href="https://spotify-popularity-predictor-dkb249nsp7axa3hkxdpkht.streamlit.app">spotify-popularity-predictor-dkb249nsp7axa3hkxdpkht.streamlit.app</a></strong></p>
-<div class="columns">
-<div class="column" style="width:50%;">
-<p><strong>High-popularity prediction</strong></p>
-<p><em>Pop song: high danceability + energy</em></p>
-<div class="verdict-yes">
-<p>✅ <strong>Popular</strong> — Confidence: 92.6%</p>
-<p>Predicted score: <strong>53.6 / 100</strong></p>
-</div>
-</div><div class="column" style="width:50%;">
-<p><strong>Low-popularity prediction</strong></p>
-<p><em>Classical instrumental: quiet + acoustic</em></p>
-<div class="verdict-no">
-<p>⚠️ <strong>Not popular</strong> — Confidence: 0.07%</p>
-<p>Predicted score: <strong>20.8 / 100</strong></p>
-</div>
-</div>
-</div>
-<p><em>Adjust any audio slider and get an instant prediction</em></p>
+<section id="limitations" class="level2">
+<h2 class="anchored" data-anchor-id="limitations">Limitations</h2>
+<ul>
+<li>Cannot predict viral social momentum</li>
+<li>Does not measure artistic quality</li>
+<li>Is weaker for niche genres</li>
+<li>Should not replace expert human judgment</li>
+</ul>
 </section>
-<section id="honest-limitations" class="level1">
-<h1>Honest Limitations</h1>
-<p><strong>What the model does well ✅</strong></p>
+<section id="recommendations" class="level2">
+<h2 class="anchored" data-anchor-id="recommendations">Recommendations</h2>
 <ul>
-<li>Identifies popular vs unpopular songs reliably</li>
-<li><strong>Finds 76 out of every 100 genuine hits</strong></li>
-<li>Useful as a first filter for large song catalogues</li>
-<li>Confirms genre, energy, and danceability are real signals</li>
+<li>Use this tool as an early screening filter</li>
+<li>Prioritise energetic, danceable tracks for mainstream appeal</li>
+<li>Combine model output with creative review</li>
+<li>Treat prediction as guidance, not the final decision</li>
 </ul>
-<p><strong>What the model cannot do ❌</strong></p>
-<ul>
-<li><strong>Predict viral hits</strong> — timing and social media are invisible to audio data</li>
-<li><strong>Evaluate artistic quality</strong> — it rewards commercial patterns</li>
-<li><strong>Work for niche genres</strong> — too few training examples</li>
-<li><strong>Replace human judgment</strong> — past patterns cannot predict future trends</li>
-</ul>
-<blockquote class="blockquote">
-<p>Audio features explain only <strong>38%</strong> of why a song becomes popular.<br>
-The remaining <strong>62%</strong> is artist fame, marketing, timing, and everything outside the sound.</p>
-</blockquote>
 </section>
-<section id="recommendations" class="level1">
-<h1>Recommendations</h1>
-<div class="columns">
-<div class="column" style="width:50%;">
-<div class="green-card">
-<p><strong>For artists &amp; producers</strong></p>
-<ul>
-<li>Choose <strong>genre intentionally</strong> — commercial genres attract more streams</li>
-<li>Aim for <strong>high energy and danceability</strong> for mainstream success</li>
-<li>Keep tracks <strong>under 4 minutes</strong></li>
-<li>Produce <strong>loudly</strong> (within streaming standards)</li>
-</ul>
-<p><em>These are data patterns — not rules. Originality still matters.</em></p>
-</div>
-</div><div class="column" style="width:50%;">
-<div class="blue-card">
-<p><strong>For labels &amp; A&amp;R teams</strong></p>
-<ul>
-<li>Use this tool as a <strong>first-pass filter</strong> on demo submissions</li>
-<li>Apply it to <strong>surface newly uploaded tracks</strong> before any listening data exists</li>
-<li>Do <strong>not</strong> use it as the final gatekeeper — human taste remains essential</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="closing-box">
-<p><strong>Key takeaway:</strong> Popularity is about 38% sound and 62% everything else.</p>
-<p><strong>Herenda Amila</strong> · Modelling in Advanced Data Analytics · FELU · 03.07.2026</p>
-<p>Professors: <strong>Uroš Godnov</strong> · <strong>Aleš Gorišek</strong></p>
-</div>
-</section>
-<section id="tools-we-used" class="level1">
-<h1>Tools We Used</h1>
-<p><strong>The technology behind this project — explained simply:</strong></p>
-<div class="columns">
-<div class="column" style="width:50%;">
-<div class="green-card">
-<p><strong>Data &amp; Modelling</strong></p>
-<ul>
-<li>🐍 <strong>Python</strong> — our programming language</li>
-<li>🤖 <strong>XGBoost</strong> — our prediction engine</li>
-<li>📊 <strong>scikit-learn</strong> — model training toolkit</li>
-<li>🐼 <strong>pandas</strong> — data cleaning and analysis</li>
-</ul>
-</div>
-</div><div class="column" style="width:50%;">
-<div class="blue-card">
-<p><strong>App &amp; Deployment</strong></p>
-<ul>
-<li>🌐 <strong>Streamlit</strong> — our web app builder</li>
-<li>⚡ <strong>FastAPI</strong> — connects app to model</li>
-<li>🤝 <strong>Claude Code</strong> — AI assistant that helped write the code</li>
-<li>📁 <strong>GitHub</strong> — where we store and share everything</li>
-</ul>
-</div>
-</div>
-</div>
-</section>
-<section id="thank-you" class="level1">
-<h1>Thank You</h1>
-<div class="title-logos">
-<p><img src="imb_logo.png" height="60"> <img src="spotify_logo.png" height="60"></p>
-</div>
-<p><strong>Herenda Amila</strong></p>
-<p>Modelling in Advanced Data Analytics</p>
-<p>Faculty of Economics Ljubljana (FELU)</p>
-<p>International Full-Time Master’s Programme in Business and Organisation</p>
-<p>03.07.2026</p>
-<div class="closing-box">
-<p>Professors: <strong>Uroš Godnov</strong> · <strong>Aleš Gorišek</strong></p>
-</div>
-<p><strong>🌐 Try the app:</strong></p>
-<p><a href="https://spotify-popularity-predictor-dkb249nsp7axa3hkxdpkht.streamlit.app">spotify-popularity-predictor-dkb249nsp7axa3hkxdpkht.streamlit.app</a></p>
+<section id="thank-you" class="level2">
+<h2 class="anchored" data-anchor-id="thank-you">Thank You</h2>
+<p><strong>Thank you for your attention.</strong></p>
+<p><strong>Student:</strong> Herenda Amila</p>
+<p><strong>Course:</strong> Modelling in Advanced Data Analytics</p>
+<p><strong>Professors:</strong> Uroš Godnov · Aleš Gorišek</p>
+<p><strong>App demo:</strong> https://spotify-popularity-predictor-dkb249nsp7axa3hkxdpkht.streamlit.app</p>
 </section>
 
 </main>

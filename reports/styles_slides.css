@@ -13,7 +13,7 @@
 .reveal .slides section {
   background: #0A0A0F !important;
   color: #DDDDDD !important;
-  padding: 44px 68px 36px !important;
+  padding: 18px 60px 56px !important;
   box-sizing: border-box !important;
   text-align: left !important;
   /* NO display:flex  NO height:100%  NO overflow:hidden */
@@ -86,8 +86,8 @@
   color: #FFFFFF !important;
   letter-spacing: -0.8px !important;
   line-height: 1.1 !important;
-  margin: 0 0 0.5em !important;
-  padding-bottom: 0.2em !important;
+  margin: 0 0 0.3em !important;
+  padding-bottom: 0.15em !important;
   border-bottom: 3px solid #1DB954 !important;
   display: block !important;
   width: 100% !important;
@@ -96,13 +96,13 @@
   font-size: 1.1em !important;
   font-weight: 700 !important;
   color: #FFFFFF !important;
-  margin: 0.6em 0 0.25em !important;
+  margin: 0.35em 0 0.15em !important;
 }
 .reveal h3 {
   font-size: 0.92em !important;
   font-weight: 600 !important;
   color: #1DB954 !important;
-  margin: 0.5em 0 0.2em !important;
+  margin: 0.3em 0 0.1em !important;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -119,12 +119,12 @@
 /* ═══════════════════════════════════════════════════════════
    LISTS
 ═══════════════════════════════════════════════════════════ */
-.reveal ul { list-style: none !important; padding: 0 !important; margin: 0.4em 0 !important; }
-.reveal ol { padding-left: 1.3em !important; margin: 0.4em 0 !important; }
+.reveal ul { list-style: none !important; padding: 0 !important; margin: 0.2em 0 !important; }
+.reveal ol { padding-left: 1.3em !important; margin: 0.2em 0 !important; }
 .reveal ul li, .reveal ol li {
   color: #CCCCCC !important;
-  line-height: 1.55 !important;
-  margin: 0.28em 0 !important;
+  line-height: 1.45 !important;
+  margin: 0.15em 0 !important;
   padding-left: 1.1em !important;
   position: relative !important;
   font-size: 0.88em !important;
@@ -152,14 +152,14 @@
   border-spacing: 0 !important;
   border-radius: 8px !important;
   overflow: hidden !important;
-  margin: 0.5em 0 !important;
-  font-size: 0.76em !important;
+  margin: 0.25em 0 !important;
+  font-size: 0.72em !important;
   border: 1px solid #1e1e2e !important;
 }
 .reveal table th {
   background: linear-gradient(135deg, #1a9e4a, #1DB954) !important;
   color: #000 !important;
-  padding: 8px 12px !important;
+  padding: 4px 10px !important;
   font-weight: 700 !important;
   text-align: left !important;
   font-size: 0.85em !important;
@@ -167,7 +167,7 @@
 .reveal table th:first-child { border-radius: 8px 0 0 0 !important; }
 .reveal table th:last-child  { border-radius: 0 8px 0 0 !important; }
 .reveal table td {
-  padding: 6px 12px !important;
+  padding: 3px 10px !important;
   color: #CCCCCC !important;
   border-bottom: 1px solid #161625 !important;
   vertical-align: middle !important;
@@ -275,6 +275,9 @@
   color: #3a3a50 !important;
   text-align: center !important;
   letter-spacing: 0.2px !important;
+  background: #0A0A0F !important;
+  padding: 3px 0 !important;
+  width: 100% !important;
 }
 
 /* ═══════════════════════════════════════════════════════════

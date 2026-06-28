@@ -1,4 +1,4 @@
-﻿---
+---
 title: "Spotify Popularity Predictor"
 subtitle: "Can audio features predict a song's success?"
 author: "Herenda Amila"
