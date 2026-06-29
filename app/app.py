@@ -548,7 +548,7 @@ with btn_col:
 @st.cache_data(ttl=30)   # re-check every 30 seconds, not on every slider move
 def _check_backend() -> bool:
     try:
-        resp = requests.get(f"{API_URL}/health", timeout=5)
+        resp = requests.get(f"{API_URL}/health", timeout=10)
         return resp.status_code == 200
     except requests.exceptions.ConnectionError:
         return False
