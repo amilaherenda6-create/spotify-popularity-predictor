@@ -507,6 +507,23 @@ if st.session_state.dark_mode:
         color: #1DB954 !important;
         font-size: 0.88em;
     }
+    [data-testid="stDataFrame"] {
+        border: 1px solid rgba(29, 185, 84, 0.25) !important;
+        border-radius: 10px !important;
+        background: rgba(29, 185, 84, 0.03) !important;
+    }
+    [data-testid="stDataFrame"] table {
+        color: #C0C0C0 !important;
+    }
+    [data-testid="stDataFrame"] th {
+        background: rgba(29, 185, 84, 0.10) !important;
+        color: #1DB954 !important;
+        border-bottom: 1px solid rgba(29, 185, 84, 0.20) !important;
+    }
+    [data-testid="stDataFrame"] tr:last-child td {
+        color: #1DB954 !important;
+        font-weight: 600 !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
