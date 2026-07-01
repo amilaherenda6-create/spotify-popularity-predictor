@@ -20,6 +20,7 @@ import os
 import requests
 import streamlit as st
 import pandas as pd
+import numpy as np
 
 # =============================================================================
 # CONFIGURATION
@@ -67,6 +68,10 @@ GENRES = sorted([
 ])
 
 PLOTS_DIR = "eda_plots"
+
+@st.cache_data
+def _load_dataset() -> pd.DataFrame:
+    return pd.read_csv("data/dataset.csv")
 
 # =============================================================================
 # PAGE SETUP
@@ -434,6 +439,54 @@ hr {{ border: none; border-top: 1px solid {t['border']}; margin: 1em 0; }}
     border-radius: 6px; padding: 3px 10px; font-family: monospace;
     font-size: 0.8em; color: {t['text_muted']}; margin: 2px 0;
 }}
+
+/* ── Song Insights tab ──────────────────────────────────────────────────── */
+.song-card {{
+    background: {t['bg_card']}; border: 1px solid {t['border']};
+    border-radius: 12px; padding: 0.9em 1.2em; margin-bottom: 0.55em;
+    display: flex; align-items: center; justify-content: space-between; gap: 1em;
+}}
+.song-card-info {{ flex: 1; min-width: 0; }}
+.song-title {{ font-weight: 700; color: {t['text']}; font-size: 0.93em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+.song-meta {{ color: {t['text_muted']}; font-size: 0.78em; margin-top: 2px; }}
+.pop-score-green {{ color: #1DB954; font-weight: 700; font-size: 0.85em; }}
+.pop-score-orange {{ color: #FF9800; font-weight: 700; font-size: 0.85em; }}
+.pop-score-gray {{ color: {t['text_muted']}; font-weight: 700; font-size: 0.85em; }}
+.match-badge-green {{
+    background: rgba(29,185,84,0.15); color: #1DB954;
+    border: 1px solid rgba(29,185,84,0.30); border-radius: 20px;
+    padding: 2px 10px; font-size: 0.76em; font-weight: 700; white-space: nowrap;
+}}
+.match-badge-blue {{
+    background: rgba(15,98,254,0.15); color: #0F62FE;
+    border: 1px solid rgba(15,98,254,0.30); border-radius: 20px;
+    padding: 2px 10px; font-size: 0.76em; font-weight: 700; white-space: nowrap;
+}}
+.match-badge-gray {{
+    background: {t['bg_card2']}; color: {t['text_muted']};
+    border: 1px solid {t['border']}; border-radius: 20px;
+    padding: 2px 10px; font-size: 0.76em; font-weight: 700; white-space: nowrap;
+}}
+.insight-box {{
+    background: {t['bg_card2']}; border: 1px solid {t['border']};
+    border-radius: 10px; padding: 0.85em 1.1em; font-size: 0.87em;
+    color: {t['text_muted']}; margin: 0.8em 0; line-height: 1.55;
+}}
+.suggest-card {{
+    background: {t['bg_card']}; border: 1px solid {t['border']};
+    border-radius: 12px; padding: 1em 1.2em; margin-bottom: 0.8em;
+}}
+.suggest-header {{ font-weight: 700; color: {t['text']}; font-size: 0.93em; margin-bottom: 3px; }}
+.suggest-values {{ font-size: 0.82em; color: {t['text_muted']}; margin-bottom: 6px; }}
+.suggest-gain {{ font-size: 0.8em; color: #1DB954; font-weight: 700; }}
+.total-score-box {{
+    background: linear-gradient(135deg,rgba(29,185,84,0.12),rgba(15,98,254,0.08));
+    border: 1px solid rgba(29,185,84,0.30); border-radius: 14px;
+    padding: 1.1em 1.5em; text-align: center; margin-top: 1em;
+}}
+.total-score-val {{ font-size: 2.2em; font-weight: 900; color: #1DB954; }}
+.total-score-lbl {{ font-size: 0.82em; color: {t['text_muted']}; margin-top: 2px; }}
 </style>
 """
 
@@ -565,8 +618,8 @@ if not backend_ok:
 # =============================================================================
 # TABS
 # =============================================================================
-tab_predict, tab_eda, tab_about = st.tabs(
-    ["🎵 Predictor", "📊 EDA Dashboard", "ℹ️ About"]
+tab_predict, tab_insights, tab_eda, tab_about = st.tabs(
+    ["🎵 Predictor", "🔍 Song Insights", "📊 EDA Dashboard", "ℹ️ About"]
 )
 
 
@@ -672,6 +725,17 @@ with tab_predict:
 
         st.markdown('<div class="header-divider" style="margin:0.7em 0;"></div>', unsafe_allow_html=True)
 
+        # Save slider values so Song Insights tab can read them
+        st.session_state['si_danceability']     = danceability
+        st.session_state['si_energy']           = energy
+        st.session_state['si_valence']          = valence
+        st.session_state['si_acousticness']     = acousticness
+        st.session_state['si_speechiness']      = speechiness
+        st.session_state['si_instrumentalness'] = instrumentalness
+        st.session_state['si_liveness']         = liveness
+        st.session_state['si_loudness']         = loudness
+        st.session_state['si_tempo']            = tempo
+
         # ── Predict button ────────────────────────────────────────────────────
         predict_btn = st.button(
             "Predict popularity", type="primary", use_container_width=True,
@@ -710,6 +774,9 @@ with tab_predict:
                     )
                     resp.raise_for_status()
                     result = resp.json()
+                    st.session_state['last_prediction'] = result
+                    st.session_state['last_features']   = payload
+                    st.session_state['last_genre']      = track_genre
 
                 except requests.exceptions.ConnectionError:
                     st.error("Backend not reachable. Is `uvicorn app.api:app` running?")
@@ -821,7 +888,203 @@ with tab_predict:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TAB 2 — EDA DASHBOARD
+# TAB 2 — SONG INSIGHTS
+# ─────────────────────────────────────────────────────────────────────────────
+with tab_insights:
+
+    _df = _load_dataset()
+
+    # ── SECTION 1 — Songs like yours ─────────────────────────────────────────
+    st.markdown("### 🎵 Songs with a similar audio profile")
+    st.caption("Based on the slider values you set in the Predictor tab")
+
+    _FEATURES = ['danceability', 'energy', 'valence', 'acousticness',
+                 'speechiness', 'instrumentalness', 'liveness', 'tempo']
+    _SI_KEYS  = ['si_danceability', 'si_energy', 'si_valence', 'si_acousticness',
+                 'si_speechiness', 'si_instrumentalness', 'si_liveness', 'si_tempo']
+
+    if all(k in st.session_state for k in _SI_KEYS):
+        from sklearn.preprocessing import MinMaxScaler
+
+        _user_vec_raw = [[
+            st.session_state['si_danceability'],
+            st.session_state['si_energy'],
+            st.session_state['si_valence'],
+            st.session_state['si_acousticness'],
+            st.session_state['si_speechiness'],
+            st.session_state['si_instrumentalness'],
+            st.session_state['si_liveness'],
+            st.session_state['si_tempo'],
+        ]]
+
+        _scaler  = MinMaxScaler()
+        _scaled  = _scaler.fit_transform(_df[_FEATURES])
+        _uvec    = _scaler.transform(_user_vec_raw)
+        _dists   = np.linalg.norm(_scaled - _uvec, axis=1)
+        _df_sim  = _df.copy()
+        _df_sim['similarity'] = 1 - (_dists / _dists.max())
+        _top5    = _df_sim.nlargest(5, 'similarity')[
+            ['track_name', 'artists', 'track_genre', 'popularity', 'similarity']
+        ]
+
+        for _, row in _top5.iterrows():
+            _pop = int(row['popularity'])
+            _sim_pct = int(round(row['similarity'] * 100))
+            _track = str(row['track_name'])[:48]
+            _artist = str(row['artists'])[:32]
+            _genre  = str(row['track_genre'])
+
+            if _pop >= 70:
+                _pop_html = f'<span class="pop-score-green">⬤ {_pop}</span>'
+            elif _pop >= 50:
+                _pop_html = f'<span class="pop-score-orange">⬤ {_pop}</span>'
+            else:
+                _pop_html = f'<span class="pop-score-gray">⬤ {_pop}</span>'
+
+            if _sim_pct > 85:
+                _badge = f'<span class="match-badge-green">{_sim_pct}% match</span>'
+            elif _sim_pct >= 70:
+                _badge = f'<span class="match-badge-blue">{_sim_pct}% match</span>'
+            else:
+                _badge = f'<span class="match-badge-gray">{_sim_pct}% match</span>'
+
+            st.markdown(f"""
+            <div class="song-card">
+                <div class="song-card-info">
+                    <div class="song-title">{_track}</div>
+                    <div class="song-meta">{_artist} &nbsp;·&nbsp; {_genre} &nbsp;·&nbsp; Popularity: {_pop_html}</div>
+                </div>
+                {_badge}
+            </div>
+            """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div class="placeholder-card">
+            <div class="placeholder-icon">🎚️</div>
+            <div class="placeholder-text">
+                Set your audio features in the <strong style="color:#1DB954;">Predictor</strong> tab first,
+                then come back here.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<div style='margin:1.5em 0 0.5em'></div>", unsafe_allow_html=True)
+    st.divider()
+
+    # ── SECTION 2 — Genre Explorer ────────────────────────────────────────────
+    st.markdown("### 🎸 Genre audio profile")
+    st.caption("Average audio features for any genre in the dataset")
+
+    _genre_sel = st.selectbox(
+        "Select a genre",
+        options=sorted(_df['track_genre'].dropna().unique()),
+        key="insights_genre_sel",
+    )
+
+    _genre_df = _df[_df['track_genre'] == _genre_sel]
+    _g_means  = _genre_df[['danceability', 'energy', 'valence', 'acousticness',
+                             'speechiness', 'instrumentalness', 'liveness',
+                             'tempo', 'popularity']].mean()
+
+    _gc1, _gc2, _gc3 = st.columns(3)
+    _gc1.metric("Danceability",  f"{_g_means['danceability']:.2f}")
+    _gc2.metric("Energy",        f"{_g_means['energy']:.2f}")
+    _gc3.metric("Valence",       f"{_g_means['valence']:.2f}")
+    _gc4, _gc5, _gc6 = st.columns(3)
+    _gc4.metric("Acousticness",  f"{_g_means['acousticness']:.2f}")
+    _gc5.metric("Avg tempo",     f"{_g_means['tempo']:.0f} BPM")
+    _gc6.metric("Avg popularity",f"{_g_means['popularity']:.1f} / 100")
+
+    # Normalized bar chart (all 0-1 features only, not tempo/popularity)
+    _chart_features = ['danceability', 'energy', 'valence',
+                       'acousticness', 'speechiness', 'instrumentalness', 'liveness']
+    _chart_vals = {f.capitalize(): float(_g_means[f]) for f in _chart_features}
+    _chart_df   = pd.DataFrame.from_dict(
+        _chart_vals, orient='index', columns=['Average (0–1)']
+    )
+    st.bar_chart(_chart_df, height=220)
+
+    _avg_pop = _g_means['popularity']
+    if _avg_pop > 55:
+        _insight_txt = f"**{_genre_sel}** is a high-popularity genre — songs here tend to go mainstream."
+    elif _avg_pop > 35:
+        _insight_txt = f"**{_genre_sel}** has moderate popularity — a solid niche with dedicated listeners."
+    else:
+        _insight_txt = f"**{_genre_sel}** is a niche genre with lower average popularity — quality over quantity."
+
+    st.markdown(f'<div class="insight-box">💡 {_insight_txt}</div>', unsafe_allow_html=True)
+
+    st.divider()
+
+    # ── SECTION 3 — Optimize my song ─────────────────────────────────────────
+    st.markdown("### 🚀 How to improve your predicted score")
+    st.caption("Suggestions based on what popular songs look like in your genre")
+
+    if 'last_prediction' not in st.session_state or 'last_features' not in st.session_state:
+        st.markdown("""
+        <div class="placeholder-card">
+            <div class="placeholder-icon">🎯</div>
+            <div class="placeholder-text">
+                Run a prediction in the <strong style="color:#1DB954;">Predictor</strong> tab first.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        _last_pred  = st.session_state['last_prediction']
+        _last_feat  = st.session_state['last_features']
+        _last_genre = st.session_state.get('last_genre', '')
+        _cur_score  = float(_last_pred.get('popularity_score', 0))
+
+        _OPT_FEATURES = ['danceability', 'energy', 'valence', 'acousticness',
+                         'speechiness', 'instrumentalness', 'liveness']
+
+        _pop_songs = _df[(_df['track_genre'] == _last_genre) & (_df['popularity'] >= 70)]
+
+        if len(_pop_songs) < 3:
+            st.info(f"Not enough popular songs in **{_last_genre}** to build suggestions (need ≥ 3).")
+        else:
+            _pop_means = _pop_songs[_OPT_FEATURES].mean()
+
+            _gaps = []
+            for _f in _OPT_FEATURES:
+                _cur = float(_last_feat.get(_f, 0))
+                _tgt = float(_pop_means[_f])
+                _diff = abs(_tgt - _cur)
+                _dir  = "increase" if _tgt > _cur else "decrease"
+                _imp  = min(15, int(round(_diff * 15)))
+                _gaps.append((_f, _cur, _tgt, _dir, _imp, _diff))
+
+            _gaps.sort(key=lambda x: x[5], reverse=True)
+            _top3 = _gaps[:3]
+            _total_improvement = sum(g[4] for g in _top3)
+            _new_score = min(98, _cur_score + _total_improvement)
+
+            for _f, _cur_v, _tgt_v, _dir, _imp, _ in _top3:
+                _arrow = "⬆️" if _dir == "increase" else "⬇️"
+                _prog_val = min(1.0, _cur_v) if _f != 'tempo' else min(1.0, _cur_v / 250)
+                st.markdown(f"""
+                <div class="suggest-card">
+                    <div class="suggest-header">{_arrow} {_f.capitalize()} — {_dir}</div>
+                    <div class="suggest-values">Current: <strong>{_cur_v:.2f}</strong>
+                        &nbsp;→&nbsp; Target: <strong>{_tgt_v:.2f}</strong>
+                        &nbsp;(avg of popular {_last_genre} songs)</div>
+                    <div class="suggest-gain">+{_imp} estimated points</div>
+                </div>
+                """, unsafe_allow_html=True)
+                st.progress(_prog_val, text=f"{_f.capitalize()}: {_cur_v:.2f}")
+
+            st.markdown(f"""
+            <div class="total-score-box">
+                <div class="total-score-lbl">Apply all suggestions → estimated new score</div>
+                <div class="total-score-val">{_new_score:.0f}</div>
+                <div class="total-score-lbl">Current: {_cur_score:.1f} &nbsp;+&nbsp;
+                    {_total_improvement} pts improvement &nbsp;(capped at 98)</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TAB 3 — EDA DASHBOARD
 # ─────────────────────────────────────────────────────────────────────────────
 with tab_eda:
 
