@@ -886,18 +886,20 @@ with tab_predict:
 
                 # ── Feature summary ───────────────────────────────────────────
                 with st.expander("Show the features you submitted"):
+                    _val_color = "#E0E0E0" if st.session_state.dark_mode else "#1A1A2E"
+                    _hdr_color = "#888" if st.session_state.dark_mode else "#555"
                     _rows = "".join(
                         f'<tr><td style="color:#1DB954;font-weight:600;padding:6px 12px;">{k}</td>'
-                        f'<td style="color:#E0E0E0;padding:6px 12px;">{v}</td></tr>'
+                        f'<td style="color:{_val_color};font-weight:500;padding:6px 12px;">{v}</td></tr>'
                         for k, v in payload.items()
                     )
                     st.markdown(f"""
                     <table style="width:100%;border-collapse:collapse;font-size:0.85em;">
                         <thead><tr>
-                            <th style="color:#888;text-transform:uppercase;font-size:0.75em;
+                            <th style="color:{_hdr_color};text-transform:uppercase;font-size:0.75em;
                                 letter-spacing:0.8px;padding:6px 12px;border-bottom:1px solid rgba(29,185,84,0.20);
                                 text-align:left;">Feature</th>
-                            <th style="color:#888;text-transform:uppercase;font-size:0.75em;
+                            <th style="color:{_hdr_color};text-transform:uppercase;font-size:0.75em;
                                 letter-spacing:0.8px;padding:6px 12px;border-bottom:1px solid rgba(29,185,84,0.20);
                                 text-align:left;">Value</th>
                         </tr></thead>
