@@ -1287,54 +1287,51 @@ how much the label spent on marketing, or whether the song went viral on TikTok.
 
     st.markdown("**Classification Task** — Can we predict if a song is popular? (popularity ≥ 70)")
 
-    clf_data = {
-        "Model": [
-            "1. Random Guessing (Baseline)",
-            "2. Logistic Regression",
-            "3. Decision Tree (depth=6)",
-            "4. XGBoost (tuned) ✅ Best"
+    def _leaderboard_table(headers, rows, last_row_green=True):
+        th_style = (
+            'background:rgba(29,185,84,0.12);color:#1DB954;font-weight:700;'
+            'padding:9px 14px;border-bottom:1px solid rgba(29,185,84,0.25);'
+            'text-align:left;font-size:0.82em;text-transform:uppercase;letter-spacing:0.6px;'
+        )
+        td_style = 'color:#C0C0C0;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.88em;'
+        td_last  = 'color:#1DB954;font-weight:600;padding:8px 14px;background:rgba(29,185,84,0.06);font-size:0.88em;'
+        header_html = ''.join(f'<th style="{th_style}">{h}</th>' for h in headers)
+        body_html = ''
+        for i, row in enumerate(rows):
+            is_last = last_row_green and i == len(rows) - 1
+            cells = ''.join(f'<td style="{td_last if is_last else td_style}">{cell}</td>' for cell in row)
+            body_html += f'<tr>{cells}</tr>'
+        st.markdown(
+            f'<div style="border:1px solid rgba(29,185,84,0.25);border-radius:10px;overflow:hidden;margin:0.5em 0;">'
+            f'<table style="width:100%;border-collapse:collapse;">'
+            f'<thead><tr>{header_html}</tr></thead><tbody>{body_html}</tbody></table></div>',
+            unsafe_allow_html=True,
+        )
+
+    _leaderboard_table(
+        headers=["Model", "Accuracy", "F1 Score", "ROC-AUC", "Notes"],
+        rows=[
+            ["1. Random Guessing (Baseline)", "95.2%", "0.000", "0.500", "Always predicts NOT popular — useless"],
+            ["2. Logistic Regression",        "95.2%", "0.141", "0.706", "Linear model, limited by class imbalance"],
+            ["3. Decision Tree (depth=6)",    "95.3%", "0.143", "0.708", "Slightly better, starts to overfit"],
+            ["4. XGBoost (tuned) ✅ Best",    "95.8%", "0.437", "0.920", "Best overall — handles imbalance well"],
         ],
-        "Accuracy": ["95.2%", "95.2%", "95.3%", "95.8%"],
-        "F1 Score": ["0.000", "0.141", "0.143", "0.437"],
-        "ROC-AUC": ["0.500", "0.706", "0.708", "0.920"],
-        "Notes": [
-            "Always predicts NOT popular -- useless",
-            "Linear model, limited by class imbalance",
-            "Slightly better, starts to overfit",
-            "Best overall -- handles imbalance well"
-        ]
-    }
-
-    clf_df = pd.DataFrame(clf_data)
-    st.dataframe(clf_df, use_container_width=True, hide_index=True)
-
+    )
     st.caption("⚠️ Note: Accuracy is misleading here — 95.2% of songs are NOT popular, so always guessing 'not popular' gives 95.2% accuracy. F1 Score and ROC-AUC are the honest metrics.")
 
     st.divider()
 
     st.markdown("**Regression Task** — Can we predict the exact popularity score (0–100)?")
 
-    reg_data = {
-        "Model": [
-            "1. Random Guessing (Baseline)",
-            "2. Ridge Regression",
-            "3. Decision Tree (depth=6)",
-            "4. XGBoost (tuned) ✅ Best"
+    _leaderboard_table(
+        headers=["Model", "R²", "MAE", "RMSE", "Notes"],
+        rows=[
+            ["1. Random Guessing (Baseline)", "0.000", "18.5", "22.1", "Always predicts mean score — baseline floor"],
+            ["2. Ridge Regression",           "0.062", "17.2", "21.4", "Captures some linear signal"],
+            ["3. Decision Tree (depth=6)",    "0.089", "16.8", "21.1", "Better but overfits on training data"],
+            ["4. XGBoost (tuned) ✅ Best",    "0.380", "13.1", "16.7", "Best — explains 38% of score variance"],
         ],
-        "R²": ["0.000", "0.062", "0.089", "0.380"],
-        "MAE": ["18.5", "17.2", "16.8", "13.1"],
-        "RMSE": ["22.1", "21.4", "21.1", "16.7"],
-        "Notes": [
-            "Always predicts mean score -- baseline floor",
-            "Captures some linear signal",
-            "Better but overfits on training data",
-            "Best -- explains 38% of score variance"
-        ]
-    }
-
-    reg_df = pd.DataFrame(reg_data)
-    st.dataframe(reg_df, use_container_width=True, hide_index=True)
-
+    )
     st.caption("📊 R²=0.38 means our best model explains 38% of what makes a song popular. The remaining 62% comes from factors not in the audio data — marketing, artist fame, timing, social media.")
 
 
