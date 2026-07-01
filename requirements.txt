@@ -4,3 +4,8 @@ plotly
 scikit-learn
 numpy
 requests
+fastapi
+uvicorn
+xgboost
+joblib
+pydantic
