@@ -275,8 +275,28 @@ section[data-testid="stSidebar"] {{
 .stExpander > details > summary {{ color: {t['text_muted']}; font-size: 0.85em; }}
 
 /* ── Dataframe ───────────────────────────────────────────────────────────── */
-[data-testid="stDataFrame"] {{
-    border: 1px solid {t['border']}; border-radius: 8px; background: {t['expander_bg']};
+[data-testid="stDataFrame"] > div {{
+    border: 1px solid rgba(29, 185, 84, 0.25) !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+}}
+[data-testid="stDataFrame"] th {{
+    background-color: rgba(29, 185, 84, 0.12) !important;
+    color: #1DB954 !important;
+    border-bottom: 1px solid rgba(29, 185, 84, 0.25) !important;
+    font-weight: 700 !important;
+}}
+[data-testid="stDataFrame"] td {{
+    color: #C0C0C0 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.04) !important;
+}}
+[data-testid="stDataFrame"] tr:last-child td {{
+    color: #1DB954 !important;
+    font-weight: 600 !important;
+    background: rgba(29, 185, 84, 0.06) !important;
+}}
+[data-testid="stDataFrame"] tr:hover td {{
+    background: rgba(29, 185, 84, 0.04) !important;
 }}
 
 /* ── Divider / caption / spinner ────────────────────────────────────────── */
@@ -506,23 +526,6 @@ if st.session_state.dark_mode:
     .stExpander > details > summary {
         color: #1DB954 !important;
         font-size: 0.88em;
-    }
-    [data-testid="stDataFrame"] {
-        border: 1px solid rgba(29, 185, 84, 0.25) !important;
-        border-radius: 10px !important;
-        background: rgba(29, 185, 84, 0.03) !important;
-    }
-    [data-testid="stDataFrame"] table {
-        color: #C0C0C0 !important;
-    }
-    [data-testid="stDataFrame"] th {
-        background: rgba(29, 185, 84, 0.10) !important;
-        color: #1DB954 !important;
-        border-bottom: 1px solid rgba(29, 185, 84, 0.20) !important;
-    }
-    [data-testid="stDataFrame"] tr:last-child td {
-        color: #1DB954 !important;
-        font-weight: 600 !important;
     }
     </style>
     """, unsafe_allow_html=True)
