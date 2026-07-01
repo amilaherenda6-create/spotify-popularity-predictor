@@ -71,7 +71,8 @@ PLOTS_DIR = "eda_plots"
 
 @st.cache_data
 def _load_dataset() -> pd.DataFrame:
-    return pd.read_csv("data/dataset.csv")
+    url = "https://huggingface.co/datasets/maharshipandya/spotify-tracks-dataset/resolve/main/dataset.csv"
+    return pd.read_csv(url)
 
 # =============================================================================
 # PAGE SETUP
