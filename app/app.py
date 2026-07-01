@@ -1161,27 +1161,88 @@ with tab_eda:
 
     # ── Section 1: Target variable ────────────────────────────────────────────
     st.markdown('<div class="eda-section-header">Target Variable — Popularity</div>', unsafe_allow_html=True)
-    st.caption("Shows how popularity scores are distributed across all 114,000 songs and how few cross the popular threshold of 70.")
+    st.markdown("""
+**What am I looking at?** Two charts about song popularity scores (0–100).
+
+The left chart shows how popular songs generally are — most songs score between 0 and 60,
+meaning they are not very well known. Very few songs reach a score of 70 or higher.
+
+The right chart shows the split we use for our model: only 1 in 20 songs (4.8%)
+is considered "popular" (score ≥ 70). This means our dataset is heavily imbalanced —
+like trying to find needles in a haystack. This is important because a model that
+always guesses "not popular" would be right 95% of the time — but completely useless!
+""")
     _show_plot("01_popularity_distribution.png", "")
 
     # ── Section 2: Correlations ───────────────────────────────────────────────
     st.markdown('<div class="eda-section-header">Correlations</div>', unsafe_allow_html=True)
-    st.caption("Pearson correlation matrix — the bottom row shows which audio features correlate most with popularity.")
+    st.markdown("""
+**What am I looking at?** A grid showing how strongly each audio feature is connected to popularity.
+
+Red squares = when one goes up, the other tends to go up too.
+Blue squares = when one goes up, the other tends to go down.
+The darker the color, the stronger the connection.
+
+The most important row is the bottom one — it shows which features are most connected
+to popularity. Loudness (how loud the song is) has the strongest positive connection.
+Acousticness (how acoustic the song sounds) and instrumentalness (no vocals)
+are negatively connected — meaning quieter, acoustic songs tend to be less popular.
+
+Key insight: no single feature strongly predicts popularity on its own.
+This is why we need a powerful model like XGBoost that combines all features together.
+""")
     _show_plot("03_correlation_heatmap.png", "")
 
     # ── Section 3: Genre popularity ───────────────────────────────────────────
     st.markdown('<div class="eda-section-header">Genre Analysis</div>', unsafe_allow_html=True)
-    st.caption("Top 25 genres ranked by mean popularity — genre is the single strongest predictor in the dataset.")
+    st.markdown("""
+**What am I looking at?** A ranking of the top 25 music genres by their average popularity score.
+
+The longer the bar, the more popular that genre is on average. Pop-film (music from movies),
+k-pop, and chill music top the list. Heavy metal, death metal, and classical
+genres tend to score much lower.
+
+Key insight: genre is the single most powerful predictor of popularity in our dataset.
+Knowing what genre a song belongs to tells us more about its likely popularity
+than any audio feature like tempo or energy. This is why genre is included as
+a feature in our prediction model.
+""")
     _show_plot("06_genre_popularity.png", "")
 
     # ── Section 4: Model evaluation plots ────────────────────────────────────
     st.markdown('<div class="eda-section-header">Model Evaluation — XGBoost (Best Model)</div>', unsafe_allow_html=True)
     c_left, c_right = st.columns(2)
     with c_left:
-        st.caption("Confusion matrix on the held-out test set — true positives are popular songs the model correctly identified.")
+        st.markdown("""
+**What am I looking at?** A table showing how well our model classified 22,800 songs as popular or not popular.
+
+Think of it like a report card with 4 boxes:
+- ✅ Top-left: songs that ARE popular and our model said YES — correct!
+- ❌ Top-right: songs that ARE popular but our model said NO — missed them
+- ❌ Bottom-left: songs that are NOT popular but our model said YES — false alarm
+- ✅ Bottom-right: songs that are NOT popular and our model said NO — correct!
+
+Our model is quite careful — it rarely gives false alarms, but it does miss
+some popular songs. Overall it scores F1 = 0.437 and AUC = 0.920,
+which is much better than random guessing (AUC = 0.500).
+""")
         _show_plot("07_confusion_matrix_xgb.png", "")
     with c_right:
-        st.caption("Predicted vs actual popularity score — perfect predictions would lie on the diagonal line.")
+        st.markdown("""
+**What am I looking at?** Each dot is one song from our test set.
+The horizontal axis shows what score the song actually has.
+The vertical axis shows what score our model predicted.
+
+If our model were perfect, every dot would sit exactly on the red diagonal line.
+Dots above the line = model overestimated. Dots below = model underestimated.
+
+The spread of dots shows that our model gets the general direction right
+but is not perfect — especially for very popular songs (80–100)
+which are rare and hard to predict. R² = 0.38 means our model explains
+38% of what makes a song popular. The other 62% comes from things
+we cannot measure from audio alone — like how famous the artist is,
+how much the label spent on marketing, or whether the song went viral on TikTok.
+""")
         _show_plot("09_predicted_vs_actual_xgb.png", "")
 
     # ── Section 8: Model Leaderboard ──────────────────────────────────────────
