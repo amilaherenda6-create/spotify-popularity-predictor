@@ -1045,13 +1045,44 @@ with tab_insights:
     _gc6.metric("Avg popularity",f"{_g_means['popularity']:.1f} / 100")
 
     # Normalized bar chart (all 0-1 features only, not tempo/popularity)
+    import plotly.graph_objects as go
+
     _chart_features = ['danceability', 'energy', 'valence',
                        'acousticness', 'speechiness', 'instrumentalness', 'liveness']
-    _chart_vals = {f.capitalize(): float(_g_means[f]) for f in _chart_features}
-    _chart_df   = pd.DataFrame.from_dict(
-        _chart_vals, orient='index', columns=['Average (0–1)']
+    _chart_values = [float(_g_means[f]) for f in _chart_features]
+
+    _fig = go.Figure(go.Bar(
+        x=_chart_values,
+        y=[f.capitalize() for f in _chart_features],
+        orientation='h',
+        marker=dict(
+            color=_chart_values,
+            colorscale=[[0, '#0d2b1a'], [0.5, '#1DB954'], [1, '#1ed760']],
+            line=dict(color='rgba(29,185,84,0.3)', width=1)
+        ),
+        text=[f'{v:.2f}' for v in _chart_values],
+        textposition='outside',
+        textfont=dict(color='#1DB954', size=13)
+    ))
+    _fig.update_layout(
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='#C0C0C0', size=13),
+        height=320,
+        margin=dict(l=10, r=60, t=10, b=10),
+        xaxis=dict(
+            showgrid=True,
+            gridcolor='rgba(255,255,255,0.05)',
+            range=[0, 1.15],
+            tickfont=dict(color='#888'),
+            zeroline=False
+        ),
+        yaxis=dict(
+            tickfont=dict(color='#C0C0C0'),
+            gridcolor='rgba(255,255,255,0.05)'
+        )
     )
-    st.bar_chart(_chart_df, height=220)
+    st.plotly_chart(_fig, use_container_width=True)
 
     _avg_pop = _g_means['popularity']
     if _avg_pop > 55:
