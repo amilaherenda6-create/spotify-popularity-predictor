@@ -639,15 +639,18 @@ def _check_backend() -> bool:
     try:
         resp = requests.get(f"{API_URL}/health", timeout=10)
         return resp.status_code == 200
-    except requests.exceptions.ConnectionError:
+    except (requests.exceptions.ConnectionError,
+            requests.exceptions.ReadTimeout,
+            requests.exceptions.ConnectTimeout):
         return False
 
 backend_ok = _check_backend()
 if not backend_ok:
     st.markdown(f"""
     <div class="backend-error">
-    <strong>⚠️ Backend offline</strong> — cannot reach FastAPI at <code>{API_URL}</code><br>
-    Start it with: <code>python -m uvicorn app.api:app --reload --port 8000</code> then refresh.
+    <strong>⏳ Backend is starting up</strong> — The free Render instance goes to sleep after inactivity.<br>
+    Please wait <strong>30–60 seconds</strong> and refresh the page. It will wake up automatically!<br>
+    <small style="color:#888">Backend URL: <code>{API_URL}</code></small>
     </div>
     """, unsafe_allow_html=True)
 
@@ -814,8 +817,16 @@ with tab_predict:
                     st.session_state['last_features']   = payload
                     st.session_state['last_genre']      = track_genre
 
+                except requests.exceptions.ReadTimeout:
+                    st.warning("⏳ The backend is waking up from sleep. Please wait a few seconds and try again.")
+                    result = None
+
+                except requests.exceptions.ConnectTimeout:
+                    st.warning("⏳ The backend is starting up. Please wait a few seconds and try again.")
+                    result = None
+
                 except requests.exceptions.ConnectionError:
-                    st.error("Backend not reachable. Is `uvicorn app.api:app` running?")
+                    st.error("❌ Backend not reachable. Is the Render service running?")
                     result = None
 
                 except requests.exceptions.HTTPError as e:
