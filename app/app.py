@@ -1150,7 +1150,7 @@ with tab_eda:
         path = os.path.join(PLOTS_DIR, filename)
         if os.path.exists(path):
             st.markdown('<div class="img-wrap">', unsafe_allow_html=True)
-            st.image(path, use_container_width=False, width=600)
+            st.image(path, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="eda-caption">{caption}</div>', unsafe_allow_html=True)
         else:
