@@ -1371,3 +1371,78 @@ All code, models, and data pipeline
 FastAPI backend with Swagger UI
 [{API_URL}/docs]({API_URL}/docs)
 """)
+
+    # ── Song Insights Features ────────────────────────────────────────────────
+    st.divider()
+    st.markdown("### 🔍 Song Insights — Three New Features")
+
+    with st.expander("🎵 Songs with a similar audio profile"):
+        st.markdown("""
+This feature takes the current slider values you set in the **Predictor** tab —
+danceability, energy, valence, acousticness, speechiness, instrumentalness,
+liveness, and tempo — and searches all **114,000 songs** in the Spotify dataset
+to find the 5 closest matches.
+
+**How similarity is calculated:**
+1. All 8 features are normalized to a 0–1 scale using **MinMaxScaler** so that
+   no single feature (e.g. tempo, which ranges up to 250) dominates the distance.
+2. **Euclidean distance** is computed between your feature vector and every song
+   in the dataset.
+3. Distance is converted to a similarity score: `1 − (distance / max_distance)`,
+   giving 100 % for a perfect match and lower percentages as songs diverge.
+
+Each result card shows the **track name**, **artist**, **genre**, **popularity
+score** (green ≥ 70, orange 50–69, gray < 50), and a **match percentage badge**
+(green > 85 %, blue 70–85 %, gray otherwise).
+
+This helps you understand what real songs your audio profile most resembles —
+and what commercial popularity those songs actually achieved.
+""")
+
+    with st.expander("🎸 Genre audio profile explorer"):
+        st.markdown("""
+Select any of the **114 genres** in the dataset and instantly see the
+**average audio fingerprint** of that genre — calculated across every song
+tagged with that genre in the 114,000-track Spotify dataset.
+
+**What is shown:**
+- **Metric cards** for mean danceability, energy, valence, acousticness,
+  average tempo (BPM), and average popularity score (out of 100).
+- A **horizontal bar chart** of all 7 normalized features (0–1 scale) for
+  easy visual comparison between genres.
+- An **automatic insight message** that classifies the genre as
+  high-popularity (avg > 55), moderate (avg 35–55), or niche (avg < 35),
+  with a plain-language interpretation.
+
+This helps you understand what audio characteristics define each genre and
+benchmark how your own song's feature values compare to the genre average.
+""")
+
+    with st.expander("🚀 Song optimization suggestions"):
+        st.markdown("""
+After running a prediction in the **Predictor** tab, this section compares
+your feature values against the **average values of popular songs**
+(popularity ≥ 70) in the **same genre** from the dataset.
+
+**How it works:**
+1. All songs in your selected genre with popularity ≥ 70 are filtered from
+   the dataset, and their mean feature values are computed.
+2. The **absolute difference** between your values and those popular-song
+   averages is calculated for each of 7 features (danceability, energy,
+   valence, acousticness, speechiness, instrumentalness, liveness).
+3. The **top 3 features** with the largest gap are surfaced as suggestions.
+
+**Each suggestion card shows:**
+- Feature name and direction (*increase* or *decrease*)
+- Current value → target value (the popular-song average for that genre)
+- Estimated point improvement: `difference × 15`, rounded, capped at **+15 per feature**
+- A progress bar showing your current value on the 0–1 scale
+
+At the bottom, a **total estimated new score** is displayed:
+`current score + sum of improvements`, capped at **98** to remain realistic.
+
+This gives you **actionable, data-driven advice** on which specific audio
+characteristics to adjust to make your song more commercially competitive
+within its genre.
+""")
+
