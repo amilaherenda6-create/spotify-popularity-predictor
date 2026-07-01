@@ -495,6 +495,21 @@ hr {{ border: none; border-top: 1px solid {t['border']}; margin: 1em 0; }}
 # Inject theme CSS
 st.markdown(_build_css(_DARK if st.session_state.dark_mode else _LIGHT), unsafe_allow_html=True)
 
+if st.session_state.dark_mode:
+    st.markdown("""
+    <style>
+    .stExpander {
+        border: 1px solid rgba(29, 185, 84, 0.20) !important;
+        background: rgba(29, 185, 84, 0.05) !important;
+        border-radius: 10px;
+    }
+    .stExpander > details > summary {
+        color: #1DB954 !important;
+        font-size: 0.88em;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
 # Animations + compact layout
 st.markdown("""
 <style>
@@ -854,10 +869,24 @@ with tab_predict:
 
                 # ── Feature summary ───────────────────────────────────────────
                 with st.expander("Show the features you submitted"):
-                    import pandas as pd
-                    feature_df = pd.DataFrame([payload]).T
-                    feature_df.columns = ["Value"]
-                    st.dataframe(feature_df, use_container_width=True)
+                    _rows = "".join(
+                        f'<tr><td style="color:#1DB954;font-weight:600;padding:6px 12px;">{k}</td>'
+                        f'<td style="color:#E0E0E0;padding:6px 12px;">{v}</td></tr>'
+                        for k, v in payload.items()
+                    )
+                    st.markdown(f"""
+                    <table style="width:100%;border-collapse:collapse;font-size:0.85em;">
+                        <thead><tr>
+                            <th style="color:#888;text-transform:uppercase;font-size:0.75em;
+                                letter-spacing:0.8px;padding:6px 12px;border-bottom:1px solid rgba(29,185,84,0.20);
+                                text-align:left;">Feature</th>
+                            <th style="color:#888;text-transform:uppercase;font-size:0.75em;
+                                letter-spacing:0.8px;padding:6px 12px;border-bottom:1px solid rgba(29,185,84,0.20);
+                                text-align:left;">Value</th>
+                        </tr></thead>
+                        <tbody>{_rows}</tbody>
+                    </table>
+                    """, unsafe_allow_html=True)
 
         else:
             # Placeholder before the user clicks Predict
