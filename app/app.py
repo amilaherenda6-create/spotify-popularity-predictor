@@ -1150,7 +1150,7 @@ with tab_eda:
         path = os.path.join(PLOTS_DIR, filename)
         if os.path.exists(path):
             st.markdown('<div class="img-wrap">', unsafe_allow_html=True)
-            st.image(path, use_container_width=True)
+            st.image(path, use_container_width=False, width=600)
             st.markdown('</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="eda-caption">{caption}</div>', unsafe_allow_html=True)
         else:
@@ -1161,71 +1161,28 @@ with tab_eda:
 
     # ── Section 1: Target variable ────────────────────────────────────────────
     st.markdown('<div class="eda-section-header">Target Variable — Popularity</div>', unsafe_allow_html=True)
-    _show_plot(
-        "01_popularity_distribution.png",
-        "Left: raw distribution of popularity scores (0-100). "
-        "Right: class balance — only 5.1% of songs cross the threshold of 70.",
-    )
+    st.caption("Shows how popularity scores are distributed across all 114,000 songs and how few cross the popular threshold of 70.")
+    _show_plot("01_popularity_distribution.png", "")
 
-    # ── Section 2: Feature distributions ─────────────────────────────────────
-    st.markdown('<div class="eda-section-header">Audio Feature Distributions</div>', unsafe_allow_html=True)
-    _show_plot(
-        "02_feature_distributions.png",
-        "Histogram of each numeric feature. "
-        "Helps spot skewed or bimodal distributions that influence model choice.",
-    )
-
-    # ── Section 3: Correlations ───────────────────────────────────────────────
+    # ── Section 2: Correlations ───────────────────────────────────────────────
     st.markdown('<div class="eda-section-header">Correlations</div>', unsafe_allow_html=True)
-    _show_plot(
-        "03_correlation_heatmap.png",
-        "Pearson correlation matrix (lower triangle only). "
-        "Red = positive correlation, blue = negative. Bottom row shows correlation with popularity.",
-    )
+    st.caption("Pearson correlation matrix — the bottom row shows which audio features correlate most with popularity.")
+    _show_plot("03_correlation_heatmap.png", "")
 
-    # ── Section 4: Outliers ────────────────────────────────────────────────────
-    st.markdown('<div class="eda-section-header">Outlier Detection</div>', unsafe_allow_html=True)
-    _show_plot(
-        "04_outlier_boxplots.png",
-        "Boxplots for key features. Dots beyond the whiskers are outliers. "
-        "We use RobustScaler in the Pipeline to handle these without removing rows.",
-    )
-
-    # ── Section 5: Feature–target relationships ───────────────────────────────
-    st.markdown('<div class="eda-section-header">Feature-Target Relationships</div>', unsafe_allow_html=True)
-    _show_plot(
-        "05_feature_target_scatter.png",
-        "Each audio feature plotted against the raw popularity score (5,000-row sample). "
-        "Weak slopes confirm no single feature dominates — we need an ensemble model.",
-    )
-
-    # ── Section 6: Genre popularity ───────────────────────────────────────────
+    # ── Section 3: Genre popularity ───────────────────────────────────────────
     st.markdown('<div class="eda-section-header">Genre Analysis</div>', unsafe_allow_html=True)
-    _show_plot(
-        "06_genre_popularity.png",
-        "Top 25 genres by mean popularity. "
-        "Genre is the strongest single predictor — pop, dance, and hip-hop score highest.",
-    )
+    st.caption("Top 25 genres ranked by mean popularity — genre is the single strongest predictor in the dataset.")
+    _show_plot("06_genre_popularity.png", "")
 
-    # ── Section 7: Model evaluation plots ─────────────────────────────────────
+    # ── Section 4: Model evaluation plots ────────────────────────────────────
     st.markdown('<div class="eda-section-header">Model Evaluation — XGBoost (Best Model)</div>', unsafe_allow_html=True)
     c_left, c_right = st.columns(2)
     with c_left:
-        _show_plot(
-            "07_confusion_matrix_xgb.png",
-            "Confusion matrix on the held-out test set. "
-            "True positives = popular songs correctly identified.",
-        )
-        _show_plot(
-            "08_roc_curve_xgb.png",
-            "ROC curve: AUC = 0.920. Random classifier would score 0.50.",
-        )
+        st.caption("Confusion matrix on the held-out test set — true positives are popular songs the model correctly identified.")
+        _show_plot("07_confusion_matrix_xgb.png", "")
     with c_right:
-        _show_plot(
-            "09_predicted_vs_actual_xgb.png",
-            "Predicted vs actual popularity. "
-            "Perfect predictions would lie on the red diagonal.",
-        )
+        st.caption("Predicted vs actual popularity score — perfect predictions would lie on the diagonal line.")
+        _show_plot("09_predicted_vs_actual_xgb.png", "")
 
     # ── Section 8: Model Leaderboard ──────────────────────────────────────────
     st.markdown("### 🏆 Model Leaderboard — All Models Compared")
