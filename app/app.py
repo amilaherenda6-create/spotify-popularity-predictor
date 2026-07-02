@@ -713,7 +713,19 @@ with tab_predict:
             st.session_state['auto_duration']          = float(_sel_song['duration_ms']) / 60000
             st.session_state['auto_explicit']          = bool(_sel_song['explicit'])
             st.session_state['auto_filled']            = True
-            st.success(f"✅ Sliders filled with values from **{_sel_song['track_name']}** by {_sel_song['artists']}")
+            col_msg, col_yt = st.columns([3, 1])
+            with col_msg:
+                st.success(f"✅ Sliders filled with values from **{_sel_song['track_name']}** by {_sel_song['artists']}")
+            with col_yt:
+                _yt_query = f"{_sel_song['track_name']} {_sel_song['artists']}".replace(" ", "+")
+                st.markdown(
+                    f"""<a href="https://www.youtube.com/results?search_query={_yt_query}"
+                    target="_blank" style="display: inline-block; background: #FF0000;
+                    color: white; padding: 0.5rem 1rem; border-radius: 8px;
+                    text-decoration: none; font-weight: bold; margin-top: 0.3rem;">
+                    ▶️ Listen on YouTube</a>""",
+                    unsafe_allow_html=True,
+                )
 
         c1, c2 = st.columns(2)
         with c1:
