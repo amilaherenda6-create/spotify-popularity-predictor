@@ -657,9 +657,14 @@ if not backend_ok:
 # =============================================================================
 # TABS
 # =============================================================================
-tab_predict, tab_insights, tab_explain, tab_eda, tab_about = st.tabs(
-    ["🎵 Predictor", "🔍 Song Insights", "🧠 How It Works", "📊 EDA Dashboard", "ℹ️ About"]
-)
+tab_predict, tab_insights, tab_explain, tab_stats, tab_eda, tab_about = st.tabs([
+    "🎵 Predictor",
+    "🔍 Song Insights",
+    "🧠 How It Works",
+    "📊 Model Stats",
+    "📈 EDA Dashboard",
+    "ℹ️ About"
+])
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -872,6 +877,23 @@ with tab_predict:
 
     # ── Right column: results ─────────────────────────────────────────────────
     with col_results:
+
+        with st.expander("📊 Model performance & how to interpret your score"):
+            m1, m2, m3, m4 = st.columns(4)
+            m1.metric("Training songs", "91,200")
+            m2.metric("Test songs", "22,800")
+            m3.metric("Best AUC (classifier)", "0.920")
+            m4.metric("Best R² (regressor)", "0.380")
+
+            st.markdown("""
+| Score range | Meaning | What it suggests |
+|-------------|---------|-----------------|
+| 0 – 30 | Very unlikely to be popular | Reconsider genre or arrangement |
+| 30 – 50 | Below average | Some potential, needs work |
+| 50 – 70 | Average popularity | Solid track, could reach mainstream |
+| 70 – 85 | Likely popular ✅ | Strong commercial potential |
+| 85 – 100 | Very likely popular 🔥 | Hit potential — prioritize release |
+""")
 
         if predict_btn:
             payload = {
@@ -1403,56 +1425,71 @@ Tell us how you feel right now — we'll find the perfect song for this moment
 with tab_explain:
 
     if 'last_prediction' not in st.session_state or 'last_features' not in st.session_state:
-        st.info("👆 Go to the Predictor tab, click **Predict popularity** first — then come back here to see a full explanation of your result.")
+        st.info("👆 Go to the Predictor tab, set your sliders and click **Predict Popularity** — then come back here to see a full explanation of your result.")
     else:
-        _exp_pred   = st.session_state['last_prediction']
-        _exp_feat   = st.session_state['last_features']
-        score       = float(_exp_pred.get('popularity_score', 0))
-        confidence  = float(_exp_pred.get('confidence', 0))
-        is_popular  = bool(_exp_pred.get('popular', False) or _exp_pred.get('is_popular', False))
-        genre       = _exp_feat.get('track_genre', '')
+        _exp_pred    = st.session_state['last_prediction']
+        _exp_feat    = st.session_state['last_features']
+        score        = float(_exp_pred.get('popularity_score', 0))
+        confidence   = float(_exp_pred.get('confidence', 0))
+        is_popular   = bool(_exp_pred.get('popular', False) or _exp_pred.get('is_popular', False))
+        genre        = _exp_feat.get('track_genre', '')
         danceability = float(_exp_feat.get('danceability', 0))
         energy       = float(_exp_feat.get('energy', 0))
         loudness     = float(_exp_feat.get('loudness', 0))
         acousticness = float(_exp_feat.get('acousticness', 0))
         tempo        = float(_exp_feat.get('tempo', 0))
 
-        # ── Visual diagram — Your prediction step by step ────────────────────
-        st.markdown("### 🔍 Your prediction explained — step by step")
+        # ── SECTION 1 — Animated architecture flow ────────────────────────────
+        st.markdown("### 🗺️ How the whole app works")
 
         st.markdown(f"""
-<div style="background: rgba(29,185,84,0.08); border: 2px solid #1DB954;
-border-radius: 10px; padding: 1.2rem; text-align: center; margin-bottom: 0.5rem;">
-<h4 style="color: #1DB954; margin: 0;">🎵 Your song</h4>
-<p style="margin: 0.5rem 0 0;">
-<b>{genre}</b> · danceability {danceability} · energy {energy} ·
-loudness {loudness} dB · tempo {tempo:.0f} BPM
-</p>
+<div style="display: flex; flex-direction: column; gap: 0.4rem; align-items: center; margin-bottom: 2rem;">
+
+<div style="background: rgba(29,185,84,0.1); border: 1px solid rgba(29,185,84,0.4);
+border-radius: 10px; padding: 0.8rem 2rem; text-align: center; width: 80%;">
+<span style="font-size: 1.2rem;">📊</span> <b style="color:#1DB954;">114,000 Spotify songs (dataset.csv)</b><br>
+<span style="color:#888; font-size:0.82em;">Raw data from Kaggle — each song has 21 audio features</span>
 </div>
 
-<div style="text-align: center; font-size: 1.5rem; color: #1DB954; margin: 0.2rem 0;">↓</div>
+<div style="color:#1DB954; font-size:1.4rem;">↓</div>
 
 <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);
-border-radius: 10px; padding: 1.2rem; text-align: center; margin-bottom: 0.5rem;">
-<h4 style="margin: 0;">🔄 Preparation step</h4>
-<p style="color: #888; margin: 0.5rem 0 0; font-size: 0.9em;">
-Before the models could read your values, two quick things happened automatically:<br><br>
-<b>1.</b> The genre name <b>"{genre}"</b> was converted into a number —
-because machine learning models only understand numbers, not words.<br><br>
-<b>2.</b> All your values were rescaled to the same range —
-so that tempo (which can be 120 BPM) doesn't unfairly overpower
-danceability (which is between 0 and 1).<br><br>
-Then both models received the same prepared values at the same time.
-</p>
+border-radius: 10px; padding: 0.8rem 2rem; text-align: center; width: 80%;">
+<span style="font-size: 1.2rem;">🏋️</span> <b style="color:var(--text-primary);">Training (train.py) — happened once, offline</b><br>
+<span style="color:#888; font-size:0.82em;">Model studied 91,200 songs and learned popularity patterns → saved as regressor.pkl + classifier.pkl</span>
 </div>
 
-<div style="display: flex; gap: 1rem; margin: 0.5rem 0;">
-<div style="flex: 1; text-align: center; color: #1DB954; font-size: 1em; font-weight: 500;">
-↙ sent to Regression model
+<div style="color:#1DB954; font-size:1.4rem;">↓</div>
+
+<div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);
+border-radius: 10px; padding: 0.8rem 2rem; text-align: center; width: 80%;">
+<span style="font-size: 1.2rem;">⚡</span> <b style="color:var(--text-primary);">FastAPI Backend (api.py) — lives on Render</b><br>
+<span style="color:#888; font-size:0.82em;">Loads the .pkl files at startup and waits for prediction requests</span>
 </div>
-<div style="flex: 1; text-align: center; color: #1DB954; font-size: 1em; font-weight: 500;">
-↘ sent to Classification model
+
+<div style="color:#1DB954; font-size:1.4rem;">↓</div>
+
+<div style="background: rgba(29,185,84,0.1); border: 2px solid #1DB954;
+border-radius: 10px; padding: 0.8rem 2rem; text-align: center; width: 80%;">
+<span style="font-size: 1.2rem;">🎵</span> <b style="color:#1DB954;">YOU — Streamlit Frontend (app.py)</b><br>
+<span style="color:#888; font-size:0.82em;">You set sliders → app sends values to backend → result shown instantly</span>
 </div>
+
+</div>
+""", unsafe_allow_html=True)
+
+        st.divider()
+
+        # ── SECTION 2 — Your result explained ────────────────────────────────
+        st.markdown("### 🎯 Your last prediction explained")
+
+        st.markdown(f"""
+<div style="background: rgba(29,185,84,0.06); border: 1px solid rgba(29,185,84,0.25);
+border-radius: 10px; padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
+<p style="color:#888; margin:0; font-size:0.85em;">YOUR SONG</p>
+<p style="color:var(--text-primary); margin:0.3rem 0 0; font-weight:500;">
+{genre} · danceability {danceability} · energy {energy} · loudness {loudness} dB · tempo {tempo:.0f} BPM
+</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -1460,172 +1497,230 @@ Then both models received the same prepared values at the same time.
 
         with col_reg:
             st.markdown(f"""
-<div style="background: rgba(29,185,84,0.08); border: 1px solid rgba(29,185,84,0.4);
-border-radius: 10px; padding: 1.2rem;">
+    <div style="background: rgba(29,185,84,0.08); border: 1px solid rgba(29,185,84,0.4);
+    border-radius: 10px; padding: 1.2rem;">
 
-<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.8rem;">
-    <span style="font-size: 1.5rem;">📈</span>
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:1rem;">
+    <span style="font-size:1.8rem;">📈</span>
     <div>
-        <h4 style="color: #1DB954; margin: 0;">Regression</h4>
-        <p style="color: #888; font-size: 0.8em; margin: 0;">Predicts an exact number</p>
+    <h4 style="color:#1DB954; margin:0;">Regression</h4>
+    <p style="color:#888; font-size:0.8em; margin:0;">Answers: "What exact score?"</p>
     </div>
-</div>
+    </div>
 
-<div style="display: flex; flex-direction: column; gap: 0.6rem;">
-    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
-        <span style="color: #888; font-size: 0.75em;">QUESTION</span><br>
-        <span style="font-size: 0.9em;">What exact score will this song get?</span>
-    </div>
-    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
-        <span style="color: #888; font-size: 0.75em;">TRAINED IN</span><br>
-        <span style="font-size: 0.9em;">train.py — offline, using 91,200 songs</span>
-    </div>
-    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
-        <span style="color: #888; font-size: 0.75em;">PREDICTION RUNS IN</span><br>
-        <span style="font-size: 0.9em;">api.py — /predict function</span>
-    </div>
-    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
-        <span style="color: #888; font-size: 0.75em;">SHOWN IN APP</span><br>
-        <span style="font-size: 0.9em;">Predictor tab → green score bar</span>
-    </div>
-    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
-        <span style="color: #888; font-size: 0.75em;">HOW DID THE MODEL GET {score:.1f}?</span><br>
-        <span style="font-size: 0.9em;">
-        During training, the model studied 91,200 songs and learned rules like:
-        <i>"party songs with high energy and low acousticness tend to score around 55,
-        while acoustic songs tend to score around 42."</i>
-        When you clicked Predict, it applied those learned rules to your song
-        and calculated <b style="color:#1DB954;">{score:.1f}</b> as the most likely score.
-        Think of it like a teacher who graded 91,200 exams and now knows exactly
-        what a {score:.0f}-point answer looks like.
-        </span>
-    </div>
-    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
-        <span style="color: #888; font-size: 0.75em;">WHAT DOES {score:.1f} MEAN IN REAL LIFE?</span><br>
-        <span style="font-size: 0.9em;">
-        Spotify popularity scores go from 0 to 100.
-        A score of <b style="color:#1DB954;">{score:.1f}</b> means this song would likely
-        be {'a moderately known song — heard by some but not mainstream' if 40 <= score < 60 else 'a niche song with a small but dedicated audience' if score < 40 else 'a popular mainstream hit'}.
-        For comparison: a viral hit like Blinding Lights scores ~87,
-        an average song scores ~42, and unknown tracks score below 20.
-        </span>
-    </div>
-</div>
+    <div style="display:flex; flex-direction:column; gap:0.5rem;">
 
-<div style="background: rgba(29,185,84,0.15); border-radius: 8px;
-padding: 0.8rem; text-align: center; margin-top: 1rem;">
-    <span style="font-size: 2rem; font-weight: 900; color: #1DB954;">{score:.1f}</span>
-    <span style="color: #888;"> / 100</span>
-    <div style="color: #888; font-size: 0.78em; margin-top: 0.2rem;">MAE ±13.1 pts · R²=0.38</div>
-</div>
-</div>
-""", unsafe_allow_html=True)
+    <div style="background:rgba(255,255,255,0.05); border-radius:6px; padding:0.6rem 0.8rem;">
+    <span style="color:#888; font-size:0.72em; text-transform:uppercase;">Where trained</span><br>
+    <span style="color:var(--text-primary); font-size:0.88em;">📁 <b>train.py</b> — offline, 91,200 songs</span>
+    </div>
+
+    <div style="background:rgba(255,255,255,0.05); border-radius:6px; padding:0.6rem 0.8rem;">
+    <span style="color:#888; font-size:0.72em; text-transform:uppercase;">Where prediction runs</span><br>
+    <span style="color:var(--text-primary); font-size:0.88em;">⚡ <b>api.py</b> → /predict function → every click</span>
+    </div>
+
+    <div style="background:rgba(255,255,255,0.05); border-radius:6px; padding:0.6rem 0.8rem;">
+    <span style="color:#888; font-size:0.72em; text-transform:uppercase;">Where shown</span><br>
+    <span style="color:var(--text-primary); font-size:0.88em;">🎵 <b>Predictor tab</b> → green score bar</span>
+    </div>
+
+    <div style="background:rgba(255,255,255,0.05); border-radius:6px; padding:0.6rem 0.8rem;">
+    <span style="color:#888; font-size:0.72em; text-transform:uppercase;">How it got {score:.1f}</span><br>
+    <span style="color:var(--text-primary); font-size:0.88em;">
+    The model learned that <b>{genre}</b> songs average ~42 popularity.
+    It compared your 15 features to patterns from 91,200 songs
+    and calculated <b style="color:#1DB954;">{score:.1f}</b> as the closest match.
+    </span>
+    </div>
+
+    <div style="background:rgba(255,255,255,0.05); border-radius:6px; padding:0.6rem 0.8rem;">
+    <span style="color:#888; font-size:0.72em; text-transform:uppercase;">What {score:.1f} means</span><br>
+    <span style="color:var(--text-primary); font-size:0.88em;">
+    {'🔥 A strong mainstream hit — this song has the audio DNA of popular music' if score >= 70 else '🟡 Moderate potential — solid song but not quite mainstream yet' if score >= 50 else '🎸 Niche appeal — great for dedicated fans but unlikely to chart'}
+    <br><span style="color:#666; font-size:0.9em;">For reference: viral hits score ~87, average songs ~42, unknown tracks below 20</span>
+    </span>
+    </div>
+
+    </div>
+
+    <div style="background:rgba(29,185,84,0.15); border-radius:8px; padding:0.8rem; text-align:center; margin-top:1rem;">
+    <span style="font-size:2rem; font-weight:900; color:#1DB954;">{score:.1f}</span>
+    <span style="color:#888;"> / 100</span>
+    <div style="color:#888; font-size:0.78em; margin-top:0.2rem;">MAE ±13.1 pts · R²=0.38</div>
+    </div>
+    </div>
+    """, unsafe_allow_html=True)
 
         with col_clf:
-            clf_color   = "#1DB954" if is_popular else "#FF5252"
-            clf_bg      = "rgba(29,185,84,0.08)" if is_popular else "rgba(255,82,82,0.08)"
-            clf_border  = "rgba(29,185,84,0.4)"  if is_popular else "rgba(255,82,82,0.4)"
-            clf_label   = "✅ Popular" if is_popular else "❌ Not Popular"
-            clf_decision = "above" if is_popular else "below"
+            clf_color  = "#1DB954" if is_popular else "#FF5252"
+            clf_bg     = "rgba(29,185,84,0.08)" if is_popular else "rgba(255,82,82,0.08)"
+            clf_border = "rgba(29,185,84,0.4)" if is_popular else "rgba(255,82,82,0.4)"
+            clf_label  = "✅ Popular" if is_popular else "❌ Not Popular"
 
             st.markdown(f"""
-<div style="background: {clf_bg}; border: 1px solid {clf_border};
-border-radius: 10px; padding: 1.2rem;">
+    <div style="background:{clf_bg}; border:1px solid {clf_border};
+    border-radius:10px; padding:1.2rem;">
 
-<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.8rem;">
-    <span style="font-size: 1.5rem;">🎯</span>
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:1rem;">
+    <span style="font-size:1.8rem;">🎯</span>
     <div>
-        <h4 style="color: {clf_color}; margin: 0;">Classification</h4>
-        <p style="color: #888; font-size: 0.8em; margin: 0;">Puts song into a category</p>
+    <h4 style="color:{clf_color}; margin:0;">Classification</h4>
+    <p style="color:#888; font-size:0.8em; margin:0;">Answers: "Popular or not?"</p>
     </div>
-</div>
-
-<div style="display: flex; flex-direction: column; gap: 0.6rem;">
-    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
-        <span style="color: #888; font-size: 0.75em;">QUESTION</span><br>
-        <span style="font-size: 0.9em;">Is this song popular or not? (threshold: score ≥ 70)</span>
     </div>
-    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
-        <span style="color: #888; font-size: 0.75em;">TRAINED IN</span><br>
-        <span style="font-size: 0.9em;">train.py — only 4.8% of songs were Popular</span>
+
+    <div style="display:flex; flex-direction:column; gap:0.5rem;">
+
+    <div style="background:rgba(255,255,255,0.05); border-radius:6px; padding:0.6rem 0.8rem;">
+    <span style="color:#888; font-size:0.72em; text-transform:uppercase;">Where trained</span><br>
+    <span style="color:var(--text-primary); font-size:0.88em;">📁 <b>train.py</b> — offline, only 4.8% were Popular (score ≥ 70)</span>
     </div>
-    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
-        <span style="color: #888; font-size: 0.75em;">PREDICTION RUNS IN</span><br>
-        <span style="font-size: 0.9em;">api.py — same /predict function</span>
+
+    <div style="background:rgba(255,255,255,0.05); border-radius:6px; padding:0.6rem 0.8rem;">
+    <span style="color:#888; font-size:0.72em; text-transform:uppercase;">Where prediction runs</span><br>
+    <span style="color:var(--text-primary); font-size:0.88em;">⚡ <b>api.py</b> → /predict function → same click</span>
     </div>
-    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
-        <span style="color: #888; font-size: 0.75em;">SHOWN IN APP</span><br>
-        <span style="font-size: 0.9em;">Predictor tab → big label at the top</span>
+
+    <div style="background:rgba(255,255,255,0.05); border-radius:6px; padding:0.6rem 0.8rem;">
+    <span style="color:#888; font-size:0.72em; text-transform:uppercase;">Where shown</span><br>
+    <span style="color:var(--text-primary); font-size:0.88em;">🎵 <b>Predictor tab</b> → big label at the top</span>
     </div>
-    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
-        <span style="color: #888; font-size: 0.75em;">HOW WAS THE DECISION MADE?</span><br>
-        <span style="font-size: 0.9em;">
-        The classifier learned that only 4.8% of all Spotify songs are truly popular
-        (score ≥ 70). It gave your song a <b style="color:{'#1DB954' if is_popular else '#FF5252'};">{confidence*100:.1f}%</b> chance
-        of being in that rare group. We use 50% as the decision line —
-        if the model is more than 50% sure, it says Popular.
-        Your song scored {confidence*100:.1f}% which is {clf_decision} that line,
-        so the final answer is <b>{'Popular ✅' if is_popular else 'Not Popular ❌'}</b>.
-        </span>
+
+    <div style="background:rgba(255,255,255,0.05); border-radius:6px; padding:0.6rem 0.8rem;">
+    <span style="color:#888; font-size:0.72em; text-transform:uppercase;">How the decision was made</span><br>
+    <span style="color:var(--text-primary); font-size:0.88em;">
+    Model gave <b style="color:{clf_color};">{confidence*100:.1f}%</b> probability of being popular.
+    Decision line = 50%.
+    {confidence*100:.1f}% is {'above ✅' if is_popular else 'below ❌'} that line
+    → <b>{clf_label}</b>
+    </span>
     </div>
-    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
-        <span style="color: #888; font-size: 0.75em;">WHAT DOES THIS MEAN IN REAL LIFE?</span><br>
-        <span style="font-size: 0.9em;">
-        {'This song has the audio DNA of a commercial hit — high danceability, energy, and the right genre profile. Songs like this tend to get playlist placements and radio play.' if is_popular else 'This song does not match the audio patterns of mainstream popular songs. That does not mean it is a bad song — it means the audio features alone suggest it will not reach the Spotify mainstream. Many great songs stay niche.'}
-        </span>
+
+    <div style="background:rgba(255,255,255,0.05); border-radius:6px; padding:0.6rem 0.8rem;">
+    <span style="color:#888; font-size:0.72em; text-transform:uppercase;">What this means</span><br>
+    <span style="color:var(--text-primary); font-size:0.88em;">
+    {'This song has the audio profile of a commercial hit — high danceability, right energy, strong genre match.' if is_popular else 'This song does not match mainstream popular patterns. That does not mean it is bad — many great songs stay niche.'}
+    </span>
     </div>
-</div>
 
-<div style="background: {clf_bg}; border-radius: 8px; border: 1px solid {clf_border};
-padding: 0.8rem; text-align: center; margin-top: 1rem;">
-    <span style="font-size: 1.5rem; font-weight: 900; color: {clf_color};">{clf_label}</span>
-    <div style="color: #888; font-size: 0.78em; margin-top: 0.2rem;">Confidence: {confidence*100:.1f}% · ROC-AUC=0.920</div>
-</div>
-</div>
-""", unsafe_allow_html=True)
+    </div>
 
-        st.divider()
-
-        # ── Model strengths and limitations ───────────────────────────────────
-        st.markdown("### ⚖️ Model strengths and limitations")
-
-        col_good, col_bad = st.columns(2)
-
-        with col_good:
-            st.markdown("""
-<div style="background: rgba(29,185,84,0.08); border: 1px solid rgba(29,185,84,0.3);
-border-radius: 10px; padding: 1.2rem;">
-<h4 style="color: #1DB954; margin-top: 0;">✅ What this model does well</h4>
-
-- Trained on 114,000 real Spotify songs — large and diverse dataset
-- XGBoost handles class imbalance better than simpler models
-- ROC-AUC of 0.920 — far better than random guessing (0.500)
-- Predicts score within ±13 points on average
-- Works across 114 different music genres
-- Gives two answers at once: exact score + popular/not popular label
-- Runs in under 1 second per prediction
-</div>
-""", unsafe_allow_html=True)
-
-        with col_bad:
-            st.markdown("""
-<div style="background: rgba(255,82,82,0.08); border: 1px solid rgba(255,82,82,0.3);
-border-radius: 10px; padding: 1.2rem;">
-<h4 style="color: #FF5252; margin-top: 0;">❌ What this model cannot do</h4>
-
-- Cannot see artist fame — a Taylor Swift song always scores higher
-- Cannot measure marketing budget or label support
-- Cannot predict TikTok or social media virality
-- Only explains 38% of popularity — 62% is invisible to audio features
-- Dataset from 2022 — music trends have changed since then
-- Rare popular songs (4.8%) are harder to detect — F1 only 0.437
-- Cannot account for release timing (summer hits, Christmas songs)
-</div>
-""", unsafe_allow_html=True)
+    <div style="background:{clf_bg}; border-radius:8px; border:1px solid {clf_border};
+    padding:0.8rem; text-align:center; margin-top:1rem;">
+    <span style="font-size:1.5rem; font-weight:900; color:{clf_color};">{clf_label}</span>
+    <div style="color:#888; font-size:0.78em; margin-top:0.2rem;">
+    Confidence: {confidence*100:.1f}% · ROC-AUC=0.920
+    </div>
+    </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TAB 4 — EDA DASHBOARD
+# TAB 4 — MODEL STATS
+# ─────────────────────────────────────────────────────────────────────────────
+with tab_stats:
+    st.markdown("### ⚖️ Model Strengths & Limitations")
+
+    col_good, col_bad = st.columns(2)
+
+    with col_good:
+        st.markdown("""
+        <div style="background: rgba(29,185,84,0.08); border: 1px solid rgba(29,185,84,0.3);
+        border-radius: 12px; padding: 1.5rem;">
+        <h4 style="color: #1DB954; margin-top: 0;">✅ What this model does well</h4>
+        <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+
+        <div style="background: rgba(29,185,84,0.08); border-radius: 8px; padding: 0.7rem 1rem; display: flex; gap: 0.8rem; align-items: flex-start;">
+        <span style="font-size: 1.3rem;">🎵</span>
+        <div><b style="color:#1DB954;">114,000 real songs</b><br><span style="color:#aaa; font-size:0.85em;">Trained on a massive, diverse Spotify dataset — not a toy example</span></div>
+        </div>
+
+        <div style="background: rgba(29,185,84,0.08); border-radius: 8px; padding: 0.7rem 1rem; display: flex; gap: 0.8rem; align-items: flex-start;">
+        <span style="font-size: 1.3rem;">🎯</span>
+        <div><b style="color:#1DB954;">ROC-AUC = 0.920</b><br><span style="color:#aaa; font-size:0.85em;">Far better than random guessing (0.500) — the model genuinely learned</span></div>
+        </div>
+
+        <div style="background: rgba(29,185,84,0.08); border-radius: 8px; padding: 0.7rem 1rem; display: flex; gap: 0.8rem; align-items: flex-start;">
+        <span style="font-size: 1.3rem;">⚡</span>
+        <div><b style="color:#1DB954;">Under 1 second per prediction</b><br><span style="color:#aaa; font-size:0.85em;">XGBoost is fast — instant results even on free hosting</span></div>
+        </div>
+
+        <div style="background: rgba(29,185,84,0.08); border-radius: 8px; padding: 0.7rem 1rem; display: flex; gap: 0.8rem; align-items: flex-start;">
+        <span style="font-size: 1.3rem;">🎸</span>
+        <div><b style="color:#1DB954;">114 genres covered</b><br><span style="color:#aaa; font-size:0.85em;">Works across every genre from death-metal to k-pop</span></div>
+        </div>
+
+        <div style="background: rgba(29,185,84,0.08); border-radius: 8px; padding: 0.7rem 1rem; display: flex; gap: 0.8rem; align-items: flex-start;">
+        <span style="font-size: 1.3rem;">🤖</span>
+        <div><b style="color:#1DB954;">Built with AI assistance</b><br><span style="color:#aaa; font-size:0.85em;">Claude Code + MCP servers helped scaffold the pipeline, debug errors, and deploy — cutting build time by 70%</span></div>
+        </div>
+
+        <div style="background: rgba(29,185,84,0.08); border-radius: 8px; padding: 0.7rem 1rem; display: flex; gap: 0.8rem; align-items: flex-start;">
+        <span style="font-size: 1.3rem;">🔄</span>
+        <div><b style="color:#1DB954;">Two models, one click</b><br><span style="color:#aaa; font-size:0.85em;">Regression gives an exact score AND classification gives a label — simultaneously</span></div>
+        </div>
+
+        </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col_bad:
+        st.markdown("""
+        <div style="background: rgba(255,82,82,0.08); border: 1px solid rgba(255,82,82,0.3);
+        border-radius: 12px; padding: 1.5rem;">
+        <h4 style="color: #FF5252; margin-top: 0;">⚠️ Limitations to keep in mind</h4>
+        <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+
+        <div style="background: rgba(255,82,82,0.08); border-radius: 8px; padding: 0.7rem 1rem; display: flex; gap: 0.8rem; align-items: flex-start;">
+        <span style="font-size: 1.3rem;">🌟</span>
+        <div><b style="color:#FF5252;">Artist fame is invisible</b><br><span style="color:#aaa; font-size:0.85em;">The same song by Taylor Swift vs an unknown artist would score completely differently in real life</span></div>
+        </div>
+
+        <div style="background: rgba(255,82,82,0.08); border-radius: 8px; padding: 0.7rem 1rem; display: flex; gap: 0.8rem; align-items: flex-start;">
+        <span style="font-size: 1.3rem;">📱</span>
+        <div><b style="color:#FF5252;">No TikTok or viral factor</b><br><span style="color:#aaa; font-size:0.85em;">A 15-second clip going viral can make any song popular overnight — audio features cannot predict this</span></div>
+        </div>
+
+        <div style="background: rgba(255,82,82,0.08); border-radius: 8px; padding: 0.7rem 1rem; display: flex; gap: 0.8rem; align-items: flex-start;">
+        <span style="font-size: 1.3rem;">😴</span>
+        <div><b style="color:#FF5252;">Backend goes to sleep</b><br><span style="color:#aaa; font-size:0.85em;">We use Render's free tier — the server sleeps after inactivity. First prediction may take 30–60 seconds to wake up</span></div>
+        </div>
+
+        <div style="background: rgba(255,82,82,0.08); border-radius: 8px; padding: 0.7rem 1rem; display: flex; gap: 0.8rem; align-items: flex-start;">
+        <span style="font-size: 1.3rem;">🧩</span>
+        <div><b style="color:#FF5252;">Only 38% explained</b><br><span style="color:#aaa; font-size:0.85em;">Audio features alone explain 38% of popularity. The other 62% is marketing, timing, and luck</span></div>
+        </div>
+
+        </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.divider()
+
+    # MCP Server highlight
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, rgba(29,185,84,0.08), rgba(100,100,255,0.08));
+    border: 1px solid rgba(29,185,84,0.3); border-radius: 12px; padding: 1.5rem; margin-top: 1rem;">
+    <h4 style="color: #1DB954; margin-top: 0;">🤖 Surprising AI moment — MCP Servers</h4>
+    <p style="color: #aaa;">
+    The most surprising part of building this app was using <b style="color:#1DB954;">MCP (Model Context Protocol) servers</b>
+    with Claude Code. Instead of writing code manually, we could say in plain English:
+    <i>"Push this to GitHub"</i> or <i>"Take a screenshot of my live app"</i> — and Claude would do it automatically
+    through connected tools like the <b>GitHub MCP</b>, <b>Playwright MCP</b>, and <b>Filesystem MCP</b>.
+    </p>
+    <p style="color: #aaa; margin-bottom: 0;">
+    🎭 <b>Playwright MCP</b> was particularly impressive — it opened a real browser, navigated to the live app,
+    and took screenshots automatically to verify the deployment worked.
+    What would normally take an hour of manual testing happened in seconds.
+    </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TAB 5 — EDA DASHBOARD
 # ─────────────────────────────────────────────────────────────────────────────
 with tab_eda:
 
@@ -1739,58 +1834,6 @@ how much the label spent on marketing, or whether the song went viral on TikTok.
 """)
         _show_plot("09_predicted_vs_actual_xgb.png", "")
 
-    # ── Section 8: Model Leaderboard ──────────────────────────────────────────
-    st.markdown("### 🏆 Model Leaderboard — All Models Compared")
-    st.caption("Honest comparison of all 4 models on the held-out test set. Baseline (random guessing) is included so we can see how much each model improves.")
-
-    st.markdown("**Classification Task** — Can we predict if a song is popular? (popularity ≥ 70)")
-
-    def _leaderboard_table(headers, rows, last_row_green=True):
-        th_style = (
-            'background:rgba(29,185,84,0.12);color:#1DB954;font-weight:700;'
-            'padding:9px 14px;border-bottom:1px solid rgba(29,185,84,0.25);'
-            'text-align:left;font-size:0.82em;text-transform:uppercase;letter-spacing:0.6px;'
-        )
-        td_style = 'color:#C0C0C0;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.88em;'
-        td_last  = 'color:#1DB954;font-weight:600;padding:8px 14px;background:rgba(29,185,84,0.06);font-size:0.88em;'
-        header_html = ''.join(f'<th style="{th_style}">{h}</th>' for h in headers)
-        body_html = ''
-        for i, row in enumerate(rows):
-            is_last = last_row_green and i == len(rows) - 1
-            cells = ''.join(f'<td style="{td_last if is_last else td_style}">{cell}</td>' for cell in row)
-            body_html += f'<tr>{cells}</tr>'
-        st.markdown(
-            f'<div style="border:1px solid rgba(29,185,84,0.25);border-radius:10px;overflow:hidden;margin:0.5em 0;">'
-            f'<table style="width:100%;border-collapse:collapse;">'
-            f'<thead><tr>{header_html}</tr></thead><tbody>{body_html}</tbody></table></div>',
-            unsafe_allow_html=True,
-        )
-
-    _leaderboard_table(
-        headers=["Model", "Accuracy", "F1 Score", "ROC-AUC", "Notes"],
-        rows=[
-            ["1. Random Guessing (Baseline)", "95.2%", "0.000", "0.500", "Always predicts NOT popular — useless"],
-            ["2. Logistic Regression",        "95.2%", "0.141", "0.706", "Linear model, limited by class imbalance"],
-            ["3. Decision Tree (depth=6)",    "95.3%", "0.143", "0.708", "Slightly better, starts to overfit"],
-            ["4. XGBoost (tuned) ✅ Best",    "95.8%", "0.437", "0.920", "Best overall — handles imbalance well"],
-        ],
-    )
-    st.caption("⚠️ Note: Accuracy is misleading here — 95.2% of songs are NOT popular, so always guessing 'not popular' gives 95.2% accuracy. F1 Score and ROC-AUC are the honest metrics.")
-
-    st.divider()
-
-    st.markdown("**Regression Task** — Can we predict the exact popularity score (0–100)?")
-
-    _leaderboard_table(
-        headers=["Model", "R²", "MAE", "RMSE", "Notes"],
-        rows=[
-            ["1. Random Guessing (Baseline)", "0.000", "18.5", "22.1", "Always predicts mean score — baseline floor"],
-            ["2. Ridge Regression",           "0.062", "17.2", "21.4", "Captures some linear signal"],
-            ["3. Decision Tree (depth=6)",    "0.089", "16.8", "21.1", "Better but overfits on training data"],
-            ["4. XGBoost (tuned) ✅ Best",    "0.380", "13.1", "16.7", "Best — explains 38% of score variance"],
-        ],
-    )
-    st.caption("📊 R²=0.38 means our best model explains 38% of what makes a song popular. The remaining 62% comes from factors not in the audio data — marketing, artist fame, timing, social media.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1870,28 +1913,6 @@ with tab_about:
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Live Model Stats ──────────────────────────────────────────────────────
-    st.divider()
-    st.markdown("### 📈 Live Model Performance")
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Training samples", "91,200", help="Songs used to train the model")
-    col2.metric("Test samples", "22,800", help="Songs used to evaluate the model")
-    col3.metric("Best AUC score", "0.920", help="Area under ROC curve — 1.0 is perfect")
-    col4.metric("Best R² score", "0.380", help="How much variance the model explains")
-
-    # ── How to interpret results ──────────────────────────────────────────────
-    st.divider()
-    st.markdown("### 🎯 How to Interpret the Prediction")
-    st.markdown("""
-| Score range | Meaning | What to do |
-|-------------|---------|------------|
-| 0 – 30 | Very unlikely to be popular | Reconsider arrangement or genre |
-| 30 – 50 | Below average popularity | Some potential, needs work |
-| 50 – 70 | Average popularity | Solid track, could reach mainstream |
-| 70 – 85 | Likely popular ✅ | Strong commercial potential |
-| 85 – 100 | Very likely popular 🔥 | Hit potential — prioritize release |
-""")
-
     # ── Fun Facts ─────────────────────────────────────────────────────────────
     st.divider()
     st.markdown("### 🎵 Interesting Findings from 114,000 Songs")
@@ -1933,71 +1954,21 @@ FastAPI backend with Swagger UI
 
     with st.expander("🎵 Songs with a similar audio profile"):
         st.markdown("""
-This feature takes the current slider values you set in the **Predictor** tab —
-danceability, energy, valence, acousticness, speechiness, instrumentalness,
-liveness, and tempo — and searches all **114,000 songs** in the Spotify dataset
-to find the 5 closest matches.
-
-**How similarity is calculated:**
-1. All 8 features are normalized to a 0–1 scale using **MinMaxScaler** so that
-   no single feature (e.g. tempo, which ranges up to 250) dominates the distance.
-2. **Euclidean distance** is computed between your feature vector and every song
-   in the dataset.
-3. Distance is converted to a similarity score: `1 − (distance / max_distance)`,
-   giving 100 % for a perfect match and lower percentages as songs diverge.
-
-Each result card shows the **track name**, **artist**, **genre**, **popularity
-score** (green ≥ 70, orange 50–69, gray < 50), and a **match percentage badge**
-(green > 85 %, blue 70–85 %, gray otherwise).
-
-This helps you understand what real songs your audio profile most resembles —
-and what commercial popularity those songs actually achieved.
+Takes your slider values and searches all **114,000 songs** to find the 5 most similar ones
+using mathematical distance. Shows track name, artist, genre, popularity score, match percentage,
+and a YouTube link to listen.
 """)
 
-    with st.expander("🎸 Genre audio profile explorer"):
+    with st.expander("🎵 Real song selector"):
         st.markdown("""
-Select any of the **114 genres** in the dataset and instantly see the
-**average audio fingerprint** of that genre — calculated across every song
-tagged with that genre in the 114,000-track Spotify dataset.
-
-**What is shown:**
-- **Metric cards** for mean danceability, energy, valence, acousticness,
-  average tempo (BPM), and average popularity score (out of 100).
-- A **horizontal bar chart** of all 7 normalized features (0–1 scale) for
-  easy visual comparison between genres.
-- An **automatic insight message** that classifies the genre as
-  high-popularity (avg > 55), moderate (avg 35–55), or niche (avg < 35),
-  with a plain-language interpretation.
-
-This helps you understand what audio characteristics define each genre and
-benchmark how your own song's feature values compare to the genre average.
+Select a genre in the Predictor tab and a dropdown appears with the top 50 real songs from that genre.
+Selecting a song auto-fills all sliders with its actual Spotify values. A YouTube link appears so you
+can listen while exploring.
 """)
 
-    with st.expander("🚀 Song optimization suggestions"):
+    with st.expander("🎭 Mood song finder"):
         st.markdown("""
-After running a prediction in the **Predictor** tab, this section compares
-your feature values against the **average values of popular songs**
-(popularity ≥ 70) in the **same genre** from the dataset.
-
-**How it works:**
-1. All songs in your selected genre with popularity ≥ 70 are filtered from
-   the dataset, and their mean feature values are computed.
-2. The **absolute difference** between your values and those popular-song
-   averages is calculated for each of 7 features (danceability, energy,
-   valence, acousticness, speechiness, instrumentalness, liveness).
-3. The **top 3 features** with the largest gap are surfaced as suggestions.
-
-**Each suggestion card shows:**
-- Feature name and direction (*increase* or *decrease*)
-- Current value → target value (the popular-song average for that genre)
-- Estimated point improvement: `difference × 15`, rounded, capped at **+15 per feature**
-- A progress bar showing your current value on the 0–1 scale
-
-At the bottom, a **total estimated new score** is displayed:
-`current score + sum of improvements`, capped at **98** to remain realistic.
-
-This gives you **actionable, data-driven advice** on which specific audio
-characteristics to adjust to make your song more commercially competitive
-within its genre.
+Answer 3 quick questions about your current mood, energy level, and activity. The app filters all
+114,000 songs and finds 3 real songs that match your vibe, with YouTube links to listen instantly.
 """)
 
