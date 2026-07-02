@@ -657,8 +657,8 @@ if not backend_ok:
 # =============================================================================
 # TABS
 # =============================================================================
-tab_predict, tab_insights, tab_explain, tab_eda, tab_about = st.tabs(
-    ["🎵 Predictor", "🔍 Song Insights", "🧠 How It Works", "📊 EDA Dashboard", "ℹ️ About"]
+tab_predict, tab_insights, tab_eda, tab_about = st.tabs(
+    ["🎵 Predictor", "🔍 Song Insights", "📊 EDA Dashboard", "ℹ️ About"]
 )
 
 
@@ -1178,128 +1178,7 @@ with tab_insights:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TAB 3 — HOW IT WORKS
-# ─────────────────────────────────────────────────────────────────────────────
-with tab_explain:
-
-    if 'last_prediction' not in st.session_state or 'last_features' not in st.session_state:
-        st.info("👆 Go to the Predictor tab, click **Predict popularity** first — then come back here to see a full explanation of your result.")
-    else:
-        _exp_pred   = st.session_state['last_prediction']
-        _exp_feat   = st.session_state['last_features']
-        score       = float(_exp_pred.get('popularity_score', 0))
-        confidence  = float(_exp_pred.get('confidence', 0))
-        is_popular  = bool(_exp_pred.get('popular', False) or _exp_pred.get('is_popular', False))
-        genre       = _exp_feat.get('track_genre', '')
-        danceability = float(_exp_feat.get('danceability', 0))
-        energy       = float(_exp_feat.get('energy', 0))
-        loudness     = float(_exp_feat.get('loudness', 0))
-        acousticness = float(_exp_feat.get('acousticness', 0))
-        tempo        = float(_exp_feat.get('tempo', 0))
-
-        # ── SECTION 1 — Your result ───────────────────────────────────────────
-        st.markdown("### 🎯 Your prediction explained")
-        st.markdown(f"""
-You described a **{genre}** song with danceability **{danceability}**, energy **{energy}**, loudness **{loudness} dB**, and tempo **{tempo} BPM**.
-
-The app returned two answers:
-- **Predicted score: {score:.1f} / 100** — this came from the Regression model
-- **{"✅ Popular" if is_popular else "❌ Not Popular"}** with **{confidence*100:.1f}% confidence** — this came from the Classification model
-
-Here is how we got each of those answers.
-""")
-
-        st.divider()
-
-        # ── SECTION 2 — Regression ────────────────────────────────────────────
-        st.markdown(f"""
-### 📈 Regression — How we got {score:.1f} / 100
-
-**What is regression?**
-Regression is when a model predicts an exact number — in our case, a popularity score between 0 and 100.
-
-**Where did this happen?**
-- Training happened in **train.py** — we fed 114,000 Spotify songs to the model and it learned what audio features lead to high or low popularity scores.
-- Prediction happened in **api.py** — in the function called `/predict`. When you clicked the Predict button, your 15 slider values were sent there and the model calculated your score.
-- The result appeared in **app.py** — in the Predictor tab, right side panel, as the green number and score bar.
-
-**Why did your song score {score:.1f}?**
-The model compared your song to patterns it learned from 91,200 training songs. Your genre ({genre}) has an average popularity of around 42 in the dataset. Songs in this genre rarely reach scores above 60, which pulled your score down.
-
-**How accurate is this?**
-The model gets within ±13 points on average (MAE = 13.1). It explains 38% of what makes a song popular — the other 62% comes from things audio features cannot capture: artist fame, marketing, and social media.
-""")
-
-        st.divider()
-
-        # ── SECTION 3 — Classification ────────────────────────────────────────
-        st.markdown(f"""
-### 🎯 Classification — How we got {"Popular ✅" if is_popular else "Not Popular ❌"}
-
-**What is classification?**
-Classification is when a model puts something into a category — in our case, either "Popular" or "Not Popular".
-
-**How was the category defined?**
-During training in **train.py**, we drew a line at popularity score 70. Songs scoring 70 or above were labelled Popular. Songs scoring below 70 were labelled Not Popular. Only 4.8% of the 114,000 songs in the dataset crossed that line — so popular songs are very rare.
-
-**Where did this happen?**
-- Training happened in **train.py** — the model studied which audio features appear in that rare 4.8% of popular songs.
-- Prediction happened in **api.py** — in the same `/predict` function. The classifier calculated a probability: how likely is it that your song belongs to the popular group?
-- The result appeared in **app.py** — in the Predictor tab, right side panel, as the big Popular/Not Popular label at the top.
-
-**What happened with your song?**
-The classifier gave your song a **{confidence*100:.1f}% probability** of being popular. We use 50% as the decision line:
-- If probability is 50% or above → Popular ✅
-- If probability is below 50% → Not Popular ❌
-
-Your song scored **{confidence*100:.1f}%** which is {"above" if is_popular else "below"} 50%, so the answer is **{"Popular ✅" if is_popular else "Not Popular ❌"}**.
-
-**How accurate is this?**
-The model scores 0.920 on ROC-AUC (where 0.5 = random guessing and 1.0 = perfect). This means it is very good at separating popular from non-popular songs overall.
-""")
-
-        st.divider()
-
-        # ── SECTION 4 — Where everything happened ─────────────────────────────
-        st.markdown("### 📍 Where each step happened — quick reference")
-        location_df = pd.DataFrame([
-            ["Training the regression model", "train.py", "Offline, once, on Amila's computer", "Fed 91,200 songs and learned popularity patterns"],
-            ["Training the classification model", "train.py", "Offline, once, on Amila's computer", "Same songs, learned what separates popular from not popular"],
-            ["Saving the trained models", "train.py", "Offline, once", "Saved as regressor.pkl and classifier.pkl files"],
-            ["Loading models into the app", "api.py — top of file", "Every time the server starts on Render", "Models loaded into memory once and stay ready"],
-            ["Receiving your slider values", "api.py — /predict function", "Every time you click Predict", "Your 15 values arrive as a request from Streamlit"],
-            ["Calculating your score (Regression)", "api.py — /predict function", "Every time you click Predict", f"Model calculated {score:.1f} / 100"],
-            ["Calculating Popular/Not Popular (Classification)", "api.py — /predict function", "Every time you click Predict", f"Model calculated {confidence*100:.1f}% → {'Popular' if is_popular else 'Not Popular'}"],
-            ["Displaying the result", "app.py — Predictor tab, right panel", "Every time you click Predict", "Score bar, label, and confidence shown on screen"],
-        ], columns=["What happened", "Where in the code", "When", "Result"])
-        st.dataframe(location_df, hide_index=True, use_container_width=True)
-
-        st.divider()
-
-        # ── SECTION 5 — Feature comparison ───────────────────────────────────
-        st.markdown(f"""
-### 💡 Why did your song score {score:.1f}?
-
-Here is how your features compare to what popular songs look like on average:
-""")
-        comparison_df = pd.DataFrame([
-            ["Genre", genre, "pop / k-pop / chill", "✅" if genre in ["pop", "k-pop", "chill", "pop-film", "dance"] else "❌"],
-            ["Danceability", f"{danceability:.2f}", "0.71", "✅" if danceability > 0.6 else "❌"],
-            ["Energy", f"{energy:.2f}", "0.65", "✅" if 0.5 < energy < 0.8 else "❌"],
-            ["Loudness", f"{loudness:.1f} dB", "-5.5 dB", "✅" if loudness > -8 else "❌"],
-            ["Acousticness", f"{acousticness:.2f}", "0.18", "✅" if acousticness < 0.3 else "❌"],
-            ["Tempo", f"{tempo:.0f} BPM", "120 BPM", "✅" if 100 < tempo < 140 else "❌"],
-        ], columns=["Feature", "Your value", "Avg popular song", "Helps popularity?"])
-        st.dataframe(comparison_df, hide_index=True, use_container_width=True)
-
-        st.markdown("""
-Features marked ✅ are working in your favour.
-Features marked ❌ are pulling your score down compared to what popular songs look like.
-""")
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# TAB 4 — EDA DASHBOARD
+# TAB 3 — EDA DASHBOARD
 # ─────────────────────────────────────────────────────────────────────────────
 with tab_eda:
 
