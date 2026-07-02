@@ -1568,7 +1568,7 @@ border-radius: 10px; padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
     <span style="font-size:1.8rem;">📈</span>
     <div>
     <h4 style="color:#1DB954; margin:0;">Regression</h4>
-    <p style="color:#888; font-size:0.8em; margin:0;">Answers: "What exact score?"</p>
+    <p style="color:#1DB954; font-size:0.85em; margin:0; background: rgba(29,185,84,0.12); padding: 3px 8px; border-radius: 4px; display: inline-block;">💬 Answers: "What exact score will this song get?"</p>
     </div>
     </div>
 
@@ -1630,7 +1630,7 @@ border-radius: 10px; padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
     <span style="font-size:1.8rem;">🎯</span>
     <div>
     <h4 style="color:{clf_color}; margin:0;">Classification</h4>
-    <p style="color:#888; font-size:0.8em; margin:0;">Answers: "Popular or not?"</p>
+    <p style="color:{clf_color}; font-size:0.85em; margin:0; background: rgba(255,82,82,0.12); padding: 3px 8px; border-radius: 4px; display: inline-block;">💬 Answers: "Is this song popular or not?"</p>
     </div>
     </div>
 
