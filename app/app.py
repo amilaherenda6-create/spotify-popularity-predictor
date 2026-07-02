@@ -1377,8 +1377,26 @@ border-radius: 10px; padding: 1.2rem;">
         <span style="font-size: 0.9em;">Predictor tab → green score bar</span>
     </div>
     <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
-        <span style="color: #888; font-size: 0.75em;">WHY THIS SCORE?</span><br>
-        <span style="font-size: 0.9em;">{genre} genre averages ~42 popularity. Songs here rarely exceed 60.</span>
+        <span style="color: #888; font-size: 0.75em;">HOW DID THE MODEL GET {score:.1f}?</span><br>
+        <span style="font-size: 0.9em;">
+        During training, the model studied 91,200 songs and learned rules like:
+        <i>"party songs with high energy and low acousticness tend to score around 55,
+        while acoustic songs tend to score around 42."</i>
+        When you clicked Predict, it applied those learned rules to your song
+        and calculated <b style="color:#1DB954;">{score:.1f}</b> as the most likely score.
+        Think of it like a teacher who graded 91,200 exams and now knows exactly
+        what a {score:.0f}-point answer looks like.
+        </span>
+    </div>
+    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
+        <span style="color: #888; font-size: 0.75em;">WHAT DOES {score:.1f} MEAN IN REAL LIFE?</span><br>
+        <span style="font-size: 0.9em;">
+        Spotify popularity scores go from 0 to 100.
+        A score of <b style="color:#1DB954;">{score:.1f}</b> means this song would likely
+        be {'a moderately known song — heard by some but not mainstream' if 40 <= score < 60 else 'a niche song with a small but dedicated audience' if score < 40 else 'a popular mainstream hit'}.
+        For comparison: a viral hit like Blinding Lights scores ~87,
+        an average song scores ~42, and unknown tracks score below 20.
+        </span>
     </div>
 </div>
 
@@ -1428,8 +1446,21 @@ border-radius: 10px; padding: 1.2rem;">
         <span style="font-size: 0.9em;">Predictor tab → big label at the top</span>
     </div>
     <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
-        <span style="color: #888; font-size: 0.75em;">HOW DECISION WAS MADE</span><br>
-        <span style="font-size: 0.9em;">Model gave {confidence*100:.1f}% probability. Decision line is 50%. {confidence*100:.1f}% is {clf_decision} 50%.</span>
+        <span style="color: #888; font-size: 0.75em;">HOW WAS THE DECISION MADE?</span><br>
+        <span style="font-size: 0.9em;">
+        The classifier learned that only 4.8% of all Spotify songs are truly popular
+        (score ≥ 70). It gave your song a <b style="color:{'#1DB954' if is_popular else '#FF5252'};">{confidence*100:.1f}%</b> chance
+        of being in that rare group. We use 50% as the decision line —
+        if the model is more than 50% sure, it says Popular.
+        Your song scored {confidence*100:.1f}% which is {clf_decision} that line,
+        so the final answer is <b>{'Popular ✅' if is_popular else 'Not Popular ❌'}</b>.
+        </span>
+    </div>
+    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
+        <span style="color: #888; font-size: 0.75em;">WHAT DOES THIS MEAN IN REAL LIFE?</span><br>
+        <span style="font-size: 0.9em;">
+        {'This song has the audio DNA of a commercial hit — high danceability, energy, and the right genre profile. Songs like this tend to get playlist placements and radio play.' if is_popular else 'This song does not match the audio patterns of mainstream popular songs. That does not mean it is a bad song — it means the audio features alone suggest it will not reach the Spotify mainstream. Many great songs stay niche.'}
+        </span>
     </div>
 </div>
 
