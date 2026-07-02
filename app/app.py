@@ -1125,72 +1125,184 @@ with tab_insights:
             """, unsafe_allow_html=True)
 
         st.divider()
+        st.markdown("### 🎭 Find your mood song")
+        st.caption("Answer 3 quick questions and we'll find a real song from the dataset that matches your current vibe")
 
-        # ── SECTION 2 — Optimize my song ─────────────────────────────────────
-        st.markdown("### 🚀 How to improve your predicted score")
-        st.caption("Suggestions based on what popular songs look like in your genre")
+        # Animated intro
+        st.markdown("""
+<div style="background: linear-gradient(135deg, rgba(29,185,84,0.08), rgba(29,185,84,0.03));
+border: 1px solid rgba(29,185,84,0.25); border-radius: 12px;
+padding: 1.2rem; margin-bottom: 1.5rem; text-align: center;">
+<div style="font-size: 2rem; margin-bottom: 0.5rem;">🎵 ✨ 🎶</div>
+<p style="color: #888; margin: 0; font-size: 0.9em;">
+Tell us how you feel right now — we'll find the perfect song for this moment
+</p>
+</div>
+""", unsafe_allow_html=True)
 
-        if 'last_prediction' not in st.session_state or 'last_features' not in st.session_state:
-            st.markdown("""
-            <div class="placeholder-card">
-                <div class="placeholder-icon">🎯</div>
-                <div class="placeholder-text">
-                    Run a prediction in the <strong style="color:#1DB954;">Predictor</strong> tab first.
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            _last_pred  = st.session_state['last_prediction']
-            _last_feat  = st.session_state['last_features']
-            _last_genre = st.session_state.get('last_genre', '')
-            _cur_score  = float(_last_pred.get('popularity_score', 0))
+        # 3 questions in columns
+        q1, q2, q3 = st.columns(3)
 
-            _OPT_FEATURES = ['danceability', 'energy', 'valence', 'acousticness',
-                             'speechiness', 'instrumentalness', 'liveness']
+        with q1:
+            st.markdown("**😊 How do you feel?**")
+            mood = st.select_slider(
+                "Mood",
+                options=["😢 Sad", "😐 Neutral", "🙂 Good", "😄 Happy", "🤩 Euphoric"],
+                value="🙂 Good",
+                label_visibility="collapsed"
+            )
 
-            _pop_songs = _df[(_df['track_genre'] == _last_genre) & (_df['popularity'] >= 70)]
+        with q2:
+            st.markdown("**⚡ Energy level?**")
+            energy_mood = st.select_slider(
+                "Energy",
+                options=["😴 Exhausted", "🧘 Calm", "🚶 Moderate", "🏃 Energetic", "🔥 Pumped"],
+                value="🚶 Moderate",
+                label_visibility="collapsed"
+            )
 
-            if len(_pop_songs) < 3:
-                st.info(f"Not enough popular songs in **{_last_genre}** to build suggestions (need ≥ 3).")
+        with q3:
+            st.markdown("**🎯 What are you doing?**")
+            activity = st.selectbox(
+                "Activity",
+                options=[
+                    "🚗 Driving",
+                    "📚 Studying",
+                    "🏋️ Working out",
+                    "😴 Relaxing",
+                    "🎉 Partying",
+                    "💔 Heartbreak",
+                    "☕ Morning coffee",
+                    "🌙 Late night",
+                    "🧹 Doing chores",
+                    "👯 Hanging with friends"
+                ],
+                label_visibility="collapsed"
+            )
+
+        # Map answers to audio feature ranges
+        mood_map = {
+            "😢 Sad":      {"valence": (0.0, 0.3), "energy": (0.0, 0.4)},
+            "😐 Neutral":  {"valence": (0.3, 0.5), "energy": (0.3, 0.6)},
+            "🙂 Good":     {"valence": (0.4, 0.7), "energy": (0.4, 0.7)},
+            "😄 Happy":    {"valence": (0.6, 0.9), "energy": (0.5, 0.8)},
+            "🤩 Euphoric": {"valence": (0.8, 1.0), "energy": (0.7, 1.0)},
+        }
+
+        energy_map = {
+            "😴 Exhausted": {"energy": (0.0, 0.25), "tempo": (0, 80)},
+            "🧘 Calm":      {"energy": (0.1, 0.4),  "tempo": (60, 100)},
+            "🚶 Moderate":  {"energy": (0.35, 0.65),"tempo": (90, 120)},
+            "🏃 Energetic": {"energy": (0.6, 0.85), "tempo": (110, 150)},
+            "🔥 Pumped":    {"energy": (0.8, 1.0),  "tempo": (130, 220)},
+        }
+
+        activity_map = {
+            "🚗 Driving":             {"danceability": (0.5, 0.9), "valence": (0.4, 0.9), "acousticness": (0.0, 0.5)},
+            "📚 Studying":            {"instrumentalness": (0.3, 1.0), "energy": (0.0, 0.5), "speechiness": (0.0, 0.1)},
+            "🏋️ Working out":         {"energy": (0.7, 1.0), "danceability": (0.6, 1.0), "tempo": (120, 220)},
+            "😴 Relaxing":            {"energy": (0.0, 0.4), "acousticness": (0.3, 1.0), "valence": (0.3, 0.8)},
+            "🎉 Partying":            {"danceability": (0.7, 1.0), "energy": (0.7, 1.0), "valence": (0.5, 1.0)},
+            "💔 Heartbreak":          {"valence": (0.0, 0.3), "acousticness": (0.3, 1.0), "energy": (0.0, 0.5)},
+            "☕ Morning coffee":      {"energy": (0.2, 0.6), "acousticness": (0.2, 0.8), "valence": (0.3, 0.7)},
+            "🌙 Late night":          {"energy": (0.0, 0.5), "valence": (0.2, 0.6), "acousticness": (0.2, 0.9)},
+            "🧹 Doing chores":        {"danceability": (0.5, 0.9), "energy": (0.4, 0.8), "valence": (0.4, 0.9)},
+            "👯 Hanging with friends":{"danceability": (0.6, 1.0), "valence": (0.5, 1.0), "energy": (0.5, 0.9)},
+        }
+
+        find_btn = st.button("🎵 Find my mood song", use_container_width=True, type="primary")
+
+        if find_btn:
+            _df_mood = _load_dataset()
+
+            # Build filter based on all 3 answers
+            mask = pd.Series([True] * len(_df_mood))
+
+            m = mood_map[mood]
+            e = energy_map[energy_mood]
+            a = activity_map[activity]
+
+            # Apply valence from mood
+            mask &= (_df_mood["valence"] >= m["valence"][0]) & (_df_mood["valence"] <= m["valence"][1])
+
+            # Apply energy (combine mood and energy level)
+            energy_min = max(m["energy"][0], e["energy"][0])
+            energy_max = min(m["energy"][1], e["energy"][1])
+            if energy_min < energy_max:
+                mask &= (_df_mood["energy"] >= energy_min) & (_df_mood["energy"] <= energy_max)
+
+            # Apply tempo from energy level
+            if "tempo" in e:
+                mask &= (_df_mood["tempo"] >= e["tempo"][0]) & (_df_mood["tempo"] <= e["tempo"][1])
+
+            # Apply activity filters
+            for feature, (fmin, fmax) in a.items():
+                if feature in _df_mood.columns and feature != "tempo":
+                    mask &= (_df_mood[feature] >= fmin) & (_df_mood[feature] <= fmax)
+
+            filtered = _df_mood[mask].copy()
+
+            # If too few results, relax filters and just use mood
+            if len(filtered) < 10:
+                filtered = _df_mood[
+                    (_df_mood["valence"] >= m["valence"][0]) &
+                    (_df_mood["valence"] <= m["valence"][1])
+                ].copy()
+
+            if len(filtered) == 0:
+                st.warning("No songs found for this mood combination. Try different settings!")
             else:
-                _pop_means = _pop_songs[_OPT_FEATURES].mean()
-
-                _gaps = []
-                for _f in _OPT_FEATURES:
-                    _cur = float(_last_feat.get(_f, 0))
-                    _tgt = float(_pop_means[_f])
-                    _diff = abs(_tgt - _cur)
-                    _dir  = "increase" if _tgt > _cur else "decrease"
-                    _imp  = min(15, int(round(_diff * 15)))
-                    _gaps.append((_f, _cur, _tgt, _dir, _imp, _diff))
-
-                _gaps.sort(key=lambda x: x[5], reverse=True)
-                _top3 = _gaps[:3]
-                _total_improvement = sum(g[4] for g in _top3)
-                _new_score = min(98, _cur_score + _total_improvement)
-
-                for _f, _cur_v, _tgt_v, _dir, _imp, _ in _top3:
-                    _arrow = "⬆️" if _dir == "increase" else "⬇️"
-                    _prog_val = min(1.0, _cur_v) if _f != 'tempo' else min(1.0, _cur_v / 250)
-                    st.markdown(f"""
-                    <div class="suggest-card">
-                        <div class="suggest-header">{_arrow} {_f.capitalize()} — {_dir}</div>
-                        <div class="suggest-values">Current: <strong>{_cur_v:.2f}</strong>
-                            &nbsp;→&nbsp; Target: <strong>{_tgt_v:.2f}</strong>
-                            &nbsp;(avg of popular {_last_genre} songs)</div>
-                        <div class="suggest-gain">+{_imp} estimated points</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    st.progress(_prog_val, text=f"{_f.capitalize()}: {_cur_v:.2f}")
+                # Pick top 3 by popularity from filtered results
+                top3 = filtered.nlargest(50, "popularity").sample(min(3, len(filtered)))
 
                 st.markdown(f"""
-                <div class="total-score-box">
-                    <div class="total-score-lbl">Apply all suggestions → estimated new score</div>
-                    <div class="total-score-val">{_new_score:.0f}</div>
-                    <div class="total-score-lbl">Current: {_cur_score:.1f} &nbsp;+&nbsp;
-                        {_total_improvement} pts improvement &nbsp;(capped at 98)</div>
+                <div style="background: rgba(29,185,84,0.08); border: 1px solid rgba(29,185,84,0.25);
+                border-radius: 10px; padding: 1rem; margin: 1rem 0; text-align: center;">
+                <p style="color: #1DB954; font-weight: 600; margin: 0; font-size: 1.1em;">
+                🎵 We found {len(filtered):,} songs that match your vibe!
+                </p>
+                <p style="color: #888; margin: 0.3rem 0 0; font-size: 0.85em;">
+                Here are 3 top picks for: <b>{mood}</b> · <b>{energy_mood}</b> · <b>{activity}</b>
+                </p>
                 </div>
                 """, unsafe_allow_html=True)
+
+                for _, song in top3.iterrows():
+                    pop_color = "#1DB954" if song["popularity"] >= 70 else "#FF9800" if song["popularity"] >= 50 else "#888"
+                    song_query = f"{song['track_name']} {song['artists']}".replace(" ", "+")
+
+                    st.markdown(f"""
+                    <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+                    border-radius: 10px; padding: 1rem 1.2rem; margin-bottom: 0.8rem;
+                    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.8rem;">
+
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="width: 44px; height: 44px; border-radius: 8px;
+                        background: rgba(29,185,84,0.15); display: flex; align-items: center;
+                        justify-content: center; font-size: 1.4rem; flex-shrink: 0;">🎵</div>
+                        <div>
+                            <div style="font-weight: 600; color: var(--text-primary); font-size: 1em;">
+                            {song['track_name']}</div>
+                            <div style="color: #888; font-size: 0.85em;">{song['artists']} · {song['track_genre']}</div>
+                            <div style="font-size: 0.78em; color: #666; margin-top: 2px;">
+                            valence {song['valence']:.2f} · energy {song['energy']:.2f} · tempo {song['tempo']:.0f} BPM
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 1rem; flex-shrink: 0;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.3rem; font-weight: 700; color: {pop_color};">
+                            {int(song['popularity'])}</div>
+                            <div style="font-size: 0.7em; color: #666;">popularity</div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query={song_query}"
+                        target="_blank" style="background: #FF0000; color: white; padding: 0.4rem 0.9rem;
+                        border-radius: 6px; text-decoration: none; font-size: 0.85em; font-weight: 600;
+                        white-space: nowrap;">▶️ YouTube</a>
+                    </div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
     # ── RIGHT COLUMN — Model Leaderboard ─────────────────────────────────────
     with col_right:
