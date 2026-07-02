@@ -1197,105 +1197,147 @@ with tab_explain:
         acousticness = float(_exp_feat.get('acousticness', 0))
         tempo        = float(_exp_feat.get('tempo', 0))
 
-        # ── SECTION 1 — Your result ───────────────────────────────────────────
-        st.markdown("### 🎯 Your prediction explained")
+        # ── Visual diagram — Your prediction step by step ────────────────────
+        st.markdown("### 🔍 Your prediction explained — step by step")
+
         st.markdown(f"""
-You described a **{genre}** song with danceability **{danceability}**, energy **{energy}**, loudness **{loudness} dB**, and tempo **{tempo} BPM**.
+<div style="background: rgba(29,185,84,0.08); border: 2px solid #1DB954;
+border-radius: 10px; padding: 1.2rem; text-align: center; margin-bottom: 0.5rem;">
+<h4 style="color: #1DB954; margin: 0;">🎵 Your song</h4>
+<p style="margin: 0.5rem 0 0;">
+<b>{genre}</b> · danceability {danceability} · energy {energy} ·
+loudness {loudness} dB · tempo {tempo:.0f} BPM
+</p>
+</div>
 
-The app returned two answers:
-- **Predicted score: {score:.1f} / 100** — this came from the Regression model
-- **{"✅ Popular" if is_popular else "❌ Not Popular"}** with **{confidence*100:.1f}% confidence** — this came from the Classification model
+<div style="text-align: center; font-size: 1.5rem; color: #1DB954; margin: 0.2rem 0;">↓</div>
 
-Here is how we got each of those answers.
-""")
+<div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);
+border-radius: 10px; padding: 1rem; text-align: center; margin-bottom: 0.5rem;">
+<h4 style="margin: 0;">⚙️ scikit-learn Pipeline</h4>
+<p style="color: #888; margin: 0.3rem 0 0; font-size: 0.9em;">
+OrdinalEncoder converts genre text to number · StandardScaler normalizes all features
+</p>
+</div>
+
+<div style="display: flex; gap: 1rem; margin: 0.2rem 0;">
+<div style="flex: 1; text-align: center; color: #1DB954; font-size: 1.5rem;">↙</div>
+<div style="flex: 1; text-align: center; color: #1DB954; font-size: 1.5rem;">↘</div>
+</div>
+""", unsafe_allow_html=True)
+
+        col_reg, col_clf = st.columns(2)
+
+        with col_reg:
+            st.markdown(f"""
+<div style="background: rgba(29,185,84,0.08); border: 1px solid rgba(29,185,84,0.4);
+border-radius: 10px; padding: 1.2rem; height: 100%;">
+
+<h4 style="color: #1DB954; margin-top: 0;">📈 Regression</h4>
+<p style="color: #888; font-size: 0.85em; margin: 0 0 0.8rem;">XGBoost Regressor · regressor.pkl</p>
+
+<p><b>Question:</b> What exact popularity score will this song get?</p>
+
+<p><b>Where trained:</b> train.py — offline on Amila's computer using 91,200 songs</p>
+
+<p><b>Where prediction ran:</b> api.py — inside the /predict function,
+every time you click Predict</p>
+
+<p><b>Where result appeared:</b> app.py — Predictor tab, right panel,
+green score bar and number</p>
+
+<p><b>Why {score:.1f}?</b> Your genre ({genre}) averages around 42 popularity
+in the dataset. Songs here rarely exceed 60, which pulled your score down.</p>
+
+<div style="background: rgba(29,185,84,0.15); border-radius: 8px;
+padding: 0.8rem; text-align: center; margin-top: 1rem;">
+<span style="font-size: 2rem; font-weight: 900; color: #1DB954;">{score:.1f}</span>
+<span style="color: #888;"> / 100</span>
+<div style="color: #888; font-size: 0.8em; margin-top: 0.2rem;">
+Accuracy: MAE ±13.1 points · R²=0.38
+</div>
+</div>
+</div>
+""", unsafe_allow_html=True)
+
+        with col_clf:
+            clf_color  = "#1DB954" if is_popular else "#FF5252"
+            clf_bg     = "rgba(29,185,84,0.08)" if is_popular else "rgba(255,82,82,0.08)"
+            clf_border = "rgba(29,185,84,0.4)"  if is_popular else "rgba(255,82,82,0.4)"
+
+            st.markdown(f"""
+<div style="background: {clf_bg}; border: 1px solid {clf_border};
+border-radius: 10px; padding: 1.2rem; height: 100%;">
+
+<h4 style="color: {clf_color}; margin-top: 0;">🎯 Classification</h4>
+<p style="color: #888; font-size: 0.85em; margin: 0 0 0.8rem;">XGBoost Classifier · classifier.pkl</p>
+
+<p><b>Question:</b> Is this song popular or not? (threshold: score ≥ 70)</p>
+
+<p><b>Where trained:</b> train.py — offline on Amila's computer.
+Only 4.8% of 114,000 songs were labelled Popular (score ≥ 70).</p>
+
+<p><b>Where prediction ran:</b> api.py — same /predict function,
+runs alongside regression every time you click Predict</p>
+
+<p><b>Where result appeared:</b> app.py — Predictor tab, right panel,
+big label at the very top</p>
+
+<p><b>How the decision was made:</b> Model gave {confidence*100:.1f}% probability.
+Decision line is 50%.
+{confidence*100:.1f}% is {"above" if is_popular else "below"} 50%
+→ {"Popular ✅" if is_popular else "Not Popular ❌"}</p>
+
+<div style="background: {clf_bg}; border-radius: 8px; border: 1px solid {clf_border};
+padding: 0.8rem; text-align: center; margin-top: 1rem;">
+<span style="font-size: 1.5rem; font-weight: 900; color: {clf_color};">
+{"✅ Popular" if is_popular else "❌ Not Popular"}
+</span>
+<div style="color: #888; font-size: 0.8em; margin-top: 0.2rem;">
+Confidence: {confidence*100:.1f}% · Accuracy: ROC-AUC=0.920
+</div>
+</div>
+</div>
+""", unsafe_allow_html=True)
 
         st.divider()
 
-        # ── SECTION 2 — Regression ────────────────────────────────────────────
-        st.markdown(f"""
-### 📈 Regression — How we got {score:.1f} / 100
+        # ── Model strengths and limitations ───────────────────────────────────
+        st.markdown("### ⚖️ Model strengths and limitations")
 
-**What is regression?**
-Regression is when a model predicts an exact number — in our case, a popularity score between 0 and 100.
+        col_good, col_bad = st.columns(2)
 
-**Where did this happen?**
-- Training happened in **train.py** — we fed 114,000 Spotify songs to the model and it learned what audio features lead to high or low popularity scores.
-- Prediction happened in **api.py** — in the function called `/predict`. When you clicked the Predict button, your 15 slider values were sent there and the model calculated your score.
-- The result appeared in **app.py** — in the Predictor tab, right side panel, as the green number and score bar.
+        with col_good:
+            st.markdown("""
+<div style="background: rgba(29,185,84,0.08); border: 1px solid rgba(29,185,84,0.3);
+border-radius: 10px; padding: 1.2rem;">
+<h4 style="color: #1DB954; margin-top: 0;">✅ What this model does well</h4>
 
-**Why did your song score {score:.1f}?**
-The model compared your song to patterns it learned from 91,200 training songs. Your genre ({genre}) has an average popularity of around 42 in the dataset. Songs in this genre rarely reach scores above 60, which pulled your score down.
+- Trained on 114,000 real Spotify songs — large and diverse dataset
+- XGBoost handles class imbalance better than simpler models
+- ROC-AUC of 0.920 — far better than random guessing (0.500)
+- Predicts score within ±13 points on average
+- Works across 114 different music genres
+- Gives two answers at once: exact score + popular/not popular label
+- Runs in under 1 second per prediction
+</div>
+""", unsafe_allow_html=True)
 
-**How accurate is this?**
-The model gets within ±13 points on average (MAE = 13.1). It explains 38% of what makes a song popular — the other 62% comes from things audio features cannot capture: artist fame, marketing, and social media.
-""")
+        with col_bad:
+            st.markdown("""
+<div style="background: rgba(255,82,82,0.08); border: 1px solid rgba(255,82,82,0.3);
+border-radius: 10px; padding: 1.2rem;">
+<h4 style="color: #FF5252; margin-top: 0;">❌ What this model cannot do</h4>
 
-        st.divider()
-
-        # ── SECTION 3 — Classification ────────────────────────────────────────
-        st.markdown(f"""
-### 🎯 Classification — How we got {"Popular ✅" if is_popular else "Not Popular ❌"}
-
-**What is classification?**
-Classification is when a model puts something into a category — in our case, either "Popular" or "Not Popular".
-
-**How was the category defined?**
-During training in **train.py**, we drew a line at popularity score 70. Songs scoring 70 or above were labelled Popular. Songs scoring below 70 were labelled Not Popular. Only 4.8% of the 114,000 songs in the dataset crossed that line — so popular songs are very rare.
-
-**Where did this happen?**
-- Training happened in **train.py** — the model studied which audio features appear in that rare 4.8% of popular songs.
-- Prediction happened in **api.py** — in the same `/predict` function. The classifier calculated a probability: how likely is it that your song belongs to the popular group?
-- The result appeared in **app.py** — in the Predictor tab, right side panel, as the big Popular/Not Popular label at the top.
-
-**What happened with your song?**
-The classifier gave your song a **{confidence*100:.1f}% probability** of being popular. We use 50% as the decision line:
-- If probability is 50% or above → Popular ✅
-- If probability is below 50% → Not Popular ❌
-
-Your song scored **{confidence*100:.1f}%** which is {"above" if is_popular else "below"} 50%, so the answer is **{"Popular ✅" if is_popular else "Not Popular ❌"}**.
-
-**How accurate is this?**
-The model scores 0.920 on ROC-AUC (where 0.5 = random guessing and 1.0 = perfect). This means it is very good at separating popular from non-popular songs overall.
-""")
-
-        st.divider()
-
-        # ── SECTION 4 — Where everything happened ─────────────────────────────
-        st.markdown("### 📍 Where each step happened — quick reference")
-        location_df = pd.DataFrame([
-            ["Training the regression model", "train.py", "Offline, once, on Amila's computer", "Fed 91,200 songs and learned popularity patterns"],
-            ["Training the classification model", "train.py", "Offline, once, on Amila's computer", "Same songs, learned what separates popular from not popular"],
-            ["Saving the trained models", "train.py", "Offline, once", "Saved as regressor.pkl and classifier.pkl files"],
-            ["Loading models into the app", "api.py — top of file", "Every time the server starts on Render", "Models loaded into memory once and stay ready"],
-            ["Receiving your slider values", "api.py — /predict function", "Every time you click Predict", "Your 15 values arrive as a request from Streamlit"],
-            ["Calculating your score (Regression)", "api.py — /predict function", "Every time you click Predict", f"Model calculated {score:.1f} / 100"],
-            ["Calculating Popular/Not Popular (Classification)", "api.py — /predict function", "Every time you click Predict", f"Model calculated {confidence*100:.1f}% → {'Popular' if is_popular else 'Not Popular'}"],
-            ["Displaying the result", "app.py — Predictor tab, right panel", "Every time you click Predict", "Score bar, label, and confidence shown on screen"],
-        ], columns=["What happened", "Where in the code", "When", "Result"])
-        st.dataframe(location_df, hide_index=True, use_container_width=True)
-
-        st.divider()
-
-        # ── SECTION 5 — Feature comparison ───────────────────────────────────
-        st.markdown(f"""
-### 💡 Why did your song score {score:.1f}?
-
-Here is how your features compare to what popular songs look like on average:
-""")
-        comparison_df = pd.DataFrame([
-            ["Genre", genre, "pop / k-pop / chill", "✅" if genre in ["pop", "k-pop", "chill", "pop-film", "dance"] else "❌"],
-            ["Danceability", f"{danceability:.2f}", "0.71", "✅" if danceability > 0.6 else "❌"],
-            ["Energy", f"{energy:.2f}", "0.65", "✅" if 0.5 < energy < 0.8 else "❌"],
-            ["Loudness", f"{loudness:.1f} dB", "-5.5 dB", "✅" if loudness > -8 else "❌"],
-            ["Acousticness", f"{acousticness:.2f}", "0.18", "✅" if acousticness < 0.3 else "❌"],
-            ["Tempo", f"{tempo:.0f} BPM", "120 BPM", "✅" if 100 < tempo < 140 else "❌"],
-        ], columns=["Feature", "Your value", "Avg popular song", "Helps popularity?"])
-        st.dataframe(comparison_df, hide_index=True, use_container_width=True)
-
-        st.markdown("""
-Features marked ✅ are working in your favour.
-Features marked ❌ are pulling your score down compared to what popular songs look like.
-""")
+- Cannot see artist fame — a Taylor Swift song always scores higher
+- Cannot measure marketing budget or label support
+- Cannot predict TikTok or social media virality
+- Only explains 38% of popularity — 62% is invisible to audio features
+- Dataset from 2022 — music trends have changed since then
+- Rare popular songs (4.8%) are harder to detect — F1 only 0.437
+- Cannot account for release timing (summer hits, Christmas songs)
+</div>
+""", unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
