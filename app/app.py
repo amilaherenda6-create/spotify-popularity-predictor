@@ -680,14 +680,55 @@ with tab_predict:
             index=GENRES.index("pop"),
             help="Select the genre closest to your song.",
         )
+
+        # ── Song selector — auto-fills sliders from a real Spotify song ───────
+        _df_sel = _load_dataset()
+        _genre_songs = _df_sel[_df_sel['track_genre'] == track_genre].copy()
+        _genre_songs = _genre_songs.drop_duplicates(subset=['track_name', 'artists'])
+        _genre_songs = _genre_songs.sort_values('popularity', ascending=False).head(50)
+        _song_labels = ["— Select a song to auto-fill sliders (optional) —"] + [
+            f"{row['track_name']} — {row['artists']} (popularity: {int(row['popularity'])})"
+            for _, row in _genre_songs.iterrows()
+        ]
+        selected_song_label = st.selectbox(
+            "🎵 Pick a real song from this genre (auto-fills sliders)",
+            options=_song_labels,
+            key=f"song_selector_{track_genre}",
+        )
+        if selected_song_label != "— Select a song to auto-fill sliders (optional) —":
+            _sel_idx  = _song_labels.index(selected_song_label) - 1
+            _sel_song = _genre_songs.iloc[_sel_idx]
+            st.session_state['auto_danceability']      = float(_sel_song['danceability'])
+            st.session_state['auto_energy']            = float(_sel_song['energy'])
+            st.session_state['auto_valence']           = float(_sel_song['valence'])
+            st.session_state['auto_acousticness']      = float(_sel_song['acousticness'])
+            st.session_state['auto_speechiness']       = float(_sel_song['speechiness'])
+            st.session_state['auto_instrumentalness']  = float(_sel_song['instrumentalness'])
+            st.session_state['auto_liveness']          = float(_sel_song['liveness'])
+            st.session_state['auto_loudness']          = float(_sel_song['loudness'])
+            st.session_state['auto_tempo']             = float(_sel_song['tempo'])
+            st.session_state['auto_key']               = int(_sel_song['key'])
+            st.session_state['auto_mode']              = int(_sel_song['mode'])
+            st.session_state['auto_time_signature']    = int(_sel_song['time_signature'])
+            st.session_state['auto_duration']          = float(_sel_song['duration_ms']) / 60000
+            st.session_state['auto_explicit']          = bool(_sel_song['explicit'])
+            st.session_state['auto_filled']            = True
+            st.success(f"✅ Sliders filled with values from **{_sel_song['track_name']}** by {_sel_song['artists']}")
+
         c1, c2 = st.columns(2)
         with c1:
-            explicit = st.checkbox("Explicit content", value=False)
+            explicit = st.checkbox(
+                "Explicit content",
+                value=st.session_state.get('auto_explicit', False),
+                key="explicit_cb",
+            )
         with c2:
             duration_min = st.slider(
                 "Duration (minutes)", min_value=0.5, max_value=15.0,
-                value=3.5, step=0.1,
+                value=float(round(st.session_state.get('auto_duration', 3.5), 1)),
+                step=0.1,
                 help="Track length. 3-4 min is typical for popular songs.",
+                key="duration_slider",
             )
         duration_ms = int(duration_min * 60_000)
 
@@ -698,37 +739,61 @@ with tab_predict:
         c3, c4 = st.columns(2)
         with c3:
             danceability = st.slider(
-                "Danceability", 0.0, 1.0, 0.65, 0.01,
+                "Danceability", min_value=0.0, max_value=1.0,
+                value=float(round(st.session_state.get('auto_danceability', 0.65), 2)),
+                step=0.01,
                 help="How suitable for dancing. 0 = not danceable, 1 = very danceable.",
+                key="danceability_slider",
             )
             energy = st.slider(
-                "Energy", 0.0, 1.0, 0.60, 0.01,
+                "Energy", min_value=0.0, max_value=1.0,
+                value=float(round(st.session_state.get('auto_energy', 0.60), 2)),
+                step=0.01,
                 help="Intensity and activity. High energy = fast, loud, noisy.",
+                key="energy_slider",
             )
             valence = st.slider(
-                "Valence", 0.0, 1.0, 0.50, 0.01,
+                "Valence", min_value=0.0, max_value=1.0,
+                value=float(round(st.session_state.get('auto_valence', 0.50), 2)),
+                step=0.01,
                 help="Musical positiveness. 1 = happy/euphoric, 0 = sad/angry.",
+                key="valence_slider",
             )
             acousticness = st.slider(
-                "Acousticness", 0.0, 1.0, 0.20, 0.01,
+                "Acousticness", min_value=0.0, max_value=1.0,
+                value=float(round(st.session_state.get('auto_acousticness', 0.20), 2)),
+                step=0.01,
                 help="Confidence that the track is acoustic. 1 = fully acoustic.",
+                key="acousticness_slider",
             )
         with c4:
             speechiness = st.slider(
-                "Speechiness", 0.0, 1.0, 0.05, 0.01,
+                "Speechiness", min_value=0.0, max_value=1.0,
+                value=float(round(st.session_state.get('auto_speechiness', 0.05), 2)),
+                step=0.01,
                 help="Presence of spoken words. >0.66 = podcast/audiobook.",
+                key="speechiness_slider",
             )
             instrumentalness = st.slider(
-                "Instrumentalness", 0.0, 1.0, 0.00, 0.01,
+                "Instrumentalness", min_value=0.0, max_value=1.0,
+                value=float(round(st.session_state.get('auto_instrumentalness', 0.00), 2)),
+                step=0.01,
                 help="Likelihood of no vocals. >0.5 = probably instrumental.",
+                key="instrumentalness_slider",
             )
             liveness = st.slider(
-                "Liveness", 0.0, 1.0, 0.10, 0.01,
+                "Liveness", min_value=0.0, max_value=1.0,
+                value=float(round(st.session_state.get('auto_liveness', 0.10), 2)),
+                step=0.01,
                 help="Presence of an audience. >0.8 = probably a live recording.",
+                key="liveness_slider",
             )
             loudness = st.slider(
-                "Loudness (dB)", -60.0, 5.0, -7.0, 0.5,
+                "Loudness (dB)", min_value=-60.0, max_value=5.0,
+                value=float(round(st.session_state.get('auto_loudness', -7.0), 1)),
+                step=0.5,
                 help="Overall loudness. Typical studio tracks: -10 to -5 dB.",
+                key="loudness_slider",
             )
 
         st.markdown('<div class="header-divider" style="margin:0.7em 0;"></div>', unsafe_allow_html=True)
@@ -738,28 +803,39 @@ with tab_predict:
         c5, c6, c7 = st.columns(3)
         with c5:
             tempo = st.slider(
-                "Tempo (BPM)", 30.0, 250.0, 120.0, 1.0,
+                "Tempo (BPM)", min_value=30.0, max_value=250.0,
+                value=float(round(st.session_state.get('auto_tempo', 120.0), 1)),
+                step=0.5,
                 help="Beats per minute. 120 BPM = standard dance track.",
+                key="tempo_slider",
             )
         with c6:
+            _auto_key = st.session_state.get('auto_key', 5)
             key = st.selectbox(
                 "Key",
                 options=list(range(12)),
                 format_func=lambda k: ["C","C#","D","D#","E","F",
                                        "F#","G","G#","A","A#","B"][k],
-                index=5,
+                index=int(_auto_key),
                 help="Musical key. 0=C, 1=C#, ... 11=B.",
+                key="key_selectbox",
             )
         with c7:
+            _auto_mode = st.session_state.get('auto_mode', 1)
             mode = st.radio(
                 "Mode", options=[1, 0],
                 format_func=lambda m: "Major" if m == 1 else "Minor",
-                index=0,
+                index=0 if _auto_mode == 1 else 1,
                 help="Major sounds brighter; minor sounds darker.",
+                key="mode_radio",
             )
+        _auto_ts = st.session_state.get('auto_time_signature', 4)
+        _ts_options = [3, 4, 5, 6, 7]
+        _ts_val = int(_auto_ts) if int(_auto_ts) in _ts_options else 4
         time_signature = st.select_slider(
-            "Time signature", options=[3, 4, 5, 6, 7], value=4,
+            "Time signature", options=_ts_options, value=_ts_val,
             help="Beats per bar. 4/4 is by far the most common in popular music.",
+            key="time_sig_slider",
         )
 
         st.markdown('<div class="header-divider" style="margin:0.7em 0;"></div>', unsafe_allow_html=True)
