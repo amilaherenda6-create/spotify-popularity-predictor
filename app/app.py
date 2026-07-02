@@ -1200,43 +1200,89 @@ with tab_insights:
 
         st.markdown("**Classification Task** — Can we predict if a song is popular? (popularity ≥ 70)")
 
-        clf_df = pd.DataFrame([
-            ["1. Random Guessing (Baseline)", "95.2%", "0.000", "0.500", "Always predicts NOT popular — useless"],
-            ["2. Logistic Regression",        "95.2%", "0.141", "0.706", "Linear model, limited by class imbalance"],
-            ["3. Decision Tree (depth=6)",    "95.3%", "0.143", "0.708", "Slightly better, starts to overfit"],
-            ["4. XGBoost (tuned) ✅ Best",    "95.8%", "0.437", "0.920", "Best overall — handles imbalance well"],
-        ], columns=["Model", "Accuracy", "F1 Score", "ROC-AUC", "Notes"])
+        st.markdown("""
+<table style="width:100%; border-collapse: collapse; font-size: 0.85em; margin-bottom: 1rem;">
+<thead>
+<tr style="background: rgba(29,185,84,0.15); color: #1DB954;">
+    <th style="padding: 8px; text-align: left; border-bottom: 1px solid rgba(29,185,84,0.3);">Model</th>
+    <th style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(29,185,84,0.3);">Accuracy</th>
+    <th style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(29,185,84,0.3);">F1 Score</th>
+    <th style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(29,185,84,0.3);">ROC-AUC</th>
+</tr>
+</thead>
+<tbody>
+<tr style="color: #888;">
+    <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">1. Random Guessing</td>
+    <td style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">95.2%</td>
+    <td style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">0.000</td>
+    <td style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">0.500</td>
+</tr>
+<tr style="color: #888;">
+    <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">2. Logistic Regression</td>
+    <td style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">95.2%</td>
+    <td style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">0.141</td>
+    <td style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">0.706</td>
+</tr>
+<tr style="color: #888;">
+    <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">3. Decision Tree</td>
+    <td style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">95.3%</td>
+    <td style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">0.143</td>
+    <td style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">0.708</td>
+</tr>
+<tr style="background: rgba(29,185,84,0.12); color: #1DB954; font-weight: bold;">
+    <td style="padding: 8px;">🏆 4. XGBoost (tuned)</td>
+    <td style="padding: 8px; text-align: center;">95.8%</td>
+    <td style="padding: 8px; text-align: center;">0.437</td>
+    <td style="padding: 8px; text-align: center;">0.920</td>
+</tr>
+</tbody>
+</table>
+""", unsafe_allow_html=True)
 
-        st.dataframe(
-            clf_df.style.apply(
-                lambda x: ['background-color: rgba(29,185,84,0.15); color: #1DB954; font-weight: bold'
-                           if x.name == 3 else '' for _ in x], axis=1
-            ),
-            hide_index=True,
-            use_container_width=True,
-        )
+        st.warning("⚠️ Accuracy is misleading here — F1 and ROC-AUC are the honest metrics.")
 
-        st.warning("⚠️ Note: Accuracy is misleading — 95.2% of songs are NOT popular, so always guessing 'not popular' gives 95.2% accuracy. F1 Score and ROC-AUC are the honest metrics.")
+        st.markdown("**Regression Task** — Predict exact popularity score (0–100)")
 
-        st.markdown("**Regression Task** — Can we predict the exact popularity score (0–100)?")
+        st.markdown("""
+<table style="width:100%; border-collapse: collapse; font-size: 0.85em; margin-bottom: 1rem;">
+<thead>
+<tr style="background: rgba(29,185,84,0.15); color: #1DB954;">
+    <th style="padding: 8px; text-align: left; border-bottom: 1px solid rgba(29,185,84,0.3);">Model</th>
+    <th style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(29,185,84,0.3);">R²</th>
+    <th style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(29,185,84,0.3);">MAE</th>
+    <th style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(29,185,84,0.3);">RMSE</th>
+</tr>
+</thead>
+<tbody>
+<tr style="color: #888;">
+    <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">1. Random Guessing</td>
+    <td style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">0.000</td>
+    <td style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">18.5</td>
+    <td style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">22.1</td>
+</tr>
+<tr style="color: #888;">
+    <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">2. Ridge Regression</td>
+    <td style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">0.062</td>
+    <td style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">17.2</td>
+    <td style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">21.4</td>
+</tr>
+<tr style="color: #888;">
+    <td style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">3. Decision Tree</td>
+    <td style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">0.089</td>
+    <td style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">16.8</td>
+    <td style="padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">21.1</td>
+</tr>
+<tr style="background: rgba(29,185,84,0.12); color: #1DB954; font-weight: bold;">
+    <td style="padding: 8px;">🏆 4. XGBoost (tuned)</td>
+    <td style="padding: 8px; text-align: center;">0.380</td>
+    <td style="padding: 8px; text-align: center;">13.1</td>
+    <td style="padding: 8px; text-align: center;">16.7</td>
+</tr>
+</tbody>
+</table>
+""", unsafe_allow_html=True)
 
-        reg_df = pd.DataFrame([
-            ["1. Random Guessing (Baseline)", "0.000", "18.5", "22.1", "Always predicts mean score — baseline floor"],
-            ["2. Ridge Regression",           "0.062", "17.2", "21.4", "Captures some linear signal"],
-            ["3. Decision Tree (depth=6)",    "0.089", "16.8", "21.1", "Better but overfits on training data"],
-            ["4. XGBoost (tuned) ✅ Best",    "0.380", "13.1", "16.7", "Best — explains 38% of score variance"],
-        ], columns=["Model", "R²", "MAE", "RMSE", "Notes"])
-
-        st.dataframe(
-            reg_df.style.apply(
-                lambda x: ['background-color: rgba(29,185,84,0.15); color: #1DB954; font-weight: bold'
-                           if x.name == 3 else '' for _ in x], axis=1
-            ),
-            hide_index=True,
-            use_container_width=True,
-        )
-
-        st.info("📊 R²=0.38 means our best model explains 38% of what makes a song popular. The remaining 62% comes from factors not in the audio data — marketing, artist fame, timing, social media.")
+        st.info("📊 R²=0.38 means the model explains 38% of popularity. The other 62% = artist fame, marketing, social media.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1275,16 +1321,26 @@ loudness {loudness} dB · tempo {tempo:.0f} BPM
 <div style="text-align: center; font-size: 1.5rem; color: #1DB954; margin: 0.2rem 0;">↓</div>
 
 <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);
-border-radius: 10px; padding: 1rem; text-align: center; margin-bottom: 0.5rem;">
-<h4 style="margin: 0;">⚙️ scikit-learn Pipeline</h4>
-<p style="color: #888; margin: 0.3rem 0 0; font-size: 0.9em;">
-OrdinalEncoder converts genre text to number · StandardScaler normalizes all features
+border-radius: 10px; padding: 1.2rem; text-align: center; margin-bottom: 0.5rem;">
+<h4 style="margin: 0;">🔄 Preparation step</h4>
+<p style="color: #888; margin: 0.5rem 0 0; font-size: 0.9em;">
+Before the models could read your values, two quick things happened automatically:<br><br>
+<b>1.</b> The genre name <b>"{genre}"</b> was converted into a number —
+because machine learning models only understand numbers, not words.<br><br>
+<b>2.</b> All your values were rescaled to the same range —
+so that tempo (which can be 120 BPM) doesn't unfairly overpower
+danceability (which is between 0 and 1).<br><br>
+Then both models received the same prepared values at the same time.
 </p>
 </div>
 
-<div style="display: flex; gap: 1rem; margin: 0.2rem 0;">
-<div style="flex: 1; text-align: center; color: #1DB954; font-size: 1.5rem;">↙</div>
-<div style="flex: 1; text-align: center; color: #1DB954; font-size: 1.5rem;">↘</div>
+<div style="display: flex; gap: 1rem; margin: 0.5rem 0;">
+<div style="flex: 1; text-align: center; color: #1DB954; font-size: 1em; font-weight: 500;">
+↙ sent to Regression model
+</div>
+<div style="flex: 1; text-align: center; color: #1DB954; font-size: 1em; font-weight: 500;">
+↘ sent to Classification model
+</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -1293,71 +1349,94 @@ OrdinalEncoder converts genre text to number · StandardScaler normalizes all fe
         with col_reg:
             st.markdown(f"""
 <div style="background: rgba(29,185,84,0.08); border: 1px solid rgba(29,185,84,0.4);
-border-radius: 10px; padding: 1.2rem; height: 100%;">
+border-radius: 10px; padding: 1.2rem;">
 
-<h4 style="color: #1DB954; margin-top: 0;">📈 Regression</h4>
-<p style="color: #888; font-size: 0.85em; margin: 0 0 0.8rem;">XGBoost Regressor · regressor.pkl</p>
+<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.8rem;">
+    <span style="font-size: 1.5rem;">📈</span>
+    <div>
+        <h4 style="color: #1DB954; margin: 0;">Regression</h4>
+        <p style="color: #888; font-size: 0.8em; margin: 0;">Predicts an exact number</p>
+    </div>
+</div>
 
-<p><b>Question:</b> What exact popularity score will this song get?</p>
-
-<p><b>Where trained:</b> train.py — offline on Amila's computer using 91,200 songs</p>
-
-<p><b>Where prediction ran:</b> api.py — inside the /predict function,
-every time you click Predict</p>
-
-<p><b>Where result appeared:</b> app.py — Predictor tab, right panel,
-green score bar and number</p>
-
-<p><b>Why {score:.1f}?</b> Your genre ({genre}) averages around 42 popularity
-in the dataset. Songs here rarely exceed 60, which pulled your score down.</p>
+<div style="display: flex; flex-direction: column; gap: 0.6rem;">
+    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
+        <span style="color: #888; font-size: 0.75em;">QUESTION</span><br>
+        <span style="font-size: 0.9em;">What exact score will this song get?</span>
+    </div>
+    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
+        <span style="color: #888; font-size: 0.75em;">TRAINED IN</span><br>
+        <span style="font-size: 0.9em;">train.py — offline, using 91,200 songs</span>
+    </div>
+    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
+        <span style="color: #888; font-size: 0.75em;">PREDICTION RUNS IN</span><br>
+        <span style="font-size: 0.9em;">api.py — /predict function</span>
+    </div>
+    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
+        <span style="color: #888; font-size: 0.75em;">SHOWN IN APP</span><br>
+        <span style="font-size: 0.9em;">Predictor tab → green score bar</span>
+    </div>
+    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
+        <span style="color: #888; font-size: 0.75em;">WHY THIS SCORE?</span><br>
+        <span style="font-size: 0.9em;">{genre} genre averages ~42 popularity. Songs here rarely exceed 60.</span>
+    </div>
+</div>
 
 <div style="background: rgba(29,185,84,0.15); border-radius: 8px;
 padding: 0.8rem; text-align: center; margin-top: 1rem;">
-<span style="font-size: 2rem; font-weight: 900; color: #1DB954;">{score:.1f}</span>
-<span style="color: #888;"> / 100</span>
-<div style="color: #888; font-size: 0.8em; margin-top: 0.2rem;">
-Accuracy: MAE ±13.1 points · R²=0.38
-</div>
+    <span style="font-size: 2rem; font-weight: 900; color: #1DB954;">{score:.1f}</span>
+    <span style="color: #888;"> / 100</span>
+    <div style="color: #888; font-size: 0.78em; margin-top: 0.2rem;">MAE ±13.1 pts · R²=0.38</div>
 </div>
 </div>
 """, unsafe_allow_html=True)
 
         with col_clf:
-            clf_color  = "#1DB954" if is_popular else "#FF5252"
-            clf_bg     = "rgba(29,185,84,0.08)" if is_popular else "rgba(255,82,82,0.08)"
-            clf_border = "rgba(29,185,84,0.4)"  if is_popular else "rgba(255,82,82,0.4)"
+            clf_color   = "#1DB954" if is_popular else "#FF5252"
+            clf_bg      = "rgba(29,185,84,0.08)" if is_popular else "rgba(255,82,82,0.08)"
+            clf_border  = "rgba(29,185,84,0.4)"  if is_popular else "rgba(255,82,82,0.4)"
+            clf_label   = "✅ Popular" if is_popular else "❌ Not Popular"
+            clf_decision = "above" if is_popular else "below"
 
             st.markdown(f"""
 <div style="background: {clf_bg}; border: 1px solid {clf_border};
-border-radius: 10px; padding: 1.2rem; height: 100%;">
+border-radius: 10px; padding: 1.2rem;">
 
-<h4 style="color: {clf_color}; margin-top: 0;">🎯 Classification</h4>
-<p style="color: #888; font-size: 0.85em; margin: 0 0 0.8rem;">XGBoost Classifier · classifier.pkl</p>
+<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.8rem;">
+    <span style="font-size: 1.5rem;">🎯</span>
+    <div>
+        <h4 style="color: {clf_color}; margin: 0;">Classification</h4>
+        <p style="color: #888; font-size: 0.8em; margin: 0;">Puts song into a category</p>
+    </div>
+</div>
 
-<p><b>Question:</b> Is this song popular or not? (threshold: score ≥ 70)</p>
-
-<p><b>Where trained:</b> train.py — offline on Amila's computer.
-Only 4.8% of 114,000 songs were labelled Popular (score ≥ 70).</p>
-
-<p><b>Where prediction ran:</b> api.py — same /predict function,
-runs alongside regression every time you click Predict</p>
-
-<p><b>Where result appeared:</b> app.py — Predictor tab, right panel,
-big label at the very top</p>
-
-<p><b>How the decision was made:</b> Model gave {confidence*100:.1f}% probability.
-Decision line is 50%.
-{confidence*100:.1f}% is {"above" if is_popular else "below"} 50%
-→ {"Popular ✅" if is_popular else "Not Popular ❌"}</p>
+<div style="display: flex; flex-direction: column; gap: 0.6rem;">
+    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
+        <span style="color: #888; font-size: 0.75em;">QUESTION</span><br>
+        <span style="font-size: 0.9em;">Is this song popular or not? (threshold: score ≥ 70)</span>
+    </div>
+    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
+        <span style="color: #888; font-size: 0.75em;">TRAINED IN</span><br>
+        <span style="font-size: 0.9em;">train.py — only 4.8% of songs were Popular</span>
+    </div>
+    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
+        <span style="color: #888; font-size: 0.75em;">PREDICTION RUNS IN</span><br>
+        <span style="font-size: 0.9em;">api.py — same /predict function</span>
+    </div>
+    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
+        <span style="color: #888; font-size: 0.75em;">SHOWN IN APP</span><br>
+        <span style="font-size: 0.9em;">Predictor tab → big label at the top</span>
+    </div>
+    <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem;">
+        <span style="color: #888; font-size: 0.75em;">HOW DECISION WAS MADE</span><br>
+        <span style="font-size: 0.9em;">Model gave {confidence*100:.1f}% probability. Decision line is 50%. {confidence*100:.1f}% is {clf_decision} 50%.</span>
+    </div>
+</div>
 
 <div style="background: {clf_bg}; border-radius: 8px; border: 1px solid {clf_border};
 padding: 0.8rem; text-align: center; margin-top: 1rem;">
-<span style="font-size: 1.5rem; font-weight: 900; color: {clf_color};">
-{"✅ Popular" if is_popular else "❌ Not Popular"}
-</span>
-<div style="color: #888; font-size: 0.8em; margin-top: 0.2rem;">
-Confidence: {confidence*100:.1f}% · Accuracy: ROC-AUC=0.920
-</div>
+    <span style="font-size: 1.5rem; font-weight: 900; color: {clf_color};">{clf_label}</span>
+    <div style="color: #888; font-size: 0.78em; margin-top: 0.2rem;">Confidence: {confidence*100:.1f}% · ROC-AUC=0.920</div>
 </div>
 </div>
 """, unsafe_allow_html=True)
