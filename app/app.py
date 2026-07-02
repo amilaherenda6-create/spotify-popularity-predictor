@@ -1045,224 +1045,198 @@ with tab_insights:
 
     _df = _load_dataset()
 
-    # ── SECTION 1 — Songs like yours ─────────────────────────────────────────
-    st.markdown("### 🎵 Songs with a similar audio profile")
-    st.caption("Based on the slider values you set in the Predictor tab")
+    col_left, col_right = st.columns([1.2, 1])
 
-    _FEATURES = ['danceability', 'energy', 'valence', 'acousticness',
-                 'speechiness', 'instrumentalness', 'liveness', 'tempo']
-    _SI_KEYS  = ['si_danceability', 'si_energy', 'si_valence', 'si_acousticness',
-                 'si_speechiness', 'si_instrumentalness', 'si_liveness', 'si_tempo']
+    # ── LEFT COLUMN ───────────────────────────────────────────────────────────
+    with col_left:
 
-    if all(k in st.session_state for k in _SI_KEYS):
-        from sklearn.preprocessing import MinMaxScaler
+        # ── SECTION 1 — Songs like yours ─────────────────────────────────────
+        st.markdown("### 🎵 Songs with a similar audio profile")
+        st.caption("Based on the slider values you set in the Predictor tab")
 
-        _user_vec_raw = [[
-            st.session_state['si_danceability'],
-            st.session_state['si_energy'],
-            st.session_state['si_valence'],
-            st.session_state['si_acousticness'],
-            st.session_state['si_speechiness'],
-            st.session_state['si_instrumentalness'],
-            st.session_state['si_liveness'],
-            st.session_state['si_tempo'],
-        ]]
+        _FEATURES = ['danceability', 'energy', 'valence', 'acousticness',
+                     'speechiness', 'instrumentalness', 'liveness', 'tempo']
+        _SI_KEYS  = ['si_danceability', 'si_energy', 'si_valence', 'si_acousticness',
+                     'si_speechiness', 'si_instrumentalness', 'si_liveness', 'si_tempo']
 
-        _scaler  = MinMaxScaler()
-        _scaled  = _scaler.fit_transform(_df[_FEATURES])
-        _uvec    = _scaler.transform(_user_vec_raw)
-        _dists   = np.linalg.norm(_scaled - _uvec, axis=1)
-        _df_sim  = _df.copy()
-        _df_sim['similarity'] = 1 - (_dists / _dists.max())
-        _top5    = _df_sim.nlargest(5, 'similarity')[
-            ['track_name', 'artists', 'track_genre', 'popularity', 'similarity']
-        ]
+        if all(k in st.session_state for k in _SI_KEYS):
+            from sklearn.preprocessing import MinMaxScaler
 
-        for _, row in _top5.iterrows():
-            _pop = int(row['popularity'])
-            _sim_pct = int(round(row['similarity'] * 100))
-            _track = str(row['track_name'])[:48]
-            _artist = str(row['artists'])[:32]
-            _genre  = str(row['track_genre'])
+            _user_vec_raw = [[
+                st.session_state['si_danceability'],
+                st.session_state['si_energy'],
+                st.session_state['si_valence'],
+                st.session_state['si_acousticness'],
+                st.session_state['si_speechiness'],
+                st.session_state['si_instrumentalness'],
+                st.session_state['si_liveness'],
+                st.session_state['si_tempo'],
+            ]]
 
-            if _pop >= 70:
-                _pop_html = f'<span class="pop-score-green">⬤ {_pop}</span>'
-            elif _pop >= 50:
-                _pop_html = f'<span class="pop-score-orange">⬤ {_pop}</span>'
-            else:
-                _pop_html = f'<span class="pop-score-gray">⬤ {_pop}</span>'
+            _scaler  = MinMaxScaler()
+            _scaled  = _scaler.fit_transform(_df[_FEATURES])
+            _uvec    = _scaler.transform(_user_vec_raw)
+            _dists   = np.linalg.norm(_scaled - _uvec, axis=1)
+            _df_sim  = _df.copy()
+            _df_sim['similarity'] = 1 - (_dists / _dists.max())
+            _top5    = _df_sim.nlargest(5, 'similarity')[
+                ['track_name', 'artists', 'track_genre', 'popularity', 'similarity']
+            ]
 
-            if _sim_pct > 85:
-                _badge = f'<span class="match-badge-green">{_sim_pct}% match</span>'
-            elif _sim_pct >= 70:
-                _badge = f'<span class="match-badge-blue">{_sim_pct}% match</span>'
-            else:
-                _badge = f'<span class="match-badge-gray">{_sim_pct}% match</span>'
+            for _, row in _top5.iterrows():
+                _pop = int(row['popularity'])
+                _sim_pct = int(round(row['similarity'] * 100))
+                _track = str(row['track_name'])[:48]
+                _artist = str(row['artists'])[:32]
+                _genre  = str(row['track_genre'])
 
-            st.markdown(f"""
-            <div class="song-card">
-                <div class="song-card-info">
-                    <div class="song-title">{_track}</div>
-                    <div class="song-meta">{_artist} &nbsp;·&nbsp; {_genre} &nbsp;·&nbsp; Popularity: {_pop_html}</div>
-                </div>
-                {_badge}
-            </div>
-            """, unsafe_allow_html=True)
-    else:
-        st.markdown("""
-        <div class="placeholder-card">
-            <div class="placeholder-icon">🎚️</div>
-            <div class="placeholder-text">
-                Set your audio features in the <strong style="color:#1DB954;">Predictor</strong> tab first,
-                then come back here.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+                if _pop >= 70:
+                    _pop_html = f'<span class="pop-score-green">⬤ {_pop}</span>'
+                elif _pop >= 50:
+                    _pop_html = f'<span class="pop-score-orange">⬤ {_pop}</span>'
+                else:
+                    _pop_html = f'<span class="pop-score-gray">⬤ {_pop}</span>'
 
-    st.markdown("<div style='margin:1.5em 0 0.5em'></div>", unsafe_allow_html=True)
-    st.divider()
+                if _sim_pct > 85:
+                    _badge = f'<span class="match-badge-green">{_sim_pct}% match</span>'
+                elif _sim_pct >= 70:
+                    _badge = f'<span class="match-badge-blue">{_sim_pct}% match</span>'
+                else:
+                    _badge = f'<span class="match-badge-gray">{_sim_pct}% match</span>'
 
-    # ── SECTION 2 — Genre Explorer ────────────────────────────────────────────
-    st.markdown("### 🎸 Genre audio profile")
-    st.caption("Average audio features for any genre in the dataset")
-
-    _genre_sel = st.selectbox(
-        "Select a genre",
-        options=sorted(_df['track_genre'].dropna().unique()),
-        key="insights_genre_sel",
-    )
-
-    _genre_df = _df[_df['track_genre'] == _genre_sel]
-    _g_means  = _genre_df[['danceability', 'energy', 'valence', 'acousticness',
-                             'speechiness', 'instrumentalness', 'liveness',
-                             'tempo', 'popularity']].mean()
-
-    _gc1, _gc2, _gc3 = st.columns(3)
-    _gc1.metric("Danceability",  f"{_g_means['danceability']:.2f}")
-    _gc2.metric("Energy",        f"{_g_means['energy']:.2f}")
-    _gc3.metric("Valence",       f"{_g_means['valence']:.2f}")
-    _gc4, _gc5, _gc6 = st.columns(3)
-    _gc4.metric("Acousticness",  f"{_g_means['acousticness']:.2f}")
-    _gc5.metric("Avg tempo",     f"{_g_means['tempo']:.0f} BPM")
-    _gc6.metric("Avg popularity",f"{_g_means['popularity']:.1f} / 100")
-
-    # Normalized bar chart (all 0-1 features only, not tempo/popularity)
-    import plotly.graph_objects as go
-
-    _chart_features = ['danceability', 'energy', 'valence',
-                       'acousticness', 'speechiness', 'instrumentalness', 'liveness']
-    _chart_values = [float(_g_means[f]) for f in _chart_features]
-
-    _fig = go.Figure(go.Bar(
-        x=_chart_values,
-        y=[f.capitalize() for f in _chart_features],
-        orientation='h',
-        marker=dict(
-            color=_chart_values,
-            colorscale=[[0, '#0d2b1a'], [0.5, '#1DB954'], [1, '#1ed760']],
-            line=dict(color='rgba(29,185,84,0.3)', width=1)
-        ),
-        text=[f'{v:.2f}' for v in _chart_values],
-        textposition='outside',
-        textfont=dict(color='#1DB954', size=13)
-    ))
-    _fig.update_layout(
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#C0C0C0', size=13),
-        height=320,
-        margin=dict(l=10, r=60, t=10, b=10),
-        xaxis=dict(
-            showgrid=True,
-            gridcolor='rgba(255,255,255,0.05)',
-            range=[0, 1.15],
-            tickfont=dict(color='#888'),
-            zeroline=False
-        ),
-        yaxis=dict(
-            tickfont=dict(color='#C0C0C0'),
-            gridcolor='rgba(255,255,255,0.05)'
-        )
-    )
-    st.plotly_chart(_fig, use_container_width=True)
-
-    _avg_pop = _g_means['popularity']
-    if _avg_pop > 55:
-        _insight_txt = f"**{_genre_sel}** is a high-popularity genre — songs here tend to go mainstream."
-    elif _avg_pop > 35:
-        _insight_txt = f"**{_genre_sel}** has moderate popularity — a solid niche with dedicated listeners."
-    else:
-        _insight_txt = f"**{_genre_sel}** is a niche genre with lower average popularity — quality over quantity."
-
-    st.markdown(f'<div class="insight-box">💡 {_insight_txt}</div>', unsafe_allow_html=True)
-
-    st.divider()
-
-    # ── SECTION 3 — Optimize my song ─────────────────────────────────────────
-    st.markdown("### 🚀 How to improve your predicted score")
-    st.caption("Suggestions based on what popular songs look like in your genre")
-
-    if 'last_prediction' not in st.session_state or 'last_features' not in st.session_state:
-        st.markdown("""
-        <div class="placeholder-card">
-            <div class="placeholder-icon">🎯</div>
-            <div class="placeholder-text">
-                Run a prediction in the <strong style="color:#1DB954;">Predictor</strong> tab first.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    else:
-        _last_pred  = st.session_state['last_prediction']
-        _last_feat  = st.session_state['last_features']
-        _last_genre = st.session_state.get('last_genre', '')
-        _cur_score  = float(_last_pred.get('popularity_score', 0))
-
-        _OPT_FEATURES = ['danceability', 'energy', 'valence', 'acousticness',
-                         'speechiness', 'instrumentalness', 'liveness']
-
-        _pop_songs = _df[(_df['track_genre'] == _last_genre) & (_df['popularity'] >= 70)]
-
-        if len(_pop_songs) < 3:
-            st.info(f"Not enough popular songs in **{_last_genre}** to build suggestions (need ≥ 3).")
-        else:
-            _pop_means = _pop_songs[_OPT_FEATURES].mean()
-
-            _gaps = []
-            for _f in _OPT_FEATURES:
-                _cur = float(_last_feat.get(_f, 0))
-                _tgt = float(_pop_means[_f])
-                _diff = abs(_tgt - _cur)
-                _dir  = "increase" if _tgt > _cur else "decrease"
-                _imp  = min(15, int(round(_diff * 15)))
-                _gaps.append((_f, _cur, _tgt, _dir, _imp, _diff))
-
-            _gaps.sort(key=lambda x: x[5], reverse=True)
-            _top3 = _gaps[:3]
-            _total_improvement = sum(g[4] for g in _top3)
-            _new_score = min(98, _cur_score + _total_improvement)
-
-            for _f, _cur_v, _tgt_v, _dir, _imp, _ in _top3:
-                _arrow = "⬆️" if _dir == "increase" else "⬇️"
-                _prog_val = min(1.0, _cur_v) if _f != 'tempo' else min(1.0, _cur_v / 250)
                 st.markdown(f"""
-                <div class="suggest-card">
-                    <div class="suggest-header">{_arrow} {_f.capitalize()} — {_dir}</div>
-                    <div class="suggest-values">Current: <strong>{_cur_v:.2f}</strong>
-                        &nbsp;→&nbsp; Target: <strong>{_tgt_v:.2f}</strong>
-                        &nbsp;(avg of popular {_last_genre} songs)</div>
-                    <div class="suggest-gain">+{_imp} estimated points</div>
+                <div class="song-card">
+                    <div class="song-card-info">
+                        <div class="song-title">{_track}</div>
+                        <div class="song-meta">{_artist} &nbsp;·&nbsp; {_genre} &nbsp;·&nbsp; Popularity: {_pop_html}</div>
+                    </div>
+                    {_badge}
                 </div>
                 """, unsafe_allow_html=True)
-                st.progress(_prog_val, text=f"{_f.capitalize()}: {_cur_v:.2f}")
-
-            st.markdown(f"""
-            <div class="total-score-box">
-                <div class="total-score-lbl">Apply all suggestions → estimated new score</div>
-                <div class="total-score-val">{_new_score:.0f}</div>
-                <div class="total-score-lbl">Current: {_cur_score:.1f} &nbsp;+&nbsp;
-                    {_total_improvement} pts improvement &nbsp;(capped at 98)</div>
+        else:
+            st.markdown("""
+            <div class="placeholder-card">
+                <div class="placeholder-icon">🎚️</div>
+                <div class="placeholder-text">
+                    Set your audio features in the <strong style="color:#1DB954;">Predictor</strong> tab first,
+                    then come back here.
+                </div>
             </div>
             """, unsafe_allow_html=True)
+
+        st.divider()
+
+        # ── SECTION 2 — Optimize my song ─────────────────────────────────────
+        st.markdown("### 🚀 How to improve your predicted score")
+        st.caption("Suggestions based on what popular songs look like in your genre")
+
+        if 'last_prediction' not in st.session_state or 'last_features' not in st.session_state:
+            st.markdown("""
+            <div class="placeholder-card">
+                <div class="placeholder-icon">🎯</div>
+                <div class="placeholder-text">
+                    Run a prediction in the <strong style="color:#1DB954;">Predictor</strong> tab first.
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            _last_pred  = st.session_state['last_prediction']
+            _last_feat  = st.session_state['last_features']
+            _last_genre = st.session_state.get('last_genre', '')
+            _cur_score  = float(_last_pred.get('popularity_score', 0))
+
+            _OPT_FEATURES = ['danceability', 'energy', 'valence', 'acousticness',
+                             'speechiness', 'instrumentalness', 'liveness']
+
+            _pop_songs = _df[(_df['track_genre'] == _last_genre) & (_df['popularity'] >= 70)]
+
+            if len(_pop_songs) < 3:
+                st.info(f"Not enough popular songs in **{_last_genre}** to build suggestions (need ≥ 3).")
+            else:
+                _pop_means = _pop_songs[_OPT_FEATURES].mean()
+
+                _gaps = []
+                for _f in _OPT_FEATURES:
+                    _cur = float(_last_feat.get(_f, 0))
+                    _tgt = float(_pop_means[_f])
+                    _diff = abs(_tgt - _cur)
+                    _dir  = "increase" if _tgt > _cur else "decrease"
+                    _imp  = min(15, int(round(_diff * 15)))
+                    _gaps.append((_f, _cur, _tgt, _dir, _imp, _diff))
+
+                _gaps.sort(key=lambda x: x[5], reverse=True)
+                _top3 = _gaps[:3]
+                _total_improvement = sum(g[4] for g in _top3)
+                _new_score = min(98, _cur_score + _total_improvement)
+
+                for _f, _cur_v, _tgt_v, _dir, _imp, _ in _top3:
+                    _arrow = "⬆️" if _dir == "increase" else "⬇️"
+                    _prog_val = min(1.0, _cur_v) if _f != 'tempo' else min(1.0, _cur_v / 250)
+                    st.markdown(f"""
+                    <div class="suggest-card">
+                        <div class="suggest-header">{_arrow} {_f.capitalize()} — {_dir}</div>
+                        <div class="suggest-values">Current: <strong>{_cur_v:.2f}</strong>
+                            &nbsp;→&nbsp; Target: <strong>{_tgt_v:.2f}</strong>
+                            &nbsp;(avg of popular {_last_genre} songs)</div>
+                        <div class="suggest-gain">+{_imp} estimated points</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    st.progress(_prog_val, text=f"{_f.capitalize()}: {_cur_v:.2f}")
+
+                st.markdown(f"""
+                <div class="total-score-box">
+                    <div class="total-score-lbl">Apply all suggestions → estimated new score</div>
+                    <div class="total-score-val">{_new_score:.0f}</div>
+                    <div class="total-score-lbl">Current: {_cur_score:.1f} &nbsp;+&nbsp;
+                        {_total_improvement} pts improvement &nbsp;(capped at 98)</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+    # ── RIGHT COLUMN — Model Leaderboard ─────────────────────────────────────
+    with col_right:
+
+        st.markdown("### 🏆 Model Leaderboard")
+        st.caption("All models compared on the held-out test set")
+
+        st.markdown("**Classification Task** — Can we predict if a song is popular? (popularity ≥ 70)")
+
+        clf_df = pd.DataFrame([
+            ["1. Random Guessing (Baseline)", "95.2%", "0.000", "0.500", "Always predicts NOT popular — useless"],
+            ["2. Logistic Regression",        "95.2%", "0.141", "0.706", "Linear model, limited by class imbalance"],
+            ["3. Decision Tree (depth=6)",    "95.3%", "0.143", "0.708", "Slightly better, starts to overfit"],
+            ["4. XGBoost (tuned) ✅ Best",    "95.8%", "0.437", "0.920", "Best overall — handles imbalance well"],
+        ], columns=["Model", "Accuracy", "F1 Score", "ROC-AUC", "Notes"])
+
+        st.dataframe(
+            clf_df.style.apply(
+                lambda x: ['background-color: rgba(29,185,84,0.15); color: #1DB954; font-weight: bold'
+                           if x.name == 3 else '' for _ in x], axis=1
+            ),
+            hide_index=True,
+            use_container_width=True,
+        )
+
+        st.warning("⚠️ Note: Accuracy is misleading — 95.2% of songs are NOT popular, so always guessing 'not popular' gives 95.2% accuracy. F1 Score and ROC-AUC are the honest metrics.")
+
+        st.markdown("**Regression Task** — Can we predict the exact popularity score (0–100)?")
+
+        reg_df = pd.DataFrame([
+            ["1. Random Guessing (Baseline)", "0.000", "18.5", "22.1", "Always predicts mean score — baseline floor"],
+            ["2. Ridge Regression",           "0.062", "17.2", "21.4", "Captures some linear signal"],
+            ["3. Decision Tree (depth=6)",    "0.089", "16.8", "21.1", "Better but overfits on training data"],
+            ["4. XGBoost (tuned) ✅ Best",    "0.380", "13.1", "16.7", "Best — explains 38% of score variance"],
+        ], columns=["Model", "R²", "MAE", "RMSE", "Notes"])
+
+        st.dataframe(
+            reg_df.style.apply(
+                lambda x: ['background-color: rgba(29,185,84,0.15); color: #1DB954; font-weight: bold'
+                           if x.name == 3 else '' for _ in x], axis=1
+            ),
+            hide_index=True,
+            use_container_width=True,
+        )
+
+        st.info("📊 R²=0.38 means our best model explains 38% of what makes a song popular. The remaining 62% comes from factors not in the audio data — marketing, artist fame, timing, social media.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
