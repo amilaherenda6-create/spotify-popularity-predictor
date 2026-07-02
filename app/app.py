@@ -879,21 +879,85 @@ with tab_predict:
     with col_results:
 
         with st.expander("📊 Model performance & how to interpret your score"):
+
             m1, m2, m3, m4 = st.columns(4)
-            m1.metric("Training songs", "91,200")
-            m2.metric("Test songs", "22,800")
-            m3.metric("Best AUC (classifier)", "0.920")
-            m4.metric("Best R² (regressor)", "0.380")
+
+            with m1:
+                st.markdown("""
+                <div style="background: rgba(29,185,84,0.08); border: 1px solid rgba(29,185,84,0.3);
+                border-radius: 8px; padding: 0.8rem; text-align: center;">
+                <div style="color: #888; font-size: 0.72em; text-transform: uppercase; letter-spacing: 1px;">Training songs</div>
+                <div style="color: #1DB954; font-size: 1.8rem; font-weight: 900;">91,200</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            with m2:
+                st.markdown("""
+                <div style="background: rgba(29,185,84,0.08); border: 1px solid rgba(29,185,84,0.3);
+                border-radius: 8px; padding: 0.8rem; text-align: center;">
+                <div style="color: #888; font-size: 0.72em; text-transform: uppercase; letter-spacing: 1px;">Test songs</div>
+                <div style="color: #1DB954; font-size: 1.8rem; font-weight: 900;">22,800</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            with m3:
+                st.markdown("""
+                <div style="background: rgba(29,185,84,0.08); border: 1px solid rgba(29,185,84,0.3);
+                border-radius: 8px; padding: 0.8rem; text-align: center;">
+                <div style="color: #888; font-size: 0.72em; text-transform: uppercase; letter-spacing: 1px;">Best AUC (classifier)</div>
+                <div style="color: #1DB954; font-size: 1.8rem; font-weight: 900;">0.920</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            with m4:
+                st.markdown("""
+                <div style="background: rgba(29,185,84,0.08); border: 1px solid rgba(29,185,84,0.3);
+                border-radius: 8px; padding: 0.8rem; text-align: center;">
+                <div style="color: #888; font-size: 0.72em; text-transform: uppercase; letter-spacing: 1px;">Best R² (regressor)</div>
+                <div style="color: #1DB954; font-size: 1.8rem; font-weight: 900;">0.380</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            st.markdown("<br>", unsafe_allow_html=True)
 
             st.markdown("""
-| Score range | Meaning | What it suggests |
-|-------------|---------|-----------------|
-| 0 – 30 | Very unlikely to be popular | Reconsider genre or arrangement |
-| 30 – 50 | Below average | Some potential, needs work |
-| 50 – 70 | Average popularity | Solid track, could reach mainstream |
-| 70 – 85 | Likely popular ✅ | Strong commercial potential |
-| 85 – 100 | Very likely popular 🔥 | Hit potential — prioritize release |
-""")
+            <table style="width:100%; border-collapse: collapse; font-size: 0.88em;">
+            <thead>
+            <tr style="background: rgba(29,185,84,0.15);">
+                <th style="padding: 8px 12px; text-align: left; color: #1DB954; border-bottom: 1px solid rgba(29,185,84,0.3);">Score range</th>
+                <th style="padding: 8px 12px; text-align: left; color: #1DB954; border-bottom: 1px solid rgba(29,185,84,0.3);">Meaning</th>
+                <th style="padding: 8px 12px; text-align: left; color: #1DB954; border-bottom: 1px solid rgba(29,185,84,0.3);">What it suggests</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td style="padding: 8px 12px; color: #aaa; border-bottom: 1px solid rgba(255,255,255,0.05);">0 – 30</td>
+                <td style="padding: 8px 12px; color: #FF5252; border-bottom: 1px solid rgba(255,255,255,0.05);">Very unlikely to be popular</td>
+                <td style="padding: 8px 12px; color: #aaa; border-bottom: 1px solid rgba(255,255,255,0.05);">Reconsider genre or arrangement</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 12px; color: #aaa; border-bottom: 1px solid rgba(255,255,255,0.05);">30 – 50</td>
+                <td style="padding: 8px 12px; color: #FF9800; border-bottom: 1px solid rgba(255,255,255,0.05);">Below average</td>
+                <td style="padding: 8px 12px; color: #aaa; border-bottom: 1px solid rgba(255,255,255,0.05);">Some potential, needs work</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 12px; color: #aaa; border-bottom: 1px solid rgba(255,255,255,0.05);">50 – 70</td>
+                <td style="padding: 8px 12px; color: #FFD700; border-bottom: 1px solid rgba(255,255,255,0.05);">Average popularity</td>
+                <td style="padding: 8px 12px; color: #aaa; border-bottom: 1px solid rgba(255,255,255,0.05);">Solid track, could reach mainstream</td>
+            </tr>
+            <tr style="background: rgba(29,185,84,0.05);">
+                <td style="padding: 8px 12px; color: #aaa; border-bottom: 1px solid rgba(255,255,255,0.05);">70 – 85</td>
+                <td style="padding: 8px 12px; color: #1DB954; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Likely popular ✅</td>
+                <td style="padding: 8px 12px; color: #aaa; border-bottom: 1px solid rgba(255,255,255,0.05);">Strong commercial potential</td>
+            </tr>
+            <tr style="background: rgba(29,185,84,0.1);">
+                <td style="padding: 8px 12px; color: #aaa;">85 – 100</td>
+                <td style="padding: 8px 12px; color: #1DB954; font-weight: 700;">Very likely popular 🔥</td>
+                <td style="padding: 8px 12px; color: #aaa;">Hit potential — prioritize release</td>
+            </tr>
+            </tbody>
+            </table>
+            """, unsafe_allow_html=True)
 
         if predict_btn:
             payload = {
